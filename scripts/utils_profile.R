@@ -1,131 +1,250 @@
-## scripts/utils_profile.R
-## u100/ANY でプロファイルを正規化する最小実装
-## - 入力: named list 例 list(D8S1179 = c("13","15")) / data.frame でも可
-## - 出力: data.frame(locus, allele1, allele2) すべて integer（100..9900 or 9999）
-## - 仕様ポイント:
-##    * "ANY","*" , NA,"" は ANY_CODE=9999
-##    * 数値/文字は u100: floor(x*100 + 0.5)
-##    * a1<=a2 に並べ替え（同値はそのまま）
-##    * 片側しか無い場合は、strict=FALSEならホモ補完（a2<-a1）
-##      strict=TRUEならエラー（必要に応じ変更）
+# scripts/utils_profile.R
+# Utilities for preparing STR profiles for matching.
+# - No multibyte characters in code/comments.
+# - ANY_CODE = 9999 for "any" wildcard.
+# - Allele pair rule: numeric ascending, ANY_CODE always on the right.
+# - Locus ordering is enforced by locus_order.
+# - Homozygous -> any conversion is optional and independent per caller.
+
+# ---------- constants ----------
 
 ANY_CODE <- 9999L
 
-# 1点を u100/ANY に変換
-encode_u100_scalar <- function(x, strict = FALSE) {
-  # ANY系
-  if (is.null(x) || length(x) == 0) return(ANY_CODE)
-  if (is.na(x) || isTRUE(x == "") || isTRUE(toupper(as.character(x)) %in% c("ANY","*"))) {
-    return(ANY_CODE)
-  }
-  # 数値/文字 → 数値
-  xv <- suppressWarnings(as.numeric(x))
-  if (is.na(xv)) {
-    if (strict) stop(sprintf("非数値を検出: [%s]", as.character(x)))
-    return(ANY_CODE)
-  }
-  # 範囲ざっくりチェック（<0 または >=100 は異常とみなす）
-  if (xv < 0 || xv >= 100) {
-    if (strict) stop(sprintf("生値が範囲外: %s (期待: [0,100))", xv))
-    return(ANY_CODE)
-  }
-  # 0.5以上は切り上げ（ties away from zero）
-  as.integer(floor(xv * 100 + 0.5))
+# ---------- helpers: type/codec ----------
+
+is_any_code <- function(x) {
+  # TRUE if value equals ANY_CODE
+  !is.na(x) & as.integer(x) == ANY_CODE
 }
 
-# ベクトル版（高速）
-encode_u100_vec <- function(v, strict = FALSE) {
-  sapply(v, encode_u100_scalar, strict = strict, USE.NAMES = FALSE)
+to_int_or_any <- function(x, lenient = FALSE) {
+  # Convert allele tokens to integer; map "any"/"ANY" to ANY_CODE.
+  # If lenient = TRUE and token cannot be parsed as numeric, map to ANY_CODE.
+  if (is.null(x)) return(ANY_CODE)
+  if (length(x) == 0) return(ANY_CODE)
+  if (is.na(x)) return(ANY_CODE)
+  
+  if (is.character(x)) {
+    tx <- trimws(x)
+    if (tx == "" || tolower(tx) == "any") return(ANY_CODE)
+    suppressWarnings(nx <- as.integer(round(as.numeric(tx))))
+    if (is.na(nx)) {
+      if (lenient) return(ANY_CODE) else stop(sprintf("Non-numeric allele: '%s'", x))
+    }
+    return(nx)
+  }
+  
+  if (is.numeric(x)) {
+    nx <- as.integer(round(x))
+    if (is.na(nx)) {
+      if (lenient) return(ANY_CODE) else stop("Non-numeric allele (NA)")
+    }
+    return(nx)
+  }
+  
+  if (is.logical(x)) {
+    if (lenient) return(ANY_CODE) else stop("Unsupported allele type (logical)")
+  }
+  
+  # fallback
+  if (lenient) return(ANY_CODE)
+  stop(sprintf("Unsupported allele type: %s", typeof(x)))
 }
 
-# メイン: プロファイル正規化
-# mode: "lenient"=寛容（不足は補完/ANY化） / "strict"=厳格（不足や不正でエラー）
-prepare_profile <- function(x,
-                            mode = c("lenient","strict"),
-                            homo_to_any = FALSE) {
-  mode <- match.arg(mode)
-  strict <- identical(mode, "strict")
+encode_any <- function(x, lenient = FALSE) {
+  # Vectorized mapping to integer; "any" -> ANY_CODE
+  vapply(x, to_int_or_any, integer(1), lenient = lenient)
+}
+
+decode_any <- function(x) {
+  # Map ANY_CODE to "any"; keep others as character of integer
+  out <- as.character(as.integer(x))
+  out[is_any_code(x)] <- "any"
+  out
+}
+
+# ---------- allele pair normalization ----------
+
+order_pair_any_last <- function(a1, a2) {
+  # Return ordered pair (left <= right), with ANY_CODE always on the right.
+  # For non-any values, ascending numeric order.
+  a1 <- as.integer(a1); a2 <- as.integer(a2)
   
-  # 入力を data.frame に寄せる
-  df <- NULL
-  if (is.data.frame(x)) {
-    df <- x
-  } else if (is.list(x) && !is.null(names(x))) {
-    # named list: locus -> c(a1,a2) or length 1
-    loci  <- names(x)
-    a1 <- integer(length(loci))
-    a2 <- integer(length(loci))
-    for (i in seq_along(loci)) {
-      alle <- x[[i]]
-      if (length(alle) == 0) {
-        if (strict) stop(sprintf("ローカス[%s]のアレルが空", loci[i]))
-        alle <- c(NA, NA)
-      } else if (length(alle) == 1) {
-        # 片側のみ
-        if (homo_to_any) {
-          alle <- c(alle[1], NA)  # 片側は ANY 化（後で9999）
-        } else {
-          alle <- c(alle[1], alle[1])  # ホモ補完
-        }
-      } else {
-        alle <- alle[1:2]
-      }
-      a1[i] <- encode_u100_scalar(alle[1], strict = strict)
-      a2[i] <- encode_u100_scalar(alle[2], strict = strict)
+  # if both ANY
+  if (is_any_code(a1) && is_any_code(a2)) return(c(ANY_CODE, ANY_CODE))
+  
+  # if one ANY -> put ANY on the right
+  if (is_any_code(a1) && !is_any_code(a2)) return(c(a2, ANY_CODE))
+  if (!is_any_code(a1) && is_any_code(a2)) return(c(a1, ANY_CODE))
+  
+  # both non-any -> ascending
+  if (a1 <= a2) c(a1, a2) else c(a2, a1)
+}
+
+std_allele_pair <- function(a1, a2, lenient = FALSE, homo_to_any = FALSE) {
+  # Standardize one allele pair:
+  # - encode tokens to integers with ANY_CODE support
+  # - reorder so ANY_CODE is on the right, otherwise ascending
+  # - optionally convert homozygous into (allele, ANY_CODE)
+  x1 <- encode_any(a1, lenient = lenient)
+  x2 <- encode_any(a2, lenient = lenient)
+  
+  if (homo_to_any && !is_any_code(x1) && !is_any_code(x2) && x1 == x2) {
+    return(c(x1, ANY_CODE))
+  }
+  
+  order_pair_any_last(x1, x2)
+}
+
+# ---------- locus order utilities ----------
+
+load_locus_order <- function(path = file.path("data", "locus_order.rds")) {
+  # Expecting a character vector (unique locus names)
+  if (!file.exists(path)) stop(sprintf("locus_order RDS not found: %s", path))
+  lo <- readRDS(path)
+  if (!is.character(lo)) stop("locus_order.rds must be a character vector")
+  unique(lo)
+}
+
+ensure_all_loci <- function(df, locus_order, fill_any = TRUE) {
+  # Ensure that all loci in locus_order exist in df.
+  # If missing and fill_any = TRUE, append rows with any,any.
+  stopifnot(is.data.frame(df))
+  if (!all(c("Locus","Allele1","Allele2") %in% names(df))) {
+    stop("df must have columns: Locus, Allele1, Allele2")
+  }
+  
+  present <- unique(df$Locus)
+  missing <- setdiff(locus_order, present)
+  
+  if (length(missing) == 0L) return(df)
+  
+  if (!fill_any) {
+    # Keep as is but warn
+    warning(sprintf("Missing loci not filled: %s", paste(missing, collapse = ", ")))
+    return(df)
+  }
+  
+  add <- data.frame(
+    Locus   = missing,
+    Allele1 = rep(ANY_CODE, length(missing)),
+    Allele2 = rep(ANY_CODE, length(missing)),
+    stringsAsFactors = FALSE
+  )
+  rbind(df, add)
+}
+
+order_by_locus <- function(df, locus_order) {
+  # Order rows by locus_order; unknown loci go to the end in original order.
+  idx <- match(df$Locus, locus_order)
+  o <- order(is.na(idx), idx, seq_len(nrow(df)))
+  df[o, , drop = FALSE]
+}
+
+# ---------- profile preparation (data.frame) ----------
+
+prepare_profile_df <- function(
+    profile_df,
+    locus_order = load_locus_order(),
+    homo_to_any = FALSE,
+    lenient = FALSE,
+    fill_missing_any = TRUE
+) {
+  # Normalize a profile given as data.frame with at least:
+  #   Locus, Allele1, Allele2
+  # Optional columns are kept but not used here.
+  if (!is.data.frame(profile_df)) stop("profile_df must be a data.frame")
+  req <- c("Locus","Allele1","Allele2")
+  if (!all(req %in% names(profile_df))) {
+    stop("profile_df must contain columns: Locus, Allele1, Allele2")
+  }
+  
+  # Copy minimal view
+  df <- data.frame(
+    Locus   = as.character(profile_df$Locus),
+    Allele1 = profile_df$Allele1,
+    Allele2 = profile_df$Allele2,
+    stringsAsFactors = FALSE
+  )
+  
+  # Standardize pairs row-wise
+  if (nrow(df) > 0L) {
+    ap <- mapply(
+      function(a1, a2) std_allele_pair(a1, a2, lenient = lenient, homo_to_any = homo_to_any),
+      df$Allele1, df$Allele2, SIMPLIFY = TRUE
+    )
+    # mapply returns 2 x N matrix
+    df$Allele1 <- as.integer(ap[1L, ])
+    df$Allele2 <- as.integer(ap[2L, ])
+  }
+  
+  # Ensure all loci, then order by locus_order
+  df2 <- ensure_all_loci(df, locus_order, fill_any = fill_missing_any)
+  df3 <- order_by_locus(df2, locus_order)
+  
+  rownames(df3) <- NULL
+  df3
+}
+
+# ---------- profile preparation (list) ----------
+
+# Accepts either:
+# - named list: names are loci, each element length 2 vector (a1,a2)
+# - data.frame: forwarded to prepare_profile_df
+prepare_profile <- function(
+    profile,
+    locus_order = load_locus_order(),
+    homo_to_any = FALSE,
+    lenient = FALSE,
+    fill_missing_any = TRUE
+) {
+  if (is.data.frame(profile)) {
+    return(prepare_profile_df(
+      profile_df = profile,
+      locus_order = locus_order,
+      homo_to_any = homo_to_any,
+      lenient = lenient,
+      fill_missing_any = fill_missing_any
+    ))
+  }
+  
+  if (is.list(profile)) {
+    if (is.null(names(profile)) || any(names(profile) == "")) {
+      stop("list profile must be a named list with locus names")
     }
-    df <- data.frame(locus = loci, allele1 = a1, allele2 = a2, stringsAsFactors = FALSE)
-  } else {
-    stop("prepare_profile: サポート外の入力。named list か data.frame を渡してください。")
+    # Build DF from list
+    loci <- names(profile)
+    vals <- lapply(profile, function(v) {
+      v <- as.list(v)
+      if (length(v) < 2L) v <- c(v, list(ANY_CODE))
+      c(v[[1L]], v[[2L]])
+    })
+    mat <- do.call(rbind, vals)
+    df <- data.frame(
+      Locus   = loci,
+      Allele1 = mat[,1],
+      Allele2 = mat[,2],
+      stringsAsFactors = FALSE
+    )
+    return(prepare_profile_df(
+      profile_df = df,
+      locus_order = locus_order,
+      homo_to_any = homo_to_any,
+      lenient = lenient,
+      fill_missing_any = fill_missing_any
+    ))
   }
   
-  # 列名を合わせる
-  names(df) <- tolower(names(df))
-  # locus 列 同定
-  if (!("locus" %in% names(df))) {
-    # 代替: marker を受けたら locus に
-    if ("marker" %in% names(df)) {
-      names(df)[names(df) == "marker"] <- "locus"
-    } else {
-      stop("prepare_profile: 'locus' 列が見つかりません（marker でも可）")
-    }
-  }
-  # アレル列 同定
-  # 許容: allele1|allele1_id, allele2|allele2_id
-  if (!("allele1" %in% names(df))) {
-    if ("allele1_id" %in% names(df)) names(df)[names(df) == "allele1_id"] <- "allele1"
-  }
-  if (!("allele2" %in% names(df))) {
-    if ("allele2_id" %in% names(df)) names(df)[names(df) == "allele2_id"] <- "allele2"
-  }
-  if (!all(c("locus","allele1","allele2") %in% names(df))) {
-    stop("prepare_profile: 必須列(locus, allele1, allele2)が不足しています")
-  }
-  
-  # u100/ANY へエンコード（既に整数でも一応通す）
-  df$allele1 <- encode_u100_vec(df$allele1, strict = strict)
-  df$allele2 <- encode_u100_vec(df$allele2, strict = strict)
-  
-  # a1<=a2 に並べ替え（ANY=9999 なので通常は後ろへ流れる）
-  swap <- df$allele1 > df$allele2
-  if (any(swap)) {
-    tmp <- df$allele1[swap]
-    df$allele1[swap] <- df$allele2[swap]
-    df$allele2[swap] <- tmp
-  }
-  
-  # 値域チェック（全件）— 高速ベクトル判定
-  ok <- (df$allele1 %in% c(ANY_CODE) | (df$allele1 >= 100L & df$allele1 <= 9900L)) &
-    (df$allele2 %in% c(ANY_CODE) | (df$allele2 >= 100L & df$allele2 <= 9900L))
-  if (!all(ok)) {
-    bad_n <- sum(!ok)
-    if (strict) stop(sprintf("u100/ANY 域外データを検出: %d 行", bad_n))
-    # lenient: 域外は ANY に落とす
-    df$allele1[!ok] <- ANY_CODE
-    df$allele2[!ok] <- ANY_CODE
-  }
-  
-  # 出力は data.frame(locus, allele1, allele2) / integer
-  df$allele1 <- as.integer(df$allele1)
-  df$allele2 <- as.integer(df$allele2)
-  df[, c("locus","allele1","allele2")]
+  stop("profile must be a data.frame or a named list")
+}
+
+# ---------- pretty-print helpers (optional) ----------
+
+format_profile_df <- function(df) {
+  # Return a copy with Allele1/2 rendered as character, ANY_CODE -> "any"
+  if (!all(c("Locus","Allele1","Allele2") %in% names(df))) return(df)
+  out <- df
+  out$Allele1 <- decode_any(out$Allele1)
+  out$Allele2 <- decode_any(out$Allele2)
+  out
 }
