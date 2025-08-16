@@ -40,20 +40,18 @@ server <- function(input, output, session) {
     db_std             = NULL,   # to be set by settings flow in future
     sample_name        = NULL,
     status_msg         = NULL,
-    trigger_run_match  = NULL
+    trigger_run_match  = NULL,
+    nav_request        = NULL 
   )
   
-  # pass sample name
-  shiny::observe({
-    # read from input module if present; safe check
-    input_ns <- "input"
-    id <- paste0(input_ns, "-", "txt_sample_name")
-    if (!is.null(shiny::isolate(input[[id]]))) {
-      rv$sample_name <- input[[id]]
-    }
+  # navigate when requested by modules
+  shiny::observeEvent(rv$nav_request, {
+    req(rv$nav_request)
+    shiny::updateNavbarPage(session, inputId = "nav", selected = rv$nav_request)
+    rv$nav_request <- NULL
   })
   
-  # wire modules
+  # wire modules (unchanged)
   server_input_logic("input", rv = rv)
   server_match_logic("result", rv = rv)
 }
