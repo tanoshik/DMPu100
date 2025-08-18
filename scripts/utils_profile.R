@@ -248,3 +248,10 @@ format_profile_df <- function(df) {
   out$Allele2 <- decode_any(out$Allele2)
   out
 }
+
+# Return the number of loci, safely.
+# locus_order: character vector of loci (required)
+get_locus_count <- function(locus_order) {
+  if (is.null(locus_order)) return(0L)
+  as.integer(length(locus_order))
+}
