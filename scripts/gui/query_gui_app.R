@@ -25,19 +25,18 @@ ui <- shiny::navbarPage(
   # use header= to inject head content (avoid warning)
   header = tags$head(
     shiny::tags$script(HTML("
-      (function() {
-        if (window.__dmp_centered__) return;
-        window.__dmp_centered__ = true;
-        try {
-          var w = Math.floor(screen.availWidth  * 0.7);
-          var h = Math.floor(screen.availHeight * 0.7);
-          window.resizeTo(w, h);
-          var x = Math.floor((screen.availWidth  - w) / 2);
-          var y = Math.floor((screen.availHeight - h) / 2);
-          window.moveTo(x, y);
-        } catch (e) { /* noop */ }
-      })();
-    "))
+    (function() {
+      if (window.__dmp_sized__) return;
+      window.__dmp_sized__ = true;
+      try {
+        var w = 1000, h = 1050;
+        window.resizeTo(w, h);  // set size once
+        var x = Math.floor((screen.availWidth  - w) / 2);
+        var y = Math.floor((screen.availHeight - h) / 3);
+        window.moveTo(Math.max(0, x), Math.max(0, y)); // then center
+      } catch (e) { /* noop */ }
+    })();
+  "))
   ),
   tabPanel("Input",   ui_input_tab("input")),
   tabPanel("Confirm", ui_confirm_tab("confirm")),
@@ -89,8 +88,24 @@ launch_app_mode <- function(url) {
   exe <- cands[file.exists(cands)][1]
   
   if (!is.na(exe) && nzchar(exe)) {
-    args <- sprintf("--app=%s", shQuote(url))
-    try(suppressWarnings(system2(exe, args = args, wait = FALSE)), silent = TRUE)
+    # Keep it minimal & robust: pass each flag as its own arg, no user-data-dir
+    args <- c(
+      paste0("--app=", shQuote(url)),
+      "--new-window"
+    )
+    
+    # デバッグ用: 必要ならコメント解除
+    # cat("Launching:\n", exe, "\nArgs:\n", paste("  ", args, collapse = "\n"), "\n")
+    
+    ok <- tryCatch({
+      system2(exe, args = args, wait = FALSE)
+      TRUE
+    }, error = function(e) FALSE)
+    
+    if (!ok) {
+      # 失敗時は通常ブラウザにフォールバック
+      utils::browseURL(url)
+    }
   } else {
     utils::browseURL(url)
   }
