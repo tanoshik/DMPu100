@@ -144,7 +144,7 @@ server_input_logic <- function(id, rv) {
       if (is.na(hit)) return(NULL); nm[hit]
     }
     
-    read_query_csv_multi <- function(path, fallback_name = "Query") {
+    read_query_csv_multi <- function(path, display_name = NULL, fallback_name = "Query") {
       df <- tryCatch(utils::read.csv(path, stringsAsFactors = FALSE, check.names = FALSE),
                      error = function(e) NULL)
       if (is.null(df) || !nrow(df)) return(NULL)
@@ -170,10 +170,16 @@ server_input_logic <- function(id, rv) {
         sub$Locus <- factor(sub$Locus, levels = locus_order)
         sub <- sub[order(sub$Locus), ]
         sub$Locus <- as.character(sub$Locus)
-        base_name <- tryCatch(tools::file_path_sans_ext(basename(path)), error = function(e) fallback_name)
-        lst <- list(sub)            # <- list of one data.frame
-        names(lst) <- base_name     # <- name that sample
-        return(list(samples = lst, names = base_name))
+        
+        # single-sample 分岐内の base_name 箇所を置換
+        base_name <- if (!is.null(display_name) && nzchar(display_name)) {
+          tools::file_path_sans_ext(display_name)
+        } else {
+          tryCatch(tools::file_path_sans_ext(basename(path)), error = function(e) fallback_name)
+        }
+        lst <- list(sub)
+        names(lst) <- base_name
+        return(list(samples = lst))
       }
       
       # multi-sample (long)
@@ -200,33 +206,44 @@ server_input_logic <- function(id, rv) {
       if (is.null(rv$query_samples) || length(rv$query_samples) == 0L) return(invisible(NULL))
       n <- length(rv$query_samples)
       idx <- max(1L, min(as.integer(idx), n))
+      
       pf <- rv$query_samples[[idx]]
-      nm <- rv$query_sample_names[[idx]] %||% "Query"
+      nm <- names(rv$query_samples)[idx] %||% "Query"   # <- ここを厳密に
+      
       shiny::updateTextInput(session, "txt_sample_name", value = nm)
+      
       for (i in seq_len(nrow(pf))) {
         locus <- as.character(pf$Locus[i]); if (!locus %in% locus_order) next
         lid <- sanitize_id(locus)
         a1 <- pf$Allele1[i] %||% "any"; a2 <- pf$Allele2[i] %||% "any"
         a1 <- if (!nzchar(a1)) "any" else as.character(a1)
         a2 <- if (!nzchar(a2)) "any" else as.character(a2)
+        
         ch <- choices_map[[locus]]
-        # keep choices unchanged; if a1/a2 not in allowed -> it will be flagged invalid
         if (!a1 %in% ch) ch <- c(ch, a1)
         if (!a2 %in% ch) ch <- c(ch, a2)
+        
         shiny::updateSelectizeInput(session, paste0("a1_", lid), choices = ch, selected = a1, server = TRUE)
         shiny::updateSelectizeInput(session, paste0("a2_", lid), choices = ch, selected = a2, server = TRUE)
       }
+      
       rv$query_sample_index <- idx
       output$txt_q_index <- shiny::renderText(sprintf("%d / %d", idx, n))
     }
     
     shiny::observeEvent(input$file_query_csv, {
-      if (is.null(input$file_query_csv) || !nzchar(input$file_query_csv$datapath)) return(invisible(NULL))
-      parsed <- read_query_csv_multi(input$file_query_csv$datapath, fallback_name = "Query")
+      fi <- input$file_query_csv
+      if (is.null(fi) || !nzchar(fi$datapath)) return(invisible(NULL))
+      
+      parsed <- read_query_csv_multi(
+        path = fi$datapath,
+        display_name = fi$name  # ← ここがポイント：元のファイル名
+      )
       if (is.null(parsed) || length(parsed$samples) == 0L) return(invisible(NULL))
+      
       rv$query_samples      <- parsed$samples
-      rv$query_sample_names <- parsed$names
-      apply_sample_to_selectors(1L)  # first sample (DMP)
+      rv$query_sample_names <- names(parsed$samples)  # ← list の名前をそのまま採用
+      apply_sample_to_selectors(1L)
     }, ignoreInit = TRUE)
     
     shiny::observeEvent(input$btn_q_prev, {
@@ -278,7 +295,7 @@ server_input_logic <- function(id, rv) {
     apply_validation_ui <- function(df, invalid) {
       any_invalid <- any(invalid)
       
-      # toggle buttons and emphasize Prepare when invalid
+      # buttons: emphasize Prepare when invalid
       if (any_invalid) {
         shinyjs::show(id = "btn_prepare")
         shinyjs::hide(id = "btn_goto_confirm")
@@ -289,38 +306,13 @@ server_input_logic <- function(id, rv) {
         shinyjs::removeClass(id = "btn_prepare", class = "btn-danger")
       }
       
-      # clear all marks first (safer)
-      for (lc in locus_order) {
-        lid <- sanitize_id(lc)
-        for (which in c("a1_", "a2_")) {
-          input_id <- session$ns(paste0(which, lid))
-          shinyjs::runjs(sprintf(
-            "$('#%s').closest('.selectize-control').removeClass('invalid-select');", input_id
-          ))
-        }
-      }
-      
-      # collect messages and mark invalid selects
+      # messages only (no selector highlighting)
       msgs <- character(0)
       for (i in seq_len(nrow(df))) {
-        lc <- df$Locus[i]; lid <- sanitize_id(lc)
-        if (invalid[i,1]) {
-          input_id <- session$ns(paste0("a1_", lid))
-          shinyjs::runjs(sprintf(
-            "$('#%s').closest('.selectize-control').addClass('invalid-select');", input_id
-          ))
-          msgs <- c(msgs, sprintf("%s - Allele1 is not in frequency table", lc))
-        }
-        if (invalid[i,2]) {
-          input_id <- session$ns(paste0("a2_", lid))
-          shinyjs::runjs(sprintf(
-            "$('#%s').closest('.selectize-control').addClass('invalid-select');", input_id
-          ))
-          msgs <- c(msgs, sprintf("%s - Allele2 is not in frequency table", lc))
-        }
+        lc <- df$Locus[i]
+        if (invalid[i,1]) msgs <- c(msgs, sprintf("%s - Allele1 is not in frequency table", lc))
+        if (invalid[i,2]) msgs <- c(msgs, sprintf("%s - Allele2 is not in frequency table", lc))
       }
-      
-      # show/hide message block
       if (length(msgs)) {
         output$val_msgs <- shiny::renderUI(HTML(paste(msgs, collapse = "<br/>")))
       } else {
