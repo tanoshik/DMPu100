@@ -246,11 +246,16 @@ server_match_logic <- function(id, rv) {
       rv$match_detail <- filtered_detail
       rv$match_scores <- filtered_summary
       
-      # Render table (detail)
+      # Render table (summary ranking)
       output$tbl_result <- DT::renderDT({
-        if (!nrow(filtered_detail)) return(filtered_detail)
+        df <- filtered_summary
+        if (is.null(df) || !nrow(df)) {
+          return(data.frame(SampleID = character(), Score = integer()))
+        }
+        # Ensure ordering: Score desc, SampleID asc
+        df <- df[order(-df$Score, df$SampleID), , drop = FALSE]
         DT::datatable(
-          filtered_detail,
+          df,
           rownames = FALSE,
           options = list(pageLength = 25, scrollX = TRUE)
         )

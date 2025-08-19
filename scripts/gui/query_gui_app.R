@@ -135,6 +135,15 @@ server <- function(input, output, session) {
     id = "result",
     rv = rv
   )
+  
+  # ADD: react to nav requests from modules (Input -> Confirm/Result/Settings)
+  observeEvent(rv$nav_request, {
+    dest <- rv$nav_request
+    if (is.character(dest) && nzchar(dest)) {
+      # "Input","Confirm","Result","Settings" は tabPanel のラベルと一致させる
+      updateNavbarPage(session, "main_nav", selected = dest)
+    }
+  }, ignoreInit = TRUE)
 }
 
 # --- Standard shinyApp footer (keep) ---

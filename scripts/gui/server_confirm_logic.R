@@ -46,8 +46,11 @@ server_confirm_logic <- function(id, rv, locus_order, db_count_reactive, freq_ca
       rv$top_n       <- as.integer(input$top_n %||% 10L)
       rv$score_min   <- as.integer(input$score_min %||% 0L)
       
-      # trigger for server_match_logic (already implemented)
+      # trigger for Result-side processing
       rv$trigger_run_match <- Sys.time()
+      
+      # ★ add: navigate to Result
+      rv$nav_request <- "Result"
       
       shiny::showNotification("Run requested.", type = "message")
     })
