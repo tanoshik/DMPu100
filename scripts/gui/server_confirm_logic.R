@@ -19,16 +19,13 @@ server_confirm_logic <- function(id, rv, locus_order, db_count_reactive, freq_ca
       paste("Database Samples : N =", ifelse(is.na(n), 0L, n))
     })
     
-    # Total Frequency (placeholder or custom function)
+    # Total Frequency (no placeholder)
     output$total_frequency <- shiny::renderText({
       prof <- rv$query_profile_show
       if (is.null(prof) || !nrow(prof)) return("NA")
-      if (is.function(freq_calc_fn)) {
-        val <- freq_calc_fn(prof)
-        return(format(val, scientific = TRUE, digits = 3))
-      }
-      # placeholder
-      format(1.23e-10, scientific = TRUE, digits = 3)
+      if (!is.function(freq_calc_fn))  return("NA")
+      val <- tryCatch(freq_calc_fn(prof), error = function(e) NA_real_)
+      format_total_frequency(val, digits = 3)
     })
     
     # Spinner placeholder
@@ -49,7 +46,7 @@ server_confirm_logic <- function(id, rv, locus_order, db_count_reactive, freq_ca
       # trigger for Result-side processing
       rv$trigger_run_match <- Sys.time()
       
-      # ★ add: navigate to Result
+      # navigate to Result
       rv$nav_request <- "Result"
       
       shiny::showNotification("Run requested.", type = "message")

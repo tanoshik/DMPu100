@@ -8,6 +8,10 @@
 #   if both invalid -> "any, any". Then re-validate and toggle buttons.
 # No multibyte characters in code/comments.
 
+# --- helpers: safe enable/disable even without shinyjs ---
+.safe_enable  <- function(id) { if (requireNamespace("shinyjs", quietly = TRUE)) shinyjs::enable(id) }
+.safe_disable <- function(id) { if (requireNamespace("shinyjs", quietly = TRUE)) shinyjs::disable(id) }
+
 server_input_logic <- function(id, rv) {
   shiny::moduleServer(id, function(input, output, session) {
     
@@ -379,8 +383,23 @@ server_input_logic <- function(id, rv) {
       apply_validation_ui(df2, inv)
     })
     
+    # auto enable/disable Go to Confirm based on prepared query
+    observe({
+      ns <- session$ns
+      ok <- !is.null(rv$query_profile_show) &&
+        is.data.frame(rv$query_profile_show) &&
+        nrow(rv$query_profile_show) > 0
+      if (ok) .safe_enable(ns("btn_goto_confirm")) else .safe_disable(ns("btn_goto_confirm"))
+    })
+    
     # build standardized profile and push to Confirm
+    # server_input_logic.R （モジュール内）
     shiny::observeEvent(input$btn_goto_confirm, {
+      ns <- session$ns
+      .safe_disable(ns("btn_goto_confirm"))
+      on.exit({ .safe_enable(ns("btn_goto_confirm")) }, add = TRUE)
+      
+      # --- ここから既存の処理そのまま ---
       # only proceed when valid (button hidden otherwise)
       df <- current_selectors()
       rv$query_profile_std <- prepare_profile_df(
@@ -406,6 +425,7 @@ server_input_logic <- function(id, rv) {
       })
       
       rv$nav_request <- "Confirm"
+      # --- ここまで既存の処理そのまま ---
     })
   })
 }

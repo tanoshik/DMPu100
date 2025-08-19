@@ -17,6 +17,7 @@ source("scripts/gui/server_input_logic.R", local = TRUE)
 # Confirm tab (newly added in this iteration)
 source("scripts/gui/ui_confirm_tab.R", local = TRUE)
 source("scripts/gui/server_confirm_logic.R", local = TRUE)
+source("scripts/utils_freq.R", local = TRUE)
 
 # Result tab (extended with downloads in this iteration)
 source("scripts/gui/ui_result_tab.R", local = TRUE)
@@ -124,11 +125,18 @@ server <- function(input, output, session) {
     # , prepare_database_df_fn = your_prepare_database_df  # if you have a project-specific function
   )
   
+  # at server() start, before calling server_confirm_logic
+  ft <- load_freq_table()  # RDS > CSV fallback
+  
   server_confirm_logic(
-    id                = "confirm",
-    rv                = rv,
-    locus_order       = locus_order,
-    db_count_reactive = db_count
+    id = "confirm",
+    rv = rv,
+    locus_order = locus_order,
+    db_count_reactive = db_count,
+    freq_calc_fn = function(prof_df) {
+      if (is.null(ft)) return(NA_real_)
+      calc_total_frequency(prof_df, ft)
+    }
   )
   
   server_match_logic(
