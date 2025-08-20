@@ -411,17 +411,6 @@ server_input_logic <- function(id, rv) {
       rv$query_profile_show <- format_profile_df(rv$query_profile_std)
       rv$sample_name        <- input$txt_sample_name %||% "Query"
       
-      output$tbl_confirm_query <- DT::renderDT({
-        rv$query_profile_show
-      }, options = list(pageLength = 25, scrollX = TRUE))
-      
-      output$txt_locus_count <- shiny::renderText({
-        sprintf("Loci in query: %d", if (!is.null(rv$query_profile_std)) nrow(rv$query_profile_std) else 0L)
-      })
-      output$txt_db_count <- shiny::renderText({
-        n <- if (!is.null(rv$db_std)) nrow(rv$db_std) else 0L
-        sprintf("Database rows (standardized): %d", n)
-      })
       .nav_to(session, "main_nav", "tab_confirm")
     })
   })
