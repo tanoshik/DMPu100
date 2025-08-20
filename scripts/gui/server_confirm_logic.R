@@ -37,17 +37,14 @@ server_confirm_logic <- function(id, rv, locus_order, db_count_reactive, freq_ca
       shiny::updateNumericInput(session, "score_min", value = full)
     }, ignoreInit = FALSE, once = TRUE)
     
-    # Run button -> set filters into rv and trigger run
     shiny::observeEvent(input$btn_run_match, {
       rv$filter_type <- input$filter_type
       rv$top_n       <- as.integer(input$top_n %||% 10L)
       rv$score_min   <- as.integer(input$score_min %||% 0L)
       
-      # trigger for Result-side processing
       rv$trigger_run_match <- Sys.time()
       
-      # navigate to Result
-      rv$nav_request <- "Result"
+      .nav_to(session, "main_nav", "tab_result")
       
       shiny::showNotification("Run requested.", type = "message")
     })

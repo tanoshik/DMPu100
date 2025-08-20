@@ -399,8 +399,7 @@ server_input_logic <- function(id, rv) {
       .safe_disable(ns("btn_goto_confirm"))
       on.exit({ .safe_enable(ns("btn_goto_confirm")) }, add = TRUE)
       
-      # --- ここから既存の処理そのまま ---
-      # only proceed when valid (button hidden otherwise)
+      # 既存の準備処理はそのまま
       df <- current_selectors()
       rv$query_profile_std <- prepare_profile_df(
         profile_df = df,
@@ -423,9 +422,7 @@ server_input_logic <- function(id, rv) {
         n <- if (!is.null(rv$db_std)) nrow(rv$db_std) else 0L
         sprintf("Database rows (standardized): %d", n)
       })
-      
-      rv$nav_request <- "Confirm"
-      # --- ここまで既存の処理そのまま ---
+      .nav_to(session, "main_nav", "tab_confirm")
     })
   })
 }

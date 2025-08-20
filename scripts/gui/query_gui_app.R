@@ -27,6 +27,13 @@ source("scripts/gui/server_match_logic.R", local = TRUE)
 source("scripts/gui/ui_settings_tab.R", local = TRUE)
 source("scripts/gui/server_settings_logic.R", local = TRUE)
 
+# ---- nav helper: call updateNavbarPage() on root session ----
+.nav_to <- function(session, input_id = "main_nav", selected) {
+  parent <- tryCatch(session$rootScope(), error = function(e) NULL)
+  if (is.null(parent)) parent <- session  # fallback
+  updateNavbarPage(parent, input_id, selected = selected)
+}
+
 # --- data bootstrap (do not change existing behavior) ---
 # Expect locus_order and visible_loci prepared elsewhere in the pipeline.
 # To avoid altering existing flow, only set them if missing.
@@ -100,15 +107,13 @@ db_count <- reactive({
 ui <- navbarPage(
   title = "DMPu100",
   id    = "main_nav",
-  
-  # Input は既存が tabPanel を返している想定だが、念のため明示ラップでも安全
-  tabPanel("Input",    ui_input_tab("input")),
-  tabPanel("Confirm",  ui_confirm_tab("confirm")),
-  tabPanel("Result",   ui_result_tab("result")),
-  tabPanel("Settings", ui_settings_tab("settings")),
-  
+  tabPanel(title = "Input",    value = "tab_input",    ui_input_tab("input")),
+  tabPanel(title = "Confirm",  value = "tab_confirm",  ui_confirm_tab("confirm")),
+  tabPanel(title = "Result",   value = "tab_result",   ui_result_tab("result")),
+  tabPanel(title = "Settings", value = "tab_settings", ui_settings_tab("settings")),
   header = tags$head(singleton(tags$script(.center_and_resize_js)))
 )
+
 
 # --- Server ---
 server <- function(input, output, session) {
@@ -143,15 +148,6 @@ server <- function(input, output, session) {
     id = "result",
     rv = rv
   )
-  
-  # ADD: react to nav requests from modules (Input -> Confirm/Result/Settings)
-  observeEvent(rv$nav_request, {
-    dest <- rv$nav_request
-    if (is.character(dest) && nzchar(dest)) {
-      # "Input","Confirm","Result","Settings" は tabPanel のラベルと一致させる
-      updateNavbarPage(session, "main_nav", selected = dest)
-    }
-  }, ignoreInit = TRUE)
 }
 
 # --- Standard shinyApp footer (keep) ---
