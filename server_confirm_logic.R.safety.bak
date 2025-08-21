@@ -1,0 +1,249 @@
+# server_confirm_logic.R
+# Shiny module server for Confirm tab: frequency table, DB count, ranking, run trigger.
+# No multibyte characters in code/comments.
+
+`%||%` <- function(x, y) if (is.null(x)) y else x
+
+server_confirm_logic <- function(id, rv, locus_order = NULL,
+                                 db_count_reactive = NULL,
+                                 freq_calc_fn = NULL) {
+  moduleServer(id, function(input, output, session) {
+    
+    # ---- Helpers ----
+    .detect_freq_col <- function(df) {
+      cand <- tolower(names(df))
+      hits <- which(cand %in% c("frequency","freq","p","prob","probability"))
+      if (length(hits) > 0) return(names(df)[hits[1]])
+      return(NULL)
+    }
+    
+    .get_allele_freq <- function(freq_df, locus, allele) {
+      if (is.null(freq_df) || is.null(locus) || is.null(allele)) return(NA_real_)
+      if (identical(tolower(allele), "any")) return(NA_real_)
+      fcol <- .detect_freq_col(freq_df)
+      if (is.null(fcol)) return(NA_real_)
+      ln <- if ("Locus" %in% names(freq_df)) "Locus" else if ("locus" %in% names(freq_df)) "locus" else NA_character_
+      an <- if ("Allele" %in% names(freq_df)) "Allele" else if ("allele" %in% names(freq_df)) "allele" else NA_character_
+      if (is.na(ln) || is.na(an)) return(NA_real_)
+      rows <- freq_df[[ln]] == locus & as.character(freq_df[[an]]) == as.character(allele)
+      if (!any(rows)) return(NA_real_)
+      val <- suppressWarnings(as.numeric(freq_df[[fcol]][which(rows)[1]]))
+      if (!is.finite(val)) return(NA_real_) else return(val)
+    }
+    
+    .pair_freq <- function(freq_df, locus, a1, a2) {
+      a1_is_any <- identical(tolower(a1), "any")
+      a2_is_any <- identical(tolower(a2), "any")
+      if (a1_is_any && a2_is_any) return(1.0)
+      if (xor(a1_is_any, a2_is_any)) {
+        other <- if (a1_is_any) a2 else a1
+        P <- .get_allele_freq(freq_df, locus, other)
+        if (!is.finite(P)) return(NA_real_)
+        return(2*P - P^2)
+      }
+      P1 <- .get_allele_freq(freq_df, locus, a1)
+      P2 <- .get_allele_freq(freq_df, locus, a2)
+      if (!is.finite(P1) || !is.finite(P2)) return(NA_real_)
+      if (identical(as.character(a1), as.character(a2))) {
+        return(P1^2)
+      } else {
+        return(P1 * P2)
+      }
+    }
+    
+    .fmt_num <- function(x) {
+      ifelse(is.finite(x), formatC(x, digits = 6, format = "fg", flag = "#"), "NA")
+    }
+    
+    # ---- Reactives ----
+    
+    # coerce various shapes into a standard data.frame: Locus, allele1, allele2
+    .coerce_to_query_df <- function(x) {
+      if (is.null(x)) return(NULL)
+      
+      # case A: already a data.frame with the right columns
+      if (is.data.frame(x)) {
+        df <- x
+        nm <- names(df)
+        # tolerate case variations
+        names(df) <- sub("^(?i)allele1$", "allele1", nm, perl = TRUE)
+        names(df) <- sub("^(?i)allele2$", "allele2", names(df), perl = TRUE)
+        names(df) <- sub("^(?i)locus$",   "Locus",   names(df), perl = TRUE)
+        # if has the 3 columns, keep only them in order
+        if (all(c("Locus","allele1","allele2") %in% names(df))) {
+          out <- df[, c("Locus","allele1","allele2"), drop = FALSE]
+          # normalize NA/"" -> "any"
+          out$allele1[is.na(out$allele1) | out$allele1 == ""] <- "any"
+          out$allele2[is.na(out$allele2) | out$allele2 == ""] <- "any"
+          return(out)
+        }
+        return(NULL)
+      }
+      
+      # case B: list: Locus -> c(a1,a2)
+      if (is.list(x)) {
+        loci <- names(x)
+        if (is.null(loci)) return(NULL)
+        alleles <- do.call(rbind, lapply(x, function(v) {
+          v <- as.character(v)
+          if (length(v) < 2) v <- c("any","any")
+          v[is.na(v) | v == ""] <- "any"
+          v[1:2]
+        }))
+        return(data.frame(Locus = loci, allele1 = alleles[,1], allele2 = alleles[,2], stringsAsFactors = FALSE))
+      }
+      
+      NULL
+    }
+    
+    query_df_reactive <- reactive({
+      # Priority order (pick the first non-null that can be coerced):
+      # 1) explicit keys used by confirm so far
+      cand <- list(
+        rv$query_df,
+        rv$query_profile_df,
+        rv$query_profile,
+        # 2) keys used in your query_gui_app.R
+        rv$query_profile_show,
+        rv$query_profile_std
+      )
+      for (obj in cand) {
+        df <- .coerce_to_query_df(obj)
+        if (!is.null(df)) {
+          # optional reordering by locus_order
+          if (!is.null(locus_order) && "Locus" %in% names(df)) {
+            ord <- match(df$Locus, locus_order)
+            df <- df[order(ord), , drop = FALSE]
+          }
+          cat("confirm: query_df rows=", nrow(df), "\n")
+          
+          return(df)
+        }
+      }
+      NULL
+    })
+    
+    freq_table_reactive <- reactive({
+      if (!is.null(rv$freq_table) && is.data.frame(rv$freq_table)) return(rv$freq_table)
+      ft <- NULL
+      if (file.exists("data/freq_table.rds")) {
+        ft <- tryCatch(readRDS("data/freq_table.rds"), error = function(e) NULL)
+      }
+      ft
+    })
+    
+    db_object_reactive <- reactive({
+      if (!is.null(rv$db)) return(rv$db)
+      if (!is.null(rv$db_df)) return(rv$db_df)
+      if (!is.null(rv$db_list)) return(rv$db_list)
+      if (!is.null(rv$database)) return(rv$database)
+      NULL
+    })
+    
+    confirm_freq_table_reactive <- reactive({
+      q  <- query_df_reactive()
+      ft <- freq_table_reactive()
+      if (is.null(q) || nrow(q) == 0 || is.null(ft)) return(NULL)
+      if (!all(c("Locus","allele1","allele2") %in% names(q))) return(NULL)
+      out <- lapply(seq_len(nrow(q)), function(i) {
+        L  <- as.character(q$Locus[i])
+        a1 <- as.character(q$allele1[i])
+        a2 <- as.character(q$allele2[i])
+        val <- .pair_freq(ft, L, a1, a2)
+        data.frame(Locus = L, Allele1 = a1, Allele2 = a2, Freq = val, stringsAsFactors = FALSE)
+      })
+      do.call(rbind, out)
+    })
+    
+    confirm_total_freq_reactive <- reactive({
+      # If external calculator is provided, use it preferentially
+      if (is.function(freq_calc_fn)) {
+        q <- query_df_reactive()
+        if (!is.null(q) && nrow(q) > 0) {
+          val <- tryCatch(freq_calc_fn(q), error = function(e) NA_real_)
+          return(val)
+        }
+      }
+      tbl <- confirm_freq_table_reactive()
+      if (is.null(tbl) || nrow(tbl) == 0) return(NA_real_)
+      v <- suppressWarnings(as.numeric(tbl$Freq))
+      v <- v[is.finite(v)]
+      if (length(v) == 0) return(NA_real_)
+      prod(v)
+    })
+    
+    db_count_internal_reactive <- reactive({
+      db <- db_object_reactive()
+      if (is.null(db)) return(0L)
+      if (is.list(db) && !is.data.frame(db)) {
+        return(length(db))
+      }
+      if (is.data.frame(db)) {
+        sid_col <- names(db)[tolower(names(db)) %in% c("sampleid","sample_id","id")]
+        if (length(sid_col) > 0) return(length(unique(db[[sid_col[1]]])))
+        return(nrow(db))
+      }
+      0L
+    })
+    
+    db_label_reactive <- reactive({
+      if (!is.null(rv$db_file_name)) return(rv$db_file_name)
+      if (!is.null(rv$current_db_label)) return(rv$current_db_label)
+      "database_profile"
+    })
+    
+    # ---- Outputs ----
+    # Prepared Query Profile table
+    output$confirm_prepared_query <- renderTable({
+      q <- query_df_reactive()
+      if (is.null(q) || nrow(q) == 0) return(NULL)
+      # display-friendly column names
+      out <- q
+      names(out) <- sub("^allele1$", "Allele1", names(out), ignore.case = TRUE)
+      names(out) <- sub("^allele2$", "Allele2", names(out), ignore.case = TRUE)
+      out
+    }, striped = TRUE, bordered = TRUE, hover = TRUE, spacing = "s")
+
+    output$confirm_freq_table <- renderTable({
+      tbl <- confirm_freq_table_reactive()
+      if (is.null(tbl)) return(NULL)
+      tbl$Freq <- .fmt_num(tbl$Freq)
+      tbl
+    }, striped = TRUE, bordered = TRUE, hover = TRUE, spacing = "s")
+    
+    output$confirm_total_freq <- renderText({
+      val <- confirm_total_freq_reactive()
+      if (is.na(val)) return("NA")
+      .fmt_num(val)
+    })
+    
+    # Prefer external db_count reactive if supplied
+    output$confirm_db_count <- renderText({
+      if (is.function(db_count_reactive)) {
+        val <- tryCatch(db_count_reactive(), error = function(e) db_count_internal_reactive())
+        return(as.character(val))
+      }
+      as.character(db_count_internal_reactive())
+    })
+    
+    output$confirm_db_label <- renderText({
+      as.character(db_label_reactive())
+    })
+    
+    # ---- Ranking condition wiring for Result tab ----
+    observe({
+      mode <- input$rank_mode %||% "top"
+      topn <- input$rank_top_n %||% 50
+      mins <- input$rank_min_score %||% 0
+      rv$rank_settings <- list(
+        mode = mode,
+        top_n = as.integer(topn),
+        min_score = as.integer(mins)
+      )
+    })
+    
+    observeEvent(input$btn_run_match, {
+      rv$run_match_trigger <- Sys.time()
+    }, ignoreInit = TRUE)
+  })
+}

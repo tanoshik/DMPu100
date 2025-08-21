@@ -1,0 +1,55 @@
+# ui_confirm_tab.R
+# Confirm tab UI for frequency table, DB count, and ranking conditions.
+# No multibyte characters in code/comments.
+
+render_confirm_tab <- function() {
+  tabPanel(
+    title = "Confirm",
+    fluidPage(
+      tags$style(HTML("
+        .kpi-box { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+        .kpi { border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; background:#fafafa; }
+        .kpi .label { font-size: 12px; color: #6b7280; }
+        .kpi .value { font-size: 18px; font-weight: 600; }
+        .controls-line { display:flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+      ")),
+      
+      h3("Confirm"),
+      
+      # KPI row: DB sample count / Total Frequency / Current DB label
+      div(class = "kpi-box",
+          div(class = "kpi", span(class="label","DB Samples"),
+              div(class = "value", textOutput("confirm_db_count", inline = TRUE))),
+          div(class = "kpi", span(class="label","Total Frequency"),
+              div(class = "value", textOutput("confirm_total_freq", inline = TRUE))),
+          div(class = "kpi", span(class="label","Current DB File"),
+              div(class = "value", textOutput("confirm_db_label", inline = TRUE)))
+      ),
+      
+      # Ranking controls + Run button
+      div(class="controls-line",
+          radioButtons(
+            inputId = "rank_mode",
+            label = "Ranking condition",
+            choices = c("Top N" = "top", "Score >= n" = "min", "All" = "all"),
+            selected = "top",
+            inline = TRUE
+          ),
+          conditionalPanel(
+            condition = "input.rank_mode == 'top'",
+            numericInput("rank_top_n", "Top N", value = 50, min = 1, step = 1, width = "140px")
+          ),
+          conditionalPanel(
+            condition = "input.rank_mode == 'min'",
+            numericInput("rank_min_score", "Score >= n", value = 10, min = 0, step = 1, width = "160px")
+          ),
+          div(style="flex-grow:1"),
+          actionButton("btn_run_match", "Run Match")
+      ),
+      
+      hr(),
+      h4("Query x Frequency table"),
+      tableOutput("confirm_freq_table")
+    )
+  )
+}

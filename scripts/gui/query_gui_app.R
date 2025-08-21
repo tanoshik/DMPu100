@@ -9,6 +9,8 @@ suppressPackageStartupMessages({
 
 # --- sources (keep as in repo; add new modules) ---
 source("scripts/utils_profile.R", local = TRUE)
+source("scripts/scoring_fast.R", local = TRUE)
+source("scripts/matcher_fast.R", local = TRUE)
 
 # Input tab (existing)
 source("scripts/gui/ui_input_tab.R", local = TRUE)

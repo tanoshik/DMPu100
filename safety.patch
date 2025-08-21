@@ -1,0 +1,191 @@
+diff --git a/scripts/gui/server_confirm_logic.R b/scripts/gui/server_confirm_logic.R
+index 86acf30..d596f9f 100644
+--- a/scripts/gui/server_confirm_logic.R
++++ b/scripts/gui/server_confirm_logic.R
+@@ -57,36 +57,70 @@ server_confirm_logic <- function(id, rv, locus_order = NULL,
+     
+     # ---- Reactives ----
+     
+-    query_df_reactive <- reactive({
+-      q <- NULL
+-      if (!is.null(rv$query_df) && is.data.frame(rv$query_df)) {
+-        q <- rv$query_df
+-      } else if (!is.null(rv$query_profile_df) && is.data.frame(rv$query_profile_df)) {
+-        q <- rv$query_profile_df
+-      } else if (!is.null(rv$query_profile)) {
+-        prof <- rv$query_profile
+-        if (is.list(prof)) {
+-          loci <- names(prof)
+-          alleles <- do.call(rbind, lapply(prof, function(v) {
+-            v <- as.character(v)
+-            if (length(v) < 2) v <- c("any","any")
+-            v[is.na(v) | v == ""] <- "any"
+-            v[1:2]
+-          }))
+-          q <- data.frame(Locus = loci, allele1 = alleles[,1], allele2 = alleles[,2], stringsAsFactors = FALSE)
++    # coerce various shapes into a standard data.frame: Locus, allele1, allele2
++    .coerce_to_query_df <- function(x) {
++      if (is.null(x)) return(NULL)
++      
++      # case A: already a data.frame with the right columns
++      if (is.data.frame(x)) {
++        df <- x
++        nm <- names(df)
++        # tolerate case variations
++        names(df) <- sub("^(?i)allele1$", "allele1", nm, perl = TRUE)
++        names(df) <- sub("^(?i)allele2$", "allele2", names(df), perl = TRUE)
++        names(df) <- sub("^(?i)locus$",   "Locus",   names(df), perl = TRUE)
++        # if has the 3 columns, keep only them in order
++        if (all(c("Locus","allele1","allele2") %in% names(df))) {
++          out <- df[, c("Locus","allele1","allele2"), drop = FALSE]
++          # normalize NA/"" -> "any"
++          out$allele1[is.na(out$allele1) | out$allele1 == ""] <- "any"
++          out$allele2[is.na(out$allele2) | out$allele2 == ""] <- "any"
++          return(out)
+         }
++        return(NULL)
+       }
+-      if (is.null(q)) return(NULL)
+-      names(q) <- gsub("^Allele1$", "allele1", names(q), ignore.case = TRUE)
+-      names(q) <- gsub("^Allele2$", "allele2", names(q), ignore.case = TRUE)
+-      names(q) <- gsub("^locus$",   "Locus",   names(q), ignore.case = TRUE)
+       
+-      # optional locus_order to reorder rows
+-      if (!is.null(locus_order) && "Locus" %in% names(q)) {
+-        ord <- match(q$Locus, locus_order)
+-        q <- q[order(ord), , drop = FALSE]
++      # case B: list: Locus -> c(a1,a2)
++      if (is.list(x)) {
++        loci <- names(x)
++        if (is.null(loci)) return(NULL)
++        alleles <- do.call(rbind, lapply(x, function(v) {
++          v <- as.character(v)
++          if (length(v) < 2) v <- c("any","any")
++          v[is.na(v) | v == ""] <- "any"
++          v[1:2]
++        }))
++        return(data.frame(Locus = loci, allele1 = alleles[,1], allele2 = alleles[,2], stringsAsFactors = FALSE))
+       }
+-      q
++      
++      NULL
++    }
++    
++    query_df_reactive <- reactive({
++      # Priority order (pick the first non-null that can be coerced):
++      # 1) explicit keys used by confirm so far
++      cand <- list(
++        rv$query_df,
++        rv$query_profile_df,
++        rv$query_profile,
++        # 2) keys used in your query_gui_app.R
++        rv$query_profile_show,
++        rv$query_profile_std
++      )
++      for (obj in cand) {
++        df <- .coerce_to_query_df(obj)
++        if (!is.null(df)) {
++          # optional reordering by locus_order
++          if (!is.null(locus_order) && "Locus" %in% names(df)) {
++            ord <- match(df$Locus, locus_order)
++            df <- df[order(ord), , drop = FALSE]
++          }
++          cat("confirm: query_df rows=", nrow(df), "\n")
++          
++          return(df)
++        }
++      }
++      NULL
+     })
+     
+     freq_table_reactive <- reactive({
+@@ -159,6 +193,17 @@ server_confirm_logic <- function(id, rv, locus_order = NULL,
+     })
+     
+     # ---- Outputs ----
++    # Prepared Query Profile table
++    output$confirm_prepared_query <- renderTable({
++      q <- query_df_reactive()
++      if (is.null(q) || nrow(q) == 0) return(NULL)
++      # display-friendly column names
++      out <- q
++      names(out) <- sub("^allele1$", "Allele1", names(out), ignore.case = TRUE)
++      names(out) <- sub("^allele2$", "Allele2", names(out), ignore.case = TRUE)
++      out
++    }, striped = TRUE, bordered = TRUE, hover = TRUE, spacing = "s")
++
+     output$confirm_freq_table <- renderTable({
+       tbl <- confirm_freq_table_reactive()
+       if (is.null(tbl)) return(NULL)
+diff --git a/scripts/gui/ui_confirm_tab.R b/scripts/gui/ui_confirm_tab.R
+index 6c40084..03dfa97 100644
+--- a/scripts/gui/ui_confirm_tab.R
++++ b/scripts/gui/ui_confirm_tab.R
+@@ -1,8 +1,8 @@
+ # ui_confirm_tab.R
+-# Confirm tab UI for frequency table, DB count, and ranking conditions.
+-# No multibyte characters in code/comments.
++# Confirm tab UI (module-ready). No multibyte characters in code/comments.
+ 
+-render_confirm_tab <- function() {
++render_confirm_tab <- function(id = "confirm") {
++  ns <- NS(id)
+   tabPanel(
+     title = "Confirm",
+     fluidPage(
+@@ -16,40 +16,44 @@ render_confirm_tab <- function() {
+       
+       h3("Confirm"),
+       
+-      # KPI row: DB sample count / Total Frequency / Current DB label
++      # KPI row
+       div(class = "kpi-box",
+           div(class = "kpi", span(class="label","DB Samples"),
+-              div(class = "value", textOutput("confirm_db_count", inline = TRUE))),
++              div(class = "value", textOutput(ns("confirm_db_count"), inline = TRUE))),
+           div(class = "kpi", span(class="label","Total Frequency"),
+-              div(class = "value", textOutput("confirm_total_freq", inline = TRUE))),
++              div(class = "value", textOutput(ns("confirm_total_freq"), inline = TRUE))),
+           div(class = "kpi", span(class="label","Current DB File"),
+-              div(class = "value", textOutput("confirm_db_label", inline = TRUE)))
++              div(class = "value", textOutput(ns("confirm_db_label"), inline = TRUE)))
+       ),
+       
+       # Ranking controls + Run button
+       div(class="controls-line",
+           radioButtons(
+-            inputId = "rank_mode",
++            inputId = ns("rank_mode"),
+             label = "Ranking condition",
+             choices = c("Top N" = "top", "Score >= n" = "min", "All" = "all"),
+             selected = "top",
+             inline = TRUE
+           ),
+           conditionalPanel(
+-            condition = "input.rank_mode == 'top'",
+-            numericInput("rank_top_n", "Top N", value = 50, min = 1, step = 1, width = "140px")
++            condition = sprintf("input['%s'] == 'top'", ns("rank_mode")),
++            numericInput(ns("rank_top_n"), "Top N", value = 50, min = 1, step = 1, width = "140px")
+           ),
+           conditionalPanel(
+-            condition = "input.rank_mode == 'min'",
+-            numericInput("rank_min_score", "Score >= n", value = 10, min = 0, step = 1, width = "160px")
++            condition = sprintf("input['%s'] == 'min'", ns("rank_mode")),
++            numericInput(ns("rank_min_score"), "Score >= n", value = 10, min = 0, step = 1, width = "160px")
+           ),
+           div(style="flex-grow:1"),
+-          actionButton("btn_run_match", "Run Match")
++          actionButton(ns("btn_run_match"), "Run Match")
+       ),
+       
++      hr(),
++      h4("Prepared Query Profile"),
++      tableOutput(ns("confirm_prepared_query")),
++      
+       hr(),
+       h4("Query x Frequency table"),
+-      tableOutput("confirm_freq_table")
++      tableOutput(ns("confirm_freq_table"))
+     )
+   )
+ }
