@@ -99,10 +99,24 @@ rv <- reactiveValues(
   "
 )
 
+# --- DB count reactive (index優先) ---
 db_count <- reactive({
+  # 1) rv$db_index（行列A1/A2）を最優先で数える
+  if (!is.null(rv$db_index) && is.list(rv$db_index) && !is.null(rv$db_index$A1)) {
+    a1 <- rv$db_index$A1
+    if (is.matrix(a1)) {
+      return(nrow(a1))
+    }
+  }
+  # 2) フォールバック：rv$db_profile（縦長CSV）からユニークSampleID数
   df <- rv$db_profile
   if (is.null(df)) return(0L)
-  tryCatch(length(unique(df$SampleID)), error = function(e) 0L)
+  # 列名ゆらぎにそこそこ耐える
+  sid_col <- names(df)[tolower(names(df)) %in% c("sampleid","sample_id","id")]
+  if (length(sid_col) > 0) {
+    return(tryCatch(length(unique(df[[sid_col[1]]])), error = function(e) 0L))
+  }
+  tryCatch(nrow(df), error = function(e) 0L)
 })
 
 # --- UI ---

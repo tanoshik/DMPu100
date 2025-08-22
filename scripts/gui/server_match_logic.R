@@ -263,19 +263,48 @@ server_match_logic <- function(id, rv) {
       df
     }
     
-    # 使い方（既存の DL ハンドラ内を書き換え）
-    output$dl_scores <- shiny::downloadHandler(
-      filename = function() "match_scores.csv",
-      content  = function(file) {
-        df <- .write_safe_df(rv$match_scores)
-        utils::write.csv(df, file, row.names = FALSE, na = "")
+    # ---- Downloads with timestamp (Asia/Tokyo) ----
+    .ts <- function() {
+      # タイムスタンプはJSTで
+      old <- Sys.getenv("TZ", unset = NA)
+      on.exit(if (!is.na(old)) Sys.setenv(TZ = old) else Sys.unsetenv("TZ"), add = TRUE)
+      Sys.setenv(TZ = "Asia/Tokyo")
+      format(Sys.time(), "%Y%m%d_%H%M%S")
+    }
+    
+    # Summary (match_scores.csv)
+    output$dl_scores <- downloadHandler(
+      filename = function() {
+        paste0("match_scores_", .ts(), ".csv")
+      },
+      content = function(file) {
+        x <- rv$match_scores
+        if (is.null(x) || !nrow(x)) {
+          x <- data.frame(SampleID = character(0), Score = integer(0), stringsAsFactors = FALSE)
+        }
+        utils::write.table(x, file = file, sep = ",", row.names = FALSE, col.names = TRUE, fileEncoding = "UTF-8")
       }
     )
-    output$dl_detail <- shiny::downloadHandler(
-      filename = function() "match_log.csv",
-      content  = function(file) {
-        df <- .write_safe_df(rv$match_detail)
-        utils::write.csv(df, file, row.names = FALSE, na = "")
+    
+    # Detail (match_log.csv)
+    output$dl_detail <- downloadHandler(
+      filename = function() {
+        paste0("match_log_", .ts(), ".csv")
+      },
+      content = function(file) {
+        x <- rv$match_detail
+        if (is.null(x) || !nrow(x)) {
+          x <- data.frame(SampleID=character(0), Locus=character(0), DB_Allele1=integer(0),
+                          DB_Allele2=integer(0), Score=integer(0),
+                          Bits=character(0), Code=integer(0),
+                          stringsAsFactors = FALSE)
+        }
+        # list/unknown列で落ちないよう型を落とし切ってから保存
+        to_chr <- c("SampleID","Locus","Bits")
+        to_int <- c("DB_Allele1","DB_Allele2","Score","Code")
+        for (nm in intersect(names(x), to_chr)) x[[nm]] <- as.character(x[[nm]])
+        for (nm in intersect(names(x), to_int)) suppressWarnings(x[[nm]] <- as.integer(x[[nm]]))
+        utils::write.table(x, file = file, sep = ",", row.names = FALSE, col.names = TRUE, fileEncoding = "UTF-8")
       }
     )
   })
