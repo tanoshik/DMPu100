@@ -6,89 +6,136 @@
 #
 # No multibyte characters in code/comments.
 
-# Do not call normalizePath for printing; just show raw absolute paths.
+# --- tiny helpers -------------------------------------------------------------
 safe_show <- function(path) {
-  # best-effort absolute without mustWork
   p <- tryCatch(normalizePath(path, winslash = "/", mustWork = FALSE),
                 error = function(e) path)
   if (is.na(p) || p == "") path else p
 }
 
-make_dist_zip <- function(project_root = getwd(),
-                          zip_prefix   = "DMP_dist",
-                          parent_dir   = dirname(getwd()),  # one level above project root
-                          head_lines   = 50,                # number of lines for head capture
-                          max_head_kb  = 128,               # per-file cap for head capture
-                          dry_run      = FALSE,
-                          verbose      = TRUE) {
+tryQuiet <- function(expr) suppressWarnings(suppressMessages(try(expr, silent = TRUE)))
+
+ts_jst <- function() {
+  old_tz <- Sys.getenv("TZ", unset = "")
+  on.exit(Sys.setenv(TZ = old_tz), add = TRUE)
+  Sys.setenv(TZ = "Asia/Tokyo")
+  format(Sys.time(), "%Y%m%d%H%M")
+}
+
+short_hash <- function() {
+  out <- tryQuiet(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE, stderr = TRUE))
+  if (inherits(out, "try-error") || length(out) == 0 || grepl("fatal", paste(out, collapse = " "))) {
+    paste(sample(c(0:9, letters[1:6]), 7, replace = TRUE), collapse = "")
+  } else trimws(out[[1]])
+}
+
+# normalize path separators to '/' before prefix judgment
+.normalize_slashes <- function(x) gsub("[\\\\]+", "/", x)
+
+is_under <- function(path, dir_prefix) {
+  path <- .normalize_slashes(path)
+  dir_prefix <- .normalize_slashes(dir_prefix)
+  startsWith(path, paste0(dir_prefix, "/"))
+}
+
+is_text_like <- function(path) {
+  ext <- tolower(tools::file_ext(path))
+  ext %in% c(
+    "r","rmd","qmd","md","txt","csv","tsv","json","yaml","yml",
+    "log","gitignore","renvignore","rprofile","rproj"
+  )
+}
+
+# --- main ---------------------------------------------------------------------
+make_dist_zip <- function(
+    project_root      = getwd(),
+    zip_prefix        = "DMP_dist",
+    parent_dir        = dirname(getwd()),  # one level above project root
+    head_lines        = 50,                # number of lines for head capture
+    max_head_kb       = 128,               # per-file cap for head capture
+    include_dirs      = c("scripts", "data"),
+    include_data_rds  = FALSE,             # <- NEW: TRUE で data/*.rds も同梱できる
+    extra_include     = character(0),      # <- NEW: 明示的に追加したいファイル/ディレクトリ
+    extra_exclude_dirs    = character(0),  # <- NEW: 除外ディレクトリの追加
+    extra_exclude_patterns= character(0),  # <- NEW: 除外パターンの追加
+    dry_run           = FALSE,
+    verbose           = TRUE
+) {
   olwd <- getwd()
   on.exit(setwd(olwd), add = TRUE)
   setwd(project_root)
   
-  # ---- helpers ----
-  tryQuiet <- function(expr) suppressWarnings(suppressMessages(try(expr, silent = TRUE)))
-  
-  ts_jst <- function() {
-    old_tz <- Sys.getenv("TZ", unset = "")
-    on.exit(Sys.setenv(TZ = old_tz), add = TRUE)
-    Sys.setenv(TZ = "Asia/Tokyo")
-    format(Sys.time(), "%Y%m%d%H%M")
-  }
-  
-  short_hash <- function() {
-    out <- tryQuiet(system2("git", c("rev-parse", "--short", "HEAD"), stdout = TRUE, stderr = TRUE))
-    if (inherits(out, "try-error") || length(out) == 0 || grepl("fatal", paste(out, collapse = " "))) {
-      paste(sample(c(0:9, letters[1:6]), 7, replace = TRUE), collapse = "")
-    } else trimws(out[[1]])
-  }
-  
-  is_under <- function(path, dir_prefix) startsWith(path, paste0(dir_prefix, "/"))
-  
-  # text-like extension check for head capture
-  is_text_like <- function(path) {
-    ext <- tolower(tools::file_ext(path))
-    ext %in% c(
-      "r","rmd","qmd","md","txt","csv","tsv","json","yaml","yml",
-      "log","gitignore","renvignore","rprofile","rproj"
-    )
-  }
-  
   # ---- inventory ----
   all <- list.files(".", recursive = TRUE, all.files = FALSE, full.names = FALSE)
-  # drop directories
-  all <- all[file.info(all)$isdir == FALSE]
+  finfo <- file.info(all)
+  all   <- all[!finfo$isdir]                 # files only
+  all   <- .normalize_slashes(all)
   
-  # whitelist: include scripts/ and data/ (but filter), plus top-level docs
+  # top-level docs
   must_include <- character(0)
-  if (file.exists("README.md"))  must_include <- c(must_include, "README.md")
-  if (file.exists("LICENSE"))    must_include <- c(must_include, "LICENSE")
-  if (file.exists("DESCRIPTION")) must_include <- c(must_include, "DESCRIPTION")
+  for (f in c("README.md","LICENSE","DESCRIPTION")) {
+    if (file.exists(f)) must_include <- c(must_include, f)
+  }
   
-  include_dirs <- c("scripts", "data")
+  # 初期シード（scripts と data、+トップドキュメント）
   keep_seed <- Reduce(`|`, lapply(include_dirs, function(d) is_under(all, d))) |
     (basename(all) %in% basename(must_include))
   
-  # data/ extension filter (no .rds)
+  # 明示追加（パスが存在するもののみ）
+  if (length(extra_include)) {
+    extra_ok <- extra_include[file.exists(extra_include)]
+    if (length(extra_ok)) {
+      # ディレクトリなら配下のファイルを展開
+      extra_files <- unlist(lapply(extra_ok, function(p) {
+        p <- .normalize_slashes(p)
+        if (dir.exists(p)) {
+          list.files(p, recursive = TRUE, full.names = FALSE)
+          # list.files はカレント起点に出ないので、ここは相対に直す
+          # ただし project_root を前提に動かしているため、呼び側は相対で渡す想定
+          # ここではそのまま返す（既に相対想定）
+        } else {
+          p
+        }
+      }), use.names = FALSE)
+      keep_seed <- keep_seed | (all %in% .normalize_slashes(extra_files))
+    }
+  }
+  
+  # data/ の拡張子フィルタ
   allow_ext_data <- function(path) {
     if (!is_under(path, "data")) return(TRUE)
     ext <- tolower(tools::file_ext(path))
-    nchar(ext) > 0 && ext %in% c("csv","txt","tsv","md","rda","rdata","json","yaml","yml")
+    if (include_data_rds) {
+      nchar(ext) > 0 && ext %in% c("csv","txt","tsv","md","rda","rdata","json","yaml","yml","rds","rds.gz")
+    } else {
+      nchar(ext) > 0 && ext %in% c("csv","txt","tsv","md","rda","rdata","json","yaml","yml")
+    }
   }
   
-  # exclude dirs anywhere in path
+  # 除外ディレクトリ
   exclude_dirs <- c(
     "output","test",".git",".github",".Rproj.user",".idea",".vscode",
     ".renv","renv","packrat","docs","dist","release","tmp","bench","notes","meta"
   )
+  if (length(extra_exclude_dirs)) exclude_dirs <- unique(c(exclude_dirs, extra_exclude_dirs))
   
-  is_excluded_dir <- function(path) any(startsWith(path, paste0(exclude_dirs, "/")))
+  is_excluded_dir <- function(path) {
+    any(vapply(exclude_dirs, function(d) startsWith(path, paste0(d, "/")), logical(1)))
+  }
   
-  # exclude patterns
+  # 除外パターン
   exclude_patterns <- c(
     "\\.rds$","\\.RDS$","\\.zip$","~$","^\\.",     # common
     "^debug_.*\\.R$","^scratch_.*\\.R$",
     "^.*[/\\\\]debug_.*\\.R$","^.*[/\\\\]scratch_.*\\.R$"
   )
+  if (include_data_rds) {
+    # data/ 以外の .rds を弾く目的は残す（data/ は allow_ext_data で制御済み）
+    exclude_patterns <- setdiff(exclude_patterns, c("\\.rds$","\\.RDS$"))
+    exclude_patterns <- c(exclude_patterns, "^(?!data/).+\\.rds$")  # PCRE: data/ 以外の .rds を除外
+  }
+  if (length(extra_exclude_patterns)) exclude_patterns <- unique(c(exclude_patterns, extra_exclude_patterns))
+  
   is_excluded_pat <- function(path) any(vapply(exclude_patterns, function(rx) grepl(rx, path, perl = TRUE), logical(1)))
   
   # build keep list
@@ -96,9 +143,10 @@ make_dist_zip <- function(project_root = getwd(),
   candidates <- candidates[vapply(candidates, allow_ext_data, logical(1))]
   keep <- candidates[!vapply(candidates, is_excluded_dir,  logical(1))]
   keep <- keep[!vapply(keep,      is_excluded_pat, logical(1))]
+  keep <- sort(unique(keep))  # 安定化
   
   # excluded = all - keep
-  excluded <- setdiff(all, keep)
+  excluded <- sort(setdiff(all, keep))
   
   if (length(keep) == 0) stop("No files to include. Check filters.", call. = FALSE)
   
@@ -117,7 +165,6 @@ make_dist_zip <- function(project_root = getwd(),
   
   # ---- meta: write excluded list and heads ----
   write_meta <- function() {
-    # EXCLUDED_LIST.txt
     list_path <- file.path(meta_dir, "EXCLUDED_LIST.txt")
     cat(sprintf("# excluded files: %d\n", length(excluded)), file = list_path)
     if (length(excluded)) {
@@ -132,14 +179,16 @@ make_dist_zip <- function(project_root = getwd(),
       info <- file.info(p)
       if (is.na(info$size) || info$size > (max_head_kb * 1024)) next
       
-      rel_out <- paste0(p, ".head.txt")
-      rel_out <- gsub("[/\\\\]+", "_", rel_out)  # sanitize
+      rel_out  <- paste0(p, ".head.txt")
+      rel_out  <- gsub("[/\\\\]+", "_", rel_out)  # sanitize
       out_path <- file.path(heads_dir, rel_out)
       
       con <- file(p, open = "rt", encoding = "UTF-8")
       on.exit(tryQuiet(close(con)), add = TRUE)
-      lines <- readLines(con, n = head_lines, warn = FALSE)
-      tryQuiet(close(con))  # close immediately, regardless of loop
+      lines <- tryCatch(readLines(con, n = head_lines, warn = FALSE), error = function(e) character(0))
+      tryQuiet(close(con))  # close immediately
+      on.exit(NULL, add = FALSE) # avoid stacking on.exit in loop
+      
       cat(sprintf("# HEAD of excluded file: %s\n", p), file = out_path)
       if (length(lines)) cat(paste(lines, collapse = "\n"), file = out_path, append = TRUE)
     }
