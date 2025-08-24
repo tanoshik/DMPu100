@@ -1,334 +1,355 @@
-# No multibyte characters in code/comments.
+# scripts/bench/bench_run_match_fast_chunks_u100.R
+# Benchmark run_match_fast() with chunked DB and configurable workers.
+# - No multibyte characters in code/comments.
+# - Working directory assumed: project root (DMPu100).
+# - Logging: append to output/bench/bench_chunks_log.csv (resumable).
+# - Safe for small "smoke test" and scalable to 1M by config.
+#
+# Usage:
+#   source("scripts/bench/bench_run_match_fast_chunks_u100.R")
 
-# DMPu100 bench: incremental CSV append + resume + KPI (+ optional parallel)
-# NOTE: run_match_fast() signature is based on CURRENT RUN LOGS (assumption).
-#       If your local function signature differs, adjust the call near "worker" section.
+suppressPackageStartupMessages({
+  # base R only; optionally parallel if available
+})
 
-########################################
-# ========== CONFIG (EDIT HERE) ==========
-########################################
+# -------------------------
+# CONFIG (edit here)
+# -------------------------
+CONFIG <- list(
+  # DB RDS path (relative to project root)
+  db_rds_path   = "data/virtual_db_u100_S1000_seed123.rds",  # replace for 1M bench
+  # Optional: query selection strategy: "first", "random", or "fixed_id"
+  query_pick    = "first",
+  fixed_query_id = NA_character_,
+  # chunk sizes for test (records per chunk; for 1M bench use larger, e.g., 100000, 200000, 250000, 500000)
+  chunk_sizes   = c(200L, 300L, 500L),
+  # workers set; for light test keep 1; for 1M try c(1,2,4)
+  workers_list  = c(1L),
+  # repeat count per setting (stability)
+  repeats       = 1L,
+  # output log csv
+  log_csv       = "output/bench/bench_chunks_log.csv",
+  # optional detail out (disabled by default for speed)
+  write_detail  = FALSE,
+  # detail path pattern if enabled
+  detail_dir    = "output/bench/details",
+  # random seed for stable query selection if needed
+  seed          = 123L,
+  # enable resume: skip if (db_file, chunk_size, workers, run_idx) already logged
+  enable_resume = TRUE
+)
 
-# --- data & output ---
-db_rds_path   <- "data/virtual_db_u100_S1000_seed123.rds"   # <= 1K quick test
-result_dir    <- "test/bench"
-log_dir       <- "logs"
+# -------------------------
+# Helpers
+# -------------------------
 
-# --- bench grid (small defaults for quick test) ---
-chunk_sizes   <- c(100, 200, 250, 500)  # <= adjust for bigger DB later
-enable_parallel   <- FALSE               # set TRUE to test parallel
-parallel_workers  <- max(1L, parallel::detectCores() - 1L)   # ex: CPU-1
-
-# --- matcher behavior ---
-ANY_CODE      <- 9999L
-include_bits_in_detail <- FALSE         # fixed FALSE for speed
-pre_add_for_any_any    <- 2L            # design doc default
-
-# --- metadata for KPI (旧DMP互換) ---
-seed          <- 1L
-bench_type    <- "gf_like"
-cores         <- if (enable_parallel) parallel_workers else 1L
-include_io    <- FALSE                  # change to TRUE if measuring IO separately
-
-# --- optional: reuse same CSV file name to resume across sessions ---
-# leave empty "" to auto-generate time-stamped name each run.
-manual_run_tag <- ""   # e.g., "resume_1M_try1" to append into same CSV
-
-########################################
-# ======== PROJECT SOURCES (REQUIRED) ========
-########################################
-
-# These scripts must exist in your repo. If not, please provide them before running.
-# - scripts/scoring_fast.R
-# - scripts/matcher_fast.R
-source("scripts/scoring_fast.R",  local = TRUE)
-source("scripts/matcher_fast.R",  local = TRUE)
-
-########################################
-# ========== OPTIONAL DEPENDENCIES ==========
-########################################
-if (enable_parallel) {
-  suppressWarnings(suppressMessages({
-    library(future)
-    library(future.apply)
-  }))
+safe_dir_create <- function(path) {
+  if (!dir.exists(path)) dir.create(path, recursive = TRUE, showWarnings = FALSE)
 }
 
-########################################
-# ========== HELPERS ==========
-########################################
-
-safe_dir_create <- function(d) if (!dir.exists(d)) dir.create(d, recursive = TRUE, showWarnings = FALSE)
-ts_tag <- function() format(Sys.time(), "%Y%m%d%H%M%S")
-
-# map "any" to ANY_CODE (integer), keep integers as-is
-.map_any <- function(x, any_code = ANY_CODE) {
-  if (is.null(x)) return(integer(0))
-  if (is.factor(x)) x <- as.character(x)
-  out <- suppressWarnings(as.integer(x))
-  is_any <- !is.na(x) & tolower(as.character(x)) == "any"
-  out[is_any] <- any_code
-  out
+safe_now_str <- function() {
+  format(Sys.time(), "%Y-%m-%d %H:%M:%S")
 }
 
-# minimal query shape: Locus, allele1, allele2  (+ sorted by locus_order if available)
-.prepare_query_min <- function(q_raw, locus_order = NULL, any_code = ANY_CODE) {
-  n <- names(q_raw)
-  names(q_raw) <- sub("(?i)^locus$","Locus", n, perl=TRUE)
-  names(q_raw) <- sub("(?i)^allele1$","allele1", names(q_raw), perl=TRUE)
-  names(q_raw) <- sub("(?i)^allele2$","allele2", names(q_raw), perl=TRUE)
-  stopifnot(all(c("Locus","allele1","allele2") %in% names(q_raw)))
-  q <- q_raw[, c("Locus","allele1","allele2"), drop = FALSE]
-  q$Locus   <- as.character(q$Locus)
-  q$allele1 <- .map_any(q$allele1, any_code)
-  q$allele2 <- .map_any(q$allele2, any_code)
-  if (!is.null(locus_order) && length(locus_order) > 0L) {
-    ord <- match(q$Locus, locus_order)
-    q <- q[order(ord), , drop = FALSE]
-  }
-  rownames(q) <- NULL
-  q
+sha7_head <- function() {
+  h <- tryCatch(system("git rev-parse --short=7 HEAD", intern = TRUE, ignore.stderr = TRUE),
+                error = function(e) NA_character_)
+  if (is.character(h) && length(h) == 1L && nchar(h) > 0) h else "unknown"
 }
 
-# build db_index (list: sample_ids, locus_ids, A1, A2) from long DF
-.build_db_index_v1 <- function(db_prep, locus_order, any_code = ANY_CODE) {
-  req <- c("SampleID","Locus","Allele1","Allele2")
-  stopifnot(is.data.frame(db_prep), all(req %in% names(db_prep)))
-  SIDs <- unique(db_prep$SampleID)
-  LIDs <- as.character(locus_order)
-  S <- length(SIDs); L <- length(LIDs)
-  A1 <- matrix(any_code, nrow = S, ncol = L, dimnames = list(NULL, LIDs))
-  A2 <- matrix(any_code, nrow = S, ncol = L, dimnames = list(NULL, LIDs))
-  Lmap <- setNames(seq_along(LIDs), LIDs)
-  sid_map <- setNames(seq_along(SIDs), SIDs)
-  for (k in seq_len(nrow(db_prep))) {
-    sid <- db_prep$SampleID[k]
-    loc <- as.character(db_prep$Locus[k])
-    i <- sid_map[[sid]]; j <- Lmap[[loc]]
-    if (is.na(i) || is.na(j)) next
-    A1[i, j] <- .map_any(db_prep$Allele1[k], any_code)
-    A2[i, j] <- .map_any(db_prep$Allele2[k], any_code)
-  }
-  list(sample_ids = SIDs, locus_ids = LIDs, A1 = A1, A2 = A2)
+split_indices <- function(n, chunk_size) {
+  if (n <= 0 || chunk_size <= 0) return(list())
+  starts <- seq.int(1L, n, by = chunk_size)
+  ends   <- pmin(starts + chunk_size - 1L, n)
+  Map(seq.int, starts, ends)
 }
 
-load_locus_order <- function() {
-  if (file.exists("data/locus_order.rds")) {
-    lo <- tryCatch(readRDS("data/locus_order.rds"), error = function(e) NULL)
-    if (is.character(lo)) return(lo)
-  }
-  NULL
+read_rds_any <- function(path) {
+  readRDS(path)
 }
 
-# Load either index RDS or long DF RDS; also returns a query builder
-load_db_index_or_df <- function(path) {
-  obj <- readRDS(path)
-  lo <- load_locus_order()
-  if (is.list(obj) && all(c("sample_ids","locus_ids","A1","A2") %in% names(obj))) {
-    make_query_from_index <- function(idx) {
-      sidx <- 1L
-      LIDs <- idx$locus_ids
-      q <- data.frame(
-        Locus   = LIDs,
-        allele1 = idx$A1[sidx, ],
-        allele2 = idx$A2[sidx, ],
-        stringsAsFactors = FALSE
-      )
-      .prepare_query_min(q, LIDs, ANY_CODE)
+# Try to infer locus count from locus_order.rds
+get_locus_count <- function() {
+  p <- "data/locus_order.rds"
+  if (!file.exists(p)) return(NA_integer_)
+  loci <- tryCatch(readRDS(p), error = function(e) NULL)
+  if (is.null(loci)) return(NA_integer_)
+  as.integer(length(loci))
+}
+
+ensure_sources <- function() {
+  # Load project functions needed by run_match_fast
+  # Adjust if your file names differ.
+  srcs <- c(
+    "scripts/utils_profile.R",
+    "scripts/utils_profile_modular.R",
+    "scripts/scoring_fast.R",
+    "scripts/matcher.R",
+    "scripts/io_profiles.R",
+    "scripts/utils_freq.R"
+  )
+  for (s in srcs) {
+    if (file.exists(s)) {
+      tryCatch(source(s), error = function(e) {
+        message("[WARN] Failed to source: ", s, " : ", conditionMessage(e))
+      })
     }
-    return(list(db_index = obj, make_query = function() make_query_from_index(obj), locus_order = obj$locus_ids))
   }
-  if (is.data.frame(obj)) {
-    n <- names(obj)
-    names(obj) <- sub("(?i)^sampleid$","SampleID", n, perl=TRUE)
-    names(obj) <- sub("(?i)^locus$","Locus", names(obj), perl=TRUE)
-    names(obj) <- sub("(?i)^allele1$","Allele1", names(obj), perl=TRUE)
-    names(obj) <- sub("(?i)^allele2$","Allele2", names(obj), perl=TRUE)
-    LIDs <- lo; if (is.null(LIDs)) LIDs <- unique(as.character(obj$Locus))
-    idx <- .build_db_index_v1(obj, LIDs, ANY_CODE)
-    make_query_from_df <- function(df) {
-      sid <- df$SampleID[1]
-      q <- subset(df, SampleID == sid, c("Locus","Allele1","Allele2"))
-      names(q) <- c("Locus","allele1","allele2")
-      .prepare_query_min(q, LIDs, ANY_CODE)
+}
+
+pick_query_from_db <- function(db_df) {
+  # Expect a long DF with columns: SampleID, Locus, allele1, allele2 (case-insensitive tolerated upstream)
+  # We will pick one SampleID and build a query list/df compatible with run_match_fast().
+  # Strategy controlled by CONFIG$query_pick.
+  sid_col <- "SampleID"
+  if (!sid_col %in% names(db_df)) {
+    # try case-insensitive
+    nms <- names(db_df)
+    hit <- nms[tolower(nms) == "sampleid"]
+    if (length(hit) == 1L) names(db_df)[names(db_df) == hit] <- "SampleID"
+  }
+  stopifnot("SampleID" %in% names(db_df))
+  set.seed(CONFIG$seed)
+  cand_ids <- unique(db_df$SampleID)
+  
+  qid <- switch(
+    CONFIG$query_pick,
+    "random"   = sample(cand_ids, 1L),
+    "fixed_id" = {
+      if (isTRUE(nzchar(CONFIG$fixed_query_id)) && CONFIG$fixed_query_id %in% cand_ids) CONFIG$fixed_query_id else cand_ids[1L]
+    },
+    "first"    = cand_ids[1L],
+    cand_ids[1L]
+  )
+  
+  q_df <- db_df[db_df$SampleID == qid, , drop = FALSE]
+  list(query_sample_id = qid, query_df = q_df)
+}
+
+prepare_db_for_match <- function(db_df, qid) {
+  # Remove query sample from DB to avoid self-match bias
+  db_df[db_df$SampleID != qid, , drop = FALSE]
+}
+
+# Estimate "loci processed" as (#loci in locus_order) * (#rows processed per sample pair)
+# For a quick throughput proxy we use loci_count * num_pairs_processed, where
+# num_pairs_processed approximates n_chunk_samples * 1 query.
+estimate_loci_processed <- function(n_records_chunk, loci_count) {
+  if (is.na(loci_count)) return(NA_real_)
+  as.numeric(loci_count) * as.numeric(n_records_chunk)
+}
+
+append_log <- function(csv_path, row_df) {
+  safe_dir_create(dirname(csv_path))
+  if (!file.exists(csv_path)) {
+    utils::write.table(row_df, file = csv_path, sep = ",", row.names = FALSE, col.names = TRUE)
+  } else {
+    suppressWarnings(utils::write.table(row_df, file = csv_path, sep = ",",
+                                        row.names = FALSE, col.names = FALSE, append = TRUE))
+  }
+}
+
+already_logged <- function(csv_path, key_cols, key_vals) {
+  if (!file.exists(csv_path)) return(FALSE)
+  df <- tryCatch(utils::read.csv(csv_path, stringsAsFactors = FALSE), error = function(e) NULL)
+  if (is.null(df)) return(FALSE)
+  if (!all(key_cols %in% names(df))) return(FALSE)
+  # exact match on all key columns
+  sel <- rep(TRUE, nrow(df))
+  for (i in seq_along(key_cols)) {
+    col <- key_cols[i]
+    val <- key_vals[[i]]
+    sel <- sel & (as.character(df[[col]]) == as.character(val))
+  }
+  any(sel)
+}
+
+# -------------------------
+# Main
+# -------------------------
+
+ensure_sources()
+
+db_path <- CONFIG$db_rds_path
+if (!file.exists(db_path)) {
+  stop(sprintf("DB RDS not found: %s (wd=%s)", db_path, getwd()))
+}
+
+message("[INFO] Loading DB: ", db_path)
+db_obj <- read_rds_any(db_path)
+
+# Accept either long DF directly or list/rds with element "db_df"
+if (is.data.frame(db_obj)) {
+  db_df <- db_obj
+} else if (is.list(db_obj) && !is.null(db_obj$db_df) && is.data.frame(db_obj$db_df)) {
+  db_df <- db_obj$db_df
+} else {
+  stop("Unsupported DB RDS structure. Expect data.frame or list with $db_df.")
+}
+
+# Normalize column names minimal (allele1/allele2 case)
+nms <- names(db_df)
+names(db_df)[tolower(nms) == "allele1"] <- "allele1"
+names(db_df)[tolower(nms) == "allele2"] <- "allele2"
+names(db_df)[tolower(nms) == "locus"]   <- "Locus"
+names(db_df)[tolower(nms) == "sampleid"]<- "SampleID"
+
+stopifnot(all(c("SampleID", "Locus", "allele1", "allele2") %in% names(db_df)))
+
+# Pick query
+pq <- pick_query_from_db(db_df)
+qid <- pq$query_sample_id
+q_df <- pq$query_df
+
+# Prepare DB excluding query sample
+db_df2 <- prepare_db_for_match(db_df, qid)
+
+loci_count <- get_locus_count()
+git_hash   <- sha7_head()
+
+message("[INFO] Query SampleID: ", qid)
+message("[INFO] Records (DB excl. query): ", nrow(db_df2))
+message("[INFO] Loci count (from locus_order.rds): ", loci_count)
+message("[INFO] Git short hash: ", git_hash)
+
+# Index per SampleID to chunk by samples (prefer even split by samples)
+sample_ids <- unique(db_df2$SampleID)
+n_samples  <- length(sample_ids)
+
+# Build combinations
+combis <- expand.grid(
+  chunk_size = as.integer(CONFIG$chunk_sizes),
+  workers    = as.integer(CONFIG$workers_list),
+  run_idx    = seq_len(as.integer(CONFIG$repeats)),
+  stringsAsFactors = FALSE
+)
+
+safe_dir_create(dirname(CONFIG$log_csv))
+if (isTRUE(CONFIG$write_detail)) safe_dir_create(CONFIG$detail_dir)
+
+for (row in seq_len(nrow(combis))) {
+  cs   <- combis$chunk_size[row]
+  wks  <- combis$workers[row]
+  ridx <- combis$run_idx[row]
+  
+  key_cols <- c("db_file", "chunk_size", "workers", "run_idx")
+  key_vals <- list(basename(db_path), cs, wks, ridx)
+  if (CONFIG$enable_resume && already_logged(CONFIG$log_csv, key_cols, key_vals)) {
+    message(sprintf("[SKIP] Logged already: db=%s chunk=%d workers=%d run=%d",
+                    basename(db_path), cs, wks, ridx))
+    next
+  }
+  
+  # Build chunk list by sample IDs
+  # Approximate records per sample: use split to get counts
+  # For chunking by samples, we split indices of sample_ids by chunk size in samples
+  idx_chunks <- split_indices(n_samples, cs)
+  n_chunks   <- length(idx_chunks)
+  if (n_chunks == 0L) {
+    message("[WARN] No chunks for chunk_size=", cs, " (n_samples=", n_samples, ")")
+    next
+  }
+  
+  # Prepare query structure for run_match_fast
+  # If run_match_fast expects certain structure, adjust here as needed.
+  query_profile <- q_df
+  
+  # Execution start
+  t0 <- proc.time()[["elapsed"]]
+  total_rows <- 0L
+  total_loci <- 0
+  detail_rows <- list()
+  
+  for (ci in seq_len(n_chunks)) {
+    sidx <- idx_chunks[[ci]]
+    sids <- sample_ids[sidx]
+    sub_df <- db_df2[db_df2$SampleID %in% sids, , drop = FALSE]
+    
+    # Run matching (single-thread by default; multi-worker orchestration can be added as needed)
+    # Here we assume run_match_fast(query_df, db_df) returns a data.frame with per-row scores
+    # Replace with the actual call signature used in your project.
+    t_chunk0 <- proc.time()[["elapsed"]]
+    res <- NULL
+    err <- NULL
+    try({
+      # If parallel workers >1 are desired for 1M bench, orchestrate here.
+      # For the light test we run single call. You can parallelize by splitting sub_df further.
+      res <- run_match_fast(query_profile = query_profile, db_profiles_df = sub_df)
+    }, silent = TRUE)
+    if (is.null(res)) {
+      err <- "run_match_fast_failed"
+      n_res <- 0L
+    } else {
+      n_res <- nrow(res)
     }
-    return(list(db_index = idx, make_query = function() make_query_from_df(obj), locus_order = LIDs))
+    t_chunk1 <- proc.time()[["elapsed"]]
+    elapsed_chunk <- t_chunk1 - t_chunk0
+    
+    # Estimate loci processed (proxy)
+    loci_proc <- estimate_loci_processed(n_records_chunk = nrow(sub_df), loci_count = loci_count)
+    
+    total_rows <- total_rows + n_res
+    total_loci <- if (is.na(loci_proc)) total_loci else total_loci + loci_proc
+    
+    # Optional detail write (disabled by default)
+    if (isTRUE(CONFIG$write_detail) && n_res > 0L) {
+      fdetail <- file.path(CONFIG$detail_dir,
+                           sprintf("detail_%s_cs%d_w%d_run%d_chunk%03d.csv",
+                                   tools::file_path_sans_ext(basename(db_path)),
+                                   cs, wks, ridx, ci))
+      utils::write.csv(res, fdetail, row.names = FALSE)
+    }
+    
+    # Per-chunk log append (progress visibility)
+    per_chunk <- data.frame(
+      timestamp    = safe_now_str(),
+      git_hash     = git_hash,
+      db_file      = basename(db_path),
+      query_id     = as.character(qid),
+      chunk_size   = as.integer(cs),
+      workers      = as.integer(wks),
+      run_idx      = as.integer(ridx),
+      chunk_id     = as.integer(ci),
+      chunks_total = as.integer(n_chunks),
+      n_db_rows    = as.integer(nrow(sub_df)),
+      n_results    = as.integer(n_res),
+      sec_chunk    = as.numeric(elapsed_chunk),
+      rows_per_sec = if (elapsed_chunk > 0) nrow(sub_df) / elapsed_chunk else NA_real_,
+      loci_proc    = as.numeric(loci_proc),
+      loci_per_sec = if (!is.na(loci_proc) && elapsed_chunk > 0) loci_proc / elapsed_chunk else NA_real_,
+      status       = if (is.null(err)) "OK" else err,
+      stringsAsFactors = FALSE
+    )
+    append_log(CONFIG$log_csv, per_chunk)
   }
-  stop("Unsupported RDS format. Expect index list or long data.frame.")
-}
-
-get_result_nrow <- function(res) {
-  if (is.data.frame(res)) return(nrow(res))
-  if (is.list(res)) {
-    if (!is.null(res$match_scores) && is.data.frame(res$match_scores)) return(nrow(res$match_scores))
-    if (!is.null(res$detail) && is.data.frame(res$detail)) return(nrow(res$detail))
-    if (!is.null(res$scores) && is.atomic(res$scores)) return(length(res$scores))
-    return(NA_integer_)
-  }
-  if (is.atomic(res)) return(length(res))
-  NA_integer_
-}
-
-append_row <- function(df_row, csv_path) {
-  exists <- file.exists(csv_path)
-  utils::write.table(
-    df_row, file = csv_path, sep = ",",
-    row.names = FALSE, col.names = !exists, append = exists, qmethod = "double"
-  )
-  flush.console()
-}
-
-# chunk worker (serial callable; also used inside parallel)
-run_one_chunk <- function(cs, k, db_index, q, tag, db_rds_path) {
-  t0 <- proc.time()[3L]
   
-  # slice
-  s_from <- (k-1L)*cs + 1L
-  s_to   <- min(length(db_index$sample_ids), k*cs)
-  sl <- s_from:s_to
-  idx_slice <- list(
-    sample_ids = db_index$sample_ids[sl],
-    locus_ids  = db_index$locus_ids,
-    A1 = db_index$A1[sl, , drop = FALSE],
-    A2 = db_index$A2[sl, , drop = FALSE]
-  )
+  t1 <- proc.time()[["elapsed"]]
+  elapsed_total <- t1 - t0
   
-  # prep timing (slice + query reuse, so prep is mostly slicing)
-  t_prep1 <- proc.time()[3L]
-  ms_prep <- (t_prep1 - t0) * 1000
-  
-  ms_io <- 0
-  ms_sched <- 0
-  
-  # ---- MATCHER CALL (adjust signature if needed) ----
-  t_work0 <- proc.time()[3L]
-  res <- run_match_fast(
-    q,
-    idx_slice,
-    pre_add_for_any_any = pre_add_for_any_any,
-    any_code = ANY_CODE,
-    include_bits_in_detail = include_bits_in_detail
-  )
-  t_work1 <- proc.time()[3L]
-  gc_before <- gc(reset = TRUE)
-  invisible(gc())
-  gc_after  <- gc()
-  had_gc <- any(gc_after[, "used"] < gc_before[, "used"])  # 簡易判定
-  row$gc_triggered <- had_gc
-  
-  # ---------------------------------------------------
-  
-  ms_worker <- (t_work1 - t_work0) * 1000
-  ms_reduce <- 0
-  ms_total  <- (t_work1 - t0) * 1000
-  elapsed   <- as.numeric(t_work1 - t0)
-  
-  samples <- length(sl)
-  loci_total <- samples * length(idx_slice$locus_ids)
-  thr_samples_sec <- if (elapsed > 0) samples / elapsed else NA_real_
-  thr_loci_sec    <- if (elapsed > 0) loci_total / elapsed else NA_real_
-  res_rows <- get_result_nrow(res)
-  
-  row <- data.frame(
-    ts = format(Sys.time(), "%Y%m%d%H%M%S"),
-    N = samples,
-    seed = seed,
-    type = bench_type,
-    cores = if (enable_parallel) parallel_workers else 1L,
-    chunk_size = cs,
-    include_io = include_io,
-    ms_prep = round(ms_prep, 3),
-    ms_io = round(ms_io, 3),
-    ms_sched = round(ms_sched, 3),
-    ms_worker = round(ms_worker, 3),
-    ms_reduce = round(ms_reduce, 3),
-    ms_total = round(ms_total, 3),
-    rows = res_rows,
-    note = "bench_u100",
-    # extensions
-    run_id = tag,
-    dataset_id = basename(db_rds_path),
-    chunk_index = k,
-    throughput_samples_per_sec = thr_samples_sec,
-    throughput_loci_per_sec    = thr_loci_sec,
-    workers = if (enable_parallel) parallel_workers else 1L,
+  # Final summary row for this combination
+  final_row <- data.frame(
+    timestamp    = safe_now_str(),
+    git_hash     = git_hash,
+    db_file      = basename(db_path),
+    query_id     = as.character(qid),
+    chunk_size   = as.integer(cs),
+    workers      = as.integer(wks),
+    run_idx      = as.integer(ridx),
+    chunk_id     = as.integer(NA),
+    chunks_total = as.integer(n_chunks),
+    n_db_rows    = as.integer(NA),
+    n_results    = as.integer(total_rows),
+    sec_chunk    = as.numeric(elapsed_total),
+    rows_per_sec = as.numeric(NA),
+    loci_proc    = as.numeric(total_loci),
+    loci_per_sec = if (!is.na(total_loci) && elapsed_total > 0) total_loci / elapsed_total else NA_real_,
+    status       = "SUMMARY",
     stringsAsFactors = FALSE
   )
+  append_log(CONFIG$log_csv, final_row)
   
-  logline <- sprintf(
-    "  [done] size=%6d idx=%4d  N=%6d  worker=%.2fs total=%.2fs  thr=%.0f samp/s, %.0f loci/s  rows=%d\n",
-    cs, k, samples, row$ms_worker/1000, row$ms_total/1000,
-    thr_samples_sec, thr_loci_sec, res_rows
-  )
-  
-  list(row = row, logline = logline)
+  message(sprintf("[DONE] db=%s chunk=%d workers=%d run=%d elapsed=%.2fs",
+                  basename(db_path), cs, wks, ridx, elapsed_total))
 }
 
-########################################
-# ========== MAIN ==========
-########################################
-
-safe_dir_create(result_dir); safe_dir_create(log_dir)
-
-info <- load_db_index_or_df(db_rds_path)
-db_index   <- info$db_index
-locus_order <- info$locus_order
-make_query <- info$make_query
-
-S <- length(db_index$sample_ids)
-L <- length(db_index$locus_ids)
-cat("[BENCH] DB index S=", S, " L=", L, "\n", sep="")
-
-# Query externalization (build ONCE)
-q <- make_query()
-
-# CSV target (support manual tag to truly resume across sessions)
-tag <- if (nzchar(manual_run_tag)) manual_run_tag else ts_tag()
-out_csv <- file.path(result_dir, sprintf("bench_run_match_fast_%s.csv", tag))
-cat("[BENCH] output CSV: ", out_csv, "\n", sep="")
-
-# resume map for this run (if appending to same CSV, previous rows are respected)
-completed <- list()
-if (file.exists(out_csv)) {
-  done <- tryCatch(read.csv(out_csv, stringsAsFactors = FALSE), error = function(e) NULL)
-  if (!is.null(done) && nrow(done) > 0) {
-    keys <- paste(done$chunk_size, done$chunk_index, sep=":")
-    completed <- as.list(stats::setNames(rep(TRUE, length(keys)), keys))
-  }
-}
-is_done <- function(cs, k) {
-  key <- paste(cs, k, sep=":")
-  isTRUE(completed[[key]])
-}
-
-for (cs in chunk_sizes) {
-  n_chunks <- max(1L, ceiling(S / cs))
-  cat("[BENCH] chunk_size=", cs, " chunks=", n_chunks, "\n", sep="")
-  
-  if (!enable_parallel) {
-    for (k in seq_len(n_chunks)) {
-      key <- paste(cs, k, sep=":")
-      if (is_done(cs, k)) { cat("  - skip chunk (already in CSV): size=", cs, " idx=", k, "\n", sep=""); next }
-      out <- run_one_chunk(cs, k, db_index, q, tag, db_rds_path)
-      append_row(out$row, out_csv); cat(out$logline); completed[[key]] <- TRUE; gc()
-    }
-  } else {
-    old_plan <- future::plan()
-    on.exit(future::plan(old_plan), add = TRUE)
-    future::plan(multisession, workers = parallel_workers)
-    
-    todo <- which(!vapply(seq_len(n_chunks), function(k) is_done(cs, k), logical(1)))
-    if (length(todo) > 0) {
-      res_list <- future_lapply(todo, function(k)
-        run_one_chunk(cs, k, db_index, q, tag, db_rds_path))
-      for (i in seq_along(todo)) {
-        k <- todo[i]; key <- paste(cs, k, sep=":")
-        append_row(res_list[[i]]$row, out_csv); cat(res_list[[i]]$logline); completed[[key]] <- TRUE
-      }
-      gc()
-    } else {
-      cat("  - all chunks already in CSV\n")
-    }
-  }
-}
-
-cat("[BENCH DONE] summary => ", out_csv, "\n", sep="")
+message("[OK] Benchmark finished. Log: ", CONFIG$log_csv)

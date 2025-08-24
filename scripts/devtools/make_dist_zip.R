@@ -41,24 +41,25 @@ is_under <- function(path, dir_prefix) {
 is_text_like <- function(path) {
   ext <- tolower(tools::file_ext(path))
   ext %in% c(
-    "r","rmd","qmd","md","txt","csv","tsv","json","yaml","yml",
-    "log","gitignore","renvignore","rprofile","rproj"
+    "r","rmd","qmd","md","txt","csv","tsv","json","yaml","yml","rdata","rda",
+    "html","css","js","xml","ini","cfg","conf","toml","sh","bat","ps1","py"
   )
 }
 
 # --- main ---------------------------------------------------------------------
-# 呼び出し例： make_dist_zip(include_dirs = c("scripts", "data", "bench"))
 make_dist_zip <- function(
     project_root      = getwd(),
     zip_prefix        = "DMP_dist",
     parent_dir        = dirname(getwd()),
     head_lines        = 50,
     max_head_kb       = 128,
-    include_dirs      = c("scripts", "data"),
+    include_dirs      = c("scripts", "data", "test", "output"),  # ★ test/output を既定で含める
     include_data_rds  = FALSE,
     extra_include     = character(0),
     extra_exclude_dirs    = character(0),
     extra_exclude_patterns= character(0),
+    data_max_bytes        = 1024 * 1024,   # ★ data/ の閾値（1MB）
+    stage_large_data_as_empty = TRUE,      # ★ 閾値超は中身なしファイルで出力
     dry_run           = FALSE,
     verbose           = TRUE
 ){
@@ -78,31 +79,30 @@ make_dist_zip <- function(
     if (file.exists(f)) must_include <- c(must_include, f)
   }
   
-  # 初期シード（scripts と data、+トップドキュメント）
-  keep_seed <- Reduce(`|`, lapply(include_dirs, function(d) is_under(all, d))) |
-    (basename(all) %in% basename(must_include))
-  
-  # 明示追加（パスが存在するもののみ）
+  # 初期シード（scripts, data, test, output + トップドキュメント）
+  seed_dirs <- unique(.normalize_slashes(include_dirs))
+  keep_seed <- rep(FALSE, length(all))
+  for (d in seed_dirs) {
+    keep_seed <- keep_seed | startsWith(all, paste0(.normalize_slashes(d), "/"))
+  }
+  if (length(must_include)) {
+    keep_seed <- keep_seed | (all %in% .normalize_slashes(must_include))
+  }
   if (length(extra_include)) {
-    extra_ok <- extra_include[file.exists(extra_include)]
-    if (length(extra_ok)) {
-      # ディレクトリなら配下のファイルを展開
-      extra_files <- unlist(lapply(extra_ok, function(p) {
-        p <- .normalize_slashes(p)
-        if (dir.exists(p)) {
-          list.files(p, recursive = TRUE, full.names = FALSE)
-          # list.files はカレント起点に出ないので、ここは相対に直す
-          # ただし project_root を前提に動かしているため、呼び側は相対で渡す想定
-          # ここではそのまま返す（既に相対想定）
-        } else {
-          p
-        }
-      }), use.names = FALSE)
-      keep_seed <- keep_seed | (all %in% .normalize_slashes(extra_files))
-    }
+    # files or directories
+    # if directory: include all under it
+    add <- unique(unlist(lapply(extra_include, function(p) {
+      p <- .normalize_slashes(p)
+      if (dir.exists(p)) {
+        all[startsWith(all, paste0(p, "/"))]
+      } else {
+        p
+      }
+    }), use.names = FALSE))
+    keep_seed <- keep_seed | (all %in% .normalize_slashes(add))
   }
   
-  # data/ の拡張子フィルタ
+  # data/ の拡張子フィルタ（RDSは既定では除外）
   allow_ext_data <- function(path) {
     if (!is_under(path, "data")) return(TRUE)
     ext <- tolower(tools::file_ext(path))
@@ -113,10 +113,10 @@ make_dist_zip <- function(
     }
   }
   
-  # 除外ディレクトリ
+  # 除外ディレクトリ（bench/test/output を除外しないように修正）
   exclude_dirs <- c(
-    "output","test",".git",".github",".Rproj.user",".idea",".vscode",
-    ".renv","renv","packrat","docs","dist","release","tmp","bench","notes","meta"
+    ".git",".github",".Rproj.user",".idea",".vscode",
+    ".renv","renv","packrat","docs","dist","release","tmp","notes","meta"
   )
   if (length(extra_exclude_dirs)) exclude_dirs <- unique(c(exclude_dirs, extra_exclude_dirs))
   
@@ -131,9 +131,8 @@ make_dist_zip <- function(
     "^.*[/\\\\]debug_.*\\.R$","^.*[/\\\\]scratch_.*\\.R$"
   )
   if (include_data_rds) {
-    # data/ 以外の .rds を弾く目的は残す（data/ は allow_ext_data で制御済み）
     exclude_patterns <- setdiff(exclude_patterns, c("\\.rds$","\\.RDS$"))
-    exclude_patterns <- c(exclude_patterns, "^(?!data/).+\\.rds$")  # PCRE: data/ 以外の .rds を除外
+    exclude_patterns <- c(exclude_patterns, "^(?!data/).+\\.rds$")  # non-data rds excluded
   }
   if (length(extra_exclude_patterns)) exclude_patterns <- unique(c(exclude_patterns, extra_exclude_patterns))
   
@@ -144,34 +143,25 @@ make_dist_zip <- function(
   candidates <- candidates[vapply(candidates, allow_ext_data, logical(1))]
   keep <- candidates[!vapply(candidates, is_excluded_dir,  logical(1))]
   keep <- keep[!vapply(keep,      is_excluded_pat, logical(1))]
-  keep <- sort(unique(keep))  # 安定化
+  keep <- sort(unique(keep))  # stable
   
   # excluded = all - keep
-  excluded <- sort(setdiff(all, keep))
+  excluded <- setdiff(all, keep)
+  excluded <- sort(unique(excluded))
   
-  if (length(keep) == 0) stop("No files to include. Check filters.", call. = FALSE)
+  # meta directory paths
+  out_hash <- short_hash()
+  out_ts   <- ts_jst()
+  zip_name <- sprintf("%s_%s_%s.zip", zip_prefix, out_hash, out_ts)
+  zip_path <- file.path(parent_dir, zip_name)
+  meta_dir <- file.path(parent_dir, sprintf("meta_%s_%s", out_hash, out_ts))
+  heads_dir<- file.path(meta_dir, "excluded_heads")
   
-  # ---- output paths (one level above) ----
-  stamp <- ts_jst()
-  shash <- short_hash()
-  zip_name  <- sprintf("%s_%s_%s.zip", zip_prefix, shash, stamp)
-  zip_path  <- file.path(parent_dir, zip_name)
-  
-  meta_dir  <- file.path(parent_dir, sprintf("meta_%s_%s", shash, stamp))
-  heads_dir <- file.path(meta_dir, "excluded_heads")
-  if (!dry_run) {
-    dir.create(meta_dir,  recursive = TRUE, showWarnings = FALSE)
-    dir.create(heads_dir, recursive = TRUE, showWarnings = FALSE)
-  }
-  
-  # ---- meta: write excluded list and heads ----
+  # meta writer
   write_meta <- function() {
-    list_path <- file.path(meta_dir, "EXCLUDED_LIST.txt")
-    cat(sprintf("# excluded files: %d\n", length(excluded)), file = list_path)
-    if (length(excluded)) {
-      cat(paste(excluded, collapse = "\n"), file = list_path, append = TRUE)
-      cat("\n", file = list_path, append = TRUE)
-    }
+    dir.create(meta_dir, recursive = TRUE, showWarnings = FALSE)
+    # excluded list
+    cat(paste(excluded, collapse = "\n"), file = file.path(meta_dir, "EXCLUDED_LIST.txt"))
     
     # heads for text-like smallish files
     for (p in excluded) {
@@ -187,9 +177,10 @@ make_dist_zip <- function(
       con <- file(p, open = "rt", encoding = "UTF-8")
       on.exit(tryQuiet(close(con)), add = TRUE)
       lines <- tryCatch(readLines(con, n = head_lines, warn = FALSE), error = function(e) character(0))
-      tryQuiet(close(con))  # close immediately
-      on.exit(NULL, add = FALSE) # avoid stacking on.exit in loop
+      tryQuiet(close(con))
+      on.exit(NULL, add = FALSE)
       
+      dir.create(dirname(out_path), recursive = TRUE, showWarnings = FALSE)
       cat(sprintf("# HEAD of excluded file: %s\n", p), file = out_path)
       if (length(lines)) cat(paste(lines, collapse = "\n"), file = out_path, append = TRUE)
     }
@@ -202,20 +193,46 @@ make_dist_zip <- function(
     cat(sprintf("* parent_dir  : %s\n", safe_show(parent_dir)))
     cat(sprintf("* files kept  : %d\n", length(keep)))
     cat(sprintf("* files excl. : %d\n", length(excluded)))
-    cat(sprintf("* zip target  : %s\n", safe_show(zip_path)), "\n")
   }
   
   if (dry_run) {
-    cat("\n-- dry_run=TRUE; no zip/meta created. Preview lists follow --\n")
-    cat(">> KEEP (head):\n"); print(utils::head(keep, 10))
-    cat(">> EXCLUDED (head):\n"); print(utils::head(excluded, 10))
+    write_meta()
+    if (verbose) {
+      cat("== DRY-RUN ONLY ==\n")
+      cat(sprintf("ZIP would be written to: %s\nMETA would be written to: %s\n", safe_show(zip_path), safe_show(meta_dir)))
+    }
     return(invisible(list(keep = keep, excluded = excluded, zip = zip_path)))
   }
   
-  # write meta before zipping
+  # write meta before building staging/zip
   write_meta()
   
-  # ---- zip build ----
+  # ---- staging (to handle large data files as empty) ----
+  staging_dir <- file.path(tempdir(), sprintf("dmp_dist_stage_%s_%s", out_hash, out_ts))
+  dir.create(staging_dir, recursive = TRUE, showWarnings = FALSE)
+  
+  # copy with special handling for data/*
+  for (p in keep) {
+    src  <- p
+    dest <- file.path(staging_dir, p)
+    dir.create(dirname(dest), recursive = TRUE, showWarnings = FALSE)
+    
+    if (is_under(p, "data") && stage_large_data_as_empty) {
+      info <- file.info(src)
+      if (!is.na(info$size) && info$size > data_max_bytes) {
+        # create empty file with same name (ファイル名だけ)
+        file.create(dest, showWarnings = FALSE)
+        next
+      }
+    }
+    file.copy(src, dest, overwrite = TRUE, copy.date = TRUE, copy.mode = TRUE)
+  }
+  
+  # ---- zip build (from staging) ----
+  owd2 <- getwd()
+  on.exit(setwd(owd2), add = TRUE)
+  setwd(staging_dir)
+  
   zip_bin <- Sys.which("zip")
   if (nzchar(zip_bin)) {
     zres <- tryQuiet(utils::zip(zipfile = zip_path, files = keep, flags = "-q"))
@@ -226,16 +243,12 @@ make_dist_zip <- function(
     stop("No system 'zip' found and package {zip} not installed.", call. = FALSE)
   }
   
-  if (!file.exists(zip_path)) stop("Zip not created; unknown error.", call. = FALSE)
-  
-  if (verbose) {
-    sz_kb <- tryCatch(file.info(zip_path)$size / 1024, error = function(e) NA_real_)
-    cat(sprintf(
-      "== DONE ==\n* ZIP : %s (%.1f KB)\n* META: %s\n",
-      safe_show(zip_path),
-      sz_kb,
-      safe_show(meta_dir)
-    ))
+  # size
+  if (file.exists(zip_path)) {
+    sz_kb <- round(file.info(zip_path)$size / 1024, 1)
+    if (verbose) cat(sprintf("== DONE ==\n* ZIP : %s (%.1f KB)\n* META: %s\n", safe_show(zip_path), sz_kb, safe_show(meta_dir)))
+  } else {
+    warning("Zip not found after build.")
   }
   
   invisible(list(zip = zip_path, meta = meta_dir, keep = keep, excluded = excluded))
