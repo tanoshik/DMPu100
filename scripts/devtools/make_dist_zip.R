@@ -1,7 +1,12 @@
 # scripts/devtools/make_dist_zip.R
 # Build a distribution zip one level above the project root.
-# Adds data/ (with >1MB files as zero-byte placeholders), scripts/bench/, test/ (incl test/bench), output/
-# No multibyte characters in code/comments.
+# Includes data/, scripts/bench/, bench/, test/ (incl. test/bench), output/
+# For data/: files larger than 1MB are replaced by empty stub files (same name).
+# Writes meta folder with EXCLUDED_LIST.txt and LARGE_FILES.txt.
+
+# ---- helpers ---------------------------------------------------------------
+
+bytes_1mb <- 1024L * 1024L
 
 safe_show <- function(path) {
   p <- tryCatch(normalizePath(path, winslash = "/", mustWork = FALSE),
@@ -9,169 +14,204 @@ safe_show <- function(path) {
   if (is.na(p) || p == "") path else p
 }
 
+is_subpath <- function(p, root) {
+  p <- normalizePath(p, winslash = "/", mustWork = FALSE)
+  root <- normalizePath(root, winslash = "/", mustWork = FALSE)
+  startsWith(paste0(p, "/"), paste0(root, "/")) || identical(p, root)
+}
+
+list_files_recursive <- function(dir) {
+  if (!dir.exists(dir)) return(character())
+  files <- list.files(dir, recursive = TRUE, all.files = TRUE, full.names = TRUE)
+  files[file.info(files)$isdir %in% FALSE]
+}
+
+# copy with parent dirs, create dirs if needed
+copy_with_dirs <- function(src, dst_root, rel) {
+  dst <- file.path(dst_root, rel)
+  dir.create(dirname(dst), recursive = TRUE, showWarnings = FALSE)
+  ok <- file.copy(src, dst, overwrite = TRUE, copy.mode = TRUE, copy.date = TRUE)
+  if (!ok) stop("Failed to copy: ", src, " -> ", dst)
+  dst
+}
+
+# create empty stub file at dst_root/rel
+create_empty_stub <- function(dst_root, rel) {
+  dst <- file.path(dst_root, rel)
+  dir.create(dirname(dst), recursive = TRUE, showWarnings = FALSE)
+  con <- file(dst, open = "wb")
+  close(con)
+  dst
+}
+
+# ---- main ------------------------------------------------------------------
+
 make_dist_zip <- function(project_root = getwd(),
                           zip_prefix   = "DMP_dist",
-                          parent_dir   = dirname(getwd()),  # one level above project root
-                          head_lines   = 50,                # number of lines for head capture
-                          small_data_threshold_bytes = 1024 * 1024  # 1MB
-) {
+                          parent_dir   = dirname(getwd()),
+                          head_lines   = 50,     # kept for compatibility (not used here)
+                          data_large_threshold = bytes_1mb) {
+  
+  project_root <- safe_show(project_root)
+  parent_dir   <- safe_show(parent_dir)
+  
+  # Staging dir for exact zip contents
+  hash_stub <- substr(as.character(as.integer(as.numeric(Sys.time()))), 1, 8)
+  ts <- format(Sys.time(), "%Y%m%d%H%M")
+  zip_base <- sprintf("%s_%s_%s", zip_prefix, hash_stub, ts)
+  staging <- file.path(tempdir(), paste0("staging_", zip_base))
+  dir.create(staging, recursive = TRUE, showWarnings = FALSE)
+  
+  # meta outputs (sibling to the zip file)
+  meta_dir <- file.path(parent_dir, paste0("meta_", hash_stub, "_", ts))
+  dir.create(meta_dir, showWarnings = FALSE, recursive = TRUE)
+  excluded_list_path <- file.path(meta_dir, "EXCLUDED_LIST.txt")
+  large_list_path    <- file.path(meta_dir, "LARGE_FILES.txt")
+  
+  # Defaults: exclude typical dev folders/files; we will add back required ones explicitly
+  default_exclude_dirs <- c(".git", ".Rproj.user", "dist", "release")
+  default_exclude_glob <- c("*.zip")  # keep as before
+  
+  # Always include these top-level paths (relative to project_root)
+  include_dirs_exact <- c(
+    "scripts",          # whole scripts/ (legacy behavior)
+    "data",             # special handling for >1MB
+    "scripts/bench",
+    "bench",
+    "test",
+    "output"
+  )
+  
+  # Build candidate file list from project_root
+  all_files <- list_files_recursive(project_root)
+  
+  # Filter out default excludes first (but not our explicit include dirs)
+  rel_all <- gsub(paste0("^", gsub("\\\\", "/", project_root), "/?"), "", gsub("\\\\", "/", all_files))
+  keep <- rep(TRUE, length(all_files))
+  
+  # exclude by directory unless inside our explicit include roots
+  for (i in seq_along(all_files)) {
+    rel <- rel_all[i]
+    top <- strsplit(rel, "/")[[1]]
+    top <- if (length(top)) top[1] else ""
+    # If path is under an explicit include root, we keep it (handle later)
+    under_include <- any(startsWith(rel, paste0(include_dirs_exact, "/")) | rel %in% include_dirs_exact)
+    if (!under_include) {
+      if (top %in% default_exclude_dirs) keep[i] <- FALSE
+      # glob excludes
+      if (keep[i] && length(default_exclude_glob)) {
+        for (g in default_exclude_glob) {
+          if (grepl(glob2rx(g), basename(rel), ignore.case = TRUE)) {
+            keep[i] <- FALSE
+            break
+          }
+        }
+      }
+    }
+  }
+  
+  all_files <- all_files[keep]
+  rel_all   <- rel_all[keep]
+  
+  # From the kept list, now compose the final include set:
+  # 1) Everything under scripts/ (legacy)
+  # 2) data/ (with >1MB stubbing)
+  # 3) scripts/bench/, bench/, test/, output/ (unrestricted)
+  is_under <- function(rel, root) {
+    rel == root || startsWith(rel, paste0(root, "/"))
+  }
+  
+  want <- logical(length(all_files))
+  for (j in seq_along(all_files)) {
+    rel <- rel_all[j]
+    if (is_under(rel, "scripts") ||
+        is_under(rel, "data") ||
+        is_under(rel, "scripts/bench") ||
+        is_under(rel, "bench") ||
+        is_under(rel, "test") ||
+        is_under(rel, "output")) {
+      want[j] <- TRUE
+    }
+  }
+  
+  # Additionally: include root-level files like README.md, LICENSE, DESCRIPTION if present
+  root_level_keep <- c("README.md", "LICENSE", "DESCRIPTION")
+  root_paths <- file.path(project_root, root_level_keep)
+  root_exists <- file.exists(root_paths)
+  root_files <- root_paths[root_exists]
+  root_rel   <- basename(root_files)
+  
+  final_src  <- c(all_files[want], root_files)
+  final_rel  <- c(rel_all[want],   root_rel)
+  
+  # Deduplicate
+  o <- order(final_rel)
+  final_src <- final_src[o]
+  final_rel <- final_rel[o]
+  dupe <- duplicated(final_rel)
+  if (any(dupe)) {
+    final_src <- final_src[!dupe]
+    final_rel <- final_rel[!dupe]
+  }
+  
+  # Prepare meta logs
+  writeLines(character(), con = excluded_list_path)
+  writeLines(c(
+    "# Files larger than threshold are stubbed as empty files in the zip.",
+    paste0("# Threshold: ", data_large_threshold, " bytes"),
+    "# Format: <size_bytes> <relative_path_from_project_root>",
+    ""
+  ), con = large_list_path)
+  
+  # Copy into staging, with special handling for data/ large files
+  info <- file.info(final_src, extra_cols = FALSE)
+  for (k in seq_along(final_src)) {
+    src <- final_src[k]
+    rel <- final_rel[k]
+    
+    # Determine if this is under data/
+    if (is_under(rel, "data")) {
+      sz <- info$size[k]
+      if (!is.na(sz) && sz > data_large_threshold) {
+        # create empty stub
+        create_empty_stub(staging, rel)
+        # record large file entry
+        cat(sprintf("%d %s\n", as.integer(sz), rel), file = large_list_path, append = TRUE)
+        next
+      }
+    }
+    copy_with_dirs(src, staging, rel)
+  }
+  
+  # Build list of excluded files (for transparency)
+  # Anything under project_root not copied to staging and not a dir becomes "excluded"
+  staged_all <- list.files(staging, recursive = TRUE, all.files = TRUE, full.names = FALSE)
+  # filter out dirs in staged listing by mapping back to file.info on staging
+  staged_full <- file.path(staging, staged_all)
+  staged_all <- staged_all[file.info(staged_full)$isdir %in% FALSE]
+  
+  # all relative files from original
+  all_project_files <- list_files_recursive(project_root)
+  all_project_rel <- gsub(paste0("^", gsub("\\\\", "/", project_root), "/?"), "", gsub("\\\\", "/", all_project_files))
+  all_project_rel <- all_project_rel[file.info(all_project_files)$isdir %in% FALSE]
+  
+  excluded_rel <- setdiff(all_project_rel, staged_all)
+  if (length(excluded_rel)) {
+    writeLines(sort(excluded_rel), con = excluded_list_path, useBytes = TRUE)
+  }
+  
+  # Create zip in parent_dir
   old_wd <- getwd()
   on.exit(setwd(old_wd), add = TRUE)
-  setwd(project_root)
+  setwd(staging)
+  zip_path <- file.path(parent_dir, paste0(zip_base, ".zip"))
   
-  timestamp <- format(Sys.time(), "%Y%m%d%H%M")
-  # Use short git hash if available
-  git_hash <- tryCatch({
-    x <- system2("git", c("rev-parse", "--short=7", "HEAD"), stdout = TRUE, stderr = FALSE)
-    if (length(x) == 0) "nohash" else gsub("\\s+", "", x[1])
-  }, error = function(e) "nohash")
+  # Use utils::zip (platform independent)
+  # Include everything under staging (relative paths)
+  files_to_zip <- list.files(".", recursive = TRUE, all.files = TRUE, full.names = FALSE)
+  utils::zip(zipfile = zip_path, files = files_to_zip)
   
-  zip_name <- sprintf("%s_%s_%s.zip", zip_prefix, git_hash, timestamp)
-  zip_path <- file.path(parent_dir, zip_name)
-  
-  meta_dir     <- file.path(parent_dir, sprintf("meta_%s_%s", git_hash, timestamp))
-  excluded_dir <- file.path(meta_dir, "excluded_heads")
-  if (!dir.exists(meta_dir)) dir.create(meta_dir, recursive = TRUE, showWarnings = FALSE)
-  if (!dir.exists(excluded_dir)) dir.create(excluded_dir, recursive = TRUE, showWarnings = FALSE)
-  
-  excluded_list_path <- file.path(meta_dir, "EXCLUDED_LIST.txt")
-  writeLines(character(0), excluded_list_path)  # reset
-  
-  # ---- base includes (existing behavior) ----
-  # Keep your current include/exclude logic; then add the four paths requested.
-  # Example of typical base excludes:
-  base_exclude_dirs <- c(".git", ".Rproj.user", "dist", "release", "notes",
-                         "bench",  # historically excluded; we will re-include scripts/bench explicitly
-                         "output", # historically excluded; we will include explicitly below
-                         "test",   # historically excluded; we will include explicitly below
-                         "meta")   # meta is generated alongside zip
-  base_exclude_globs <- c("*.zip", "*.rds")    # historical; we will re-include where requested
-  base_include <- c("scripts", "data", "README.md", "LICENSE", "DESCRIPTION")
-  
-  # Gather all files under project_root
-  all_files <- list.files(".", recursive = TRUE, all.files = FALSE, include.dirs = FALSE, no.. = TRUE)
-  # Filter out meta output paths
-  all_files <- all_files[!grepl(sprintf("^%s", gsub("\\.", "\\\\.", basename(meta_dir))), all_files)]
-  
-  # Start from base include, then subtract base excludes
-  want <- all_files[
-    startsWith(all_files, "scripts") |
-      startsWith(all_files, "data")    |
-      all_files %in% c("README.md", "LICENSE", "DESCRIPTION")
-  ]
-  
-  # Remove base excludes
-  drop_dir_pat <- paste0("^(", paste(gsub("\\.", "\\\\.", base_exclude_dirs), collapse = "|"), ")(/|$)")
-  want <- want[!grepl(drop_dir_pat, want)]
-  for (g in base_exclude_globs) {
-    want <- want[!grepl(glob2rx(g), basename(want))]
-  }
-  
-  # ---- explicit additions per request ----
-  must_add_dirs <- c("scripts/bench", "test", "output")
-  for (ad in must_add_dirs) {
-    if (dir.exists(ad)) {
-      add_files <- list.files(ad, recursive = TRUE, all.files = FALSE, include.dirs = FALSE, no.. = TRUE)
-      add_files <- file.path(ad, add_files)
-      # ensure no duplicates
-      want <- unique(c(want, add_files))
-    }
-  }
-  
-  # ---- data/ handling: small vs large ----
-  # Small (<= threshold) : include as-is
-  # Large (> threshold)  : replace with zero-byte placeholder (same relative path) and log to EXCLUDED_LIST
-  data_small <- character(0)
-  data_large <- character(0)
-  if (dir.exists("data")) {
-    data_files <- list.files("data", recursive = TRUE, all.files = FALSE, include.dirs = FALSE, no.. = TRUE)
-    data_files <- file.path("data", data_files)
-    sizes <- file.info(data_files)$size
-    data_small <- data_files[which(sizes <= small_data_threshold_bytes)]
-    data_large <- data_files[which(sizes >  small_data_threshold_bytes)]
-  }
-  
-  # Ensure all small data files are included
-  want <- unique(c(want, data_small))
-  
-  # Stage placeholders for large data files into a temp staging dir
-  staging_root <- file.path(tempdir(), sprintf("dmp_dist_staging_%s_%s", git_hash, timestamp))
-  if (!dir.exists(staging_root)) dir.create(staging_root, recursive = TRUE, showWarnings = FALSE)
-  
-  stage_paths <- character(0)
-  if (length(data_large) > 0) {
-    for (rel in data_large) {
-      stage_abs <- file.path(staging_root, rel)
-      dir.create(dirname(stage_abs), recursive = TRUE, showWarnings = FALSE)
-      file.create(stage_abs)  # zero-byte placeholder
-      stage_paths <- c(stage_paths, stage_abs)
-    }
-    # Log large files to meta/EXCLUDED_LIST.txt
-    log_lines <- sprintf("[data-large] %s\t(size=%s bytes)",
-                         vapply(data_large, safe_show, character(1)),
-                         format(file.info(data_large)$size, scientific = FALSE))
-    write(log_lines, file = excluded_list_path, append = TRUE)
-  }
-  
-  # Build final include list:
-  #  - project-root-relative paths in 'want'
-  #  - absolute staged paths in 'stage_paths' (we will zip them with the same relative layout)
-  # Zip needs relative paths; so we will zip in two steps:
-  #  (A) from project_root for 'want'
-  #  (B) from staging_root for 'stage_paths'
-  # Then merge into single zip (utils::zip cannot append; we recreate with combined file list via a temp tree)
-  
-  # Create a final, unified staging tree to zip once
-  final_stage <- file.path(tempdir(), sprintf("dmp_final_stage_%s_%s", git_hash, timestamp))
-  if (dir.exists(final_stage)) unlink(final_stage, recursive = TRUE, force = TRUE)
-  dir.create(final_stage, recursive = TRUE, showWarnings = FALSE)
-  
-  # Copy regular includes
-  for (rel in want) {
-    if (!file.exists(rel)) next
-    dst <- file.path(final_stage, rel)
-    dir.create(dirname(dst), recursive = TRUE, showWarnings = FALSE)
-    ok <- file.copy(rel, dst, overwrite = TRUE, copy.mode = TRUE, copy.date = TRUE)
-    if (!ok) {
-      write(sprintf("[copy-fail] %s", safe_show(rel)), file = excluded_list_path, append = TRUE)
-    }
-  }
-  
-  # Copy staged placeholders for large data
-  if (length(stage_paths) > 0) {
-    for (abs_p in stage_paths) {
-      rel <- substring(abs_p, nchar(staging_root) + 2L)  # relative to staging_root
-      dst <- file.path(final_stage, rel)
-      dir.create(dirname(dst), recursive = TRUE, showWarnings = FALSE)
-      file.copy(abs_p, dst, overwrite = TRUE, copy.mode = TRUE, copy.date = TRUE)
-    }
-  }
-  
-  # Write meta heads for selected excluded files (optional: disabled for simplicity here)
-  # You can add head capture for excluded texts if needed using 'head_lines'.
-  
-  # Create the zip from the final staging tree
-  old2 <- getwd()
-  setwd(final_stage)
-  on.exit(setwd(old2), add = TRUE)
-  files_to_zip <- list.files(".", recursive = TRUE, all.files = FALSE, include.dirs = FALSE, no.. = TRUE)
-  if (file.exists(zip_path)) file.remove(zip_path)
-  utils::zip(zipfile = zip_path, files = files_to_zip, flags = "-r9X")
-  
-  # Write meta README
-  meta_readme <- file.path(meta_dir, "README_meta.txt")
-  writeLines(c(
-    "This folder contains auxiliary information for the distribution zip.",
-    sprintf("Zip: %s", safe_show(zip_path)),
-    sprintf("Project root: %s", safe_show(project_root)),
-    sprintf("Created at: %s", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
-    sprintf("Git hash: %s", git_hash),
-    sprintf("Large data threshold: %d bytes", small_data_threshold_bytes),
-    "Large data files were replaced with zero-byte placeholders in the zip.",
-    "See EXCLUDED_LIST.txt for the list of large data files."
-  ), meta_readme)
-  
-  message(sprintf("[OK] Wrote zip: %s", safe_show(zip_path)))
-  message(sprintf("[OK] Meta dir: %s", safe_show(meta_dir)))
-  invisible(list(zip = zip_path, meta = meta_dir))
+  message("[OK] Wrote zip: ", safe_show(zip_path))
+  message("[OK] Wrote meta: ", safe_show(meta_dir))
+  invisible(list(zip = zip_path, meta = meta_dir, staging = staging))
 }
