@@ -1,5 +1,5 @@
 # scripts/gui/ui_result_tab.R
-# Result tab UI: shows match results.
+# Result tab UI: Summary-only, server-side DT.
 # No multibyte characters in code/comments.
 
 ui_result_tab <- function(id = "result_tab") {
@@ -14,31 +14,24 @@ ui_result_tab <- function(id = "result_tab") {
       .result-right { display:flex; gap:10px; align-items:center; }
       .result-status {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-size:12px; color:#6b7280;
+        font-size: 12px; color:#444; background:#f8f8f8; padding:6px 8px; border-radius:6px;
+        border:1px solid #eee; white-space:pre-wrap; max-width: 520px;
       }
     ")),
-    
     shiny::h4("Match Results"),
     shiny::div(class = "result-bar",
                shiny::div(class = "result-left",
-                          shiny::radioButtons(
-                            inputId = ns("result_view"),
-                            label   = NULL,
-                            choices = c("Summary", "Detail"),
-                            selected = "Summary",
-                            inline = TRUE
-                          )
+                          shiny::span("View:"),
+                          shiny::span("Summary")  # ← Summary固定（ラジオボタン撤去）
                ),
                shiny::div(class = "result-right",
                           shiny::downloadButton(ns("dl_scores"), label = "Summary (match_scores.csv)"),
-                          shiny::downloadButton(ns("dl_detail"), label  = "Detail (match_log.csv)"),
-                          # NOTE: verbatimTextOutput に class は渡せないので div で包む
+                          shiny::downloadButton(ns("dl_detail"), label = "Detail (disabled)"),
                           shiny::div(class = "result-status",
                                      shiny::verbatimTextOutput(ns("result_status"), placeholder = TRUE)
                           )
                )
     ),
-    
-    DT::DTOutput(ns("tbl_result"))
+    DT::dataTableOutput(ns("tbl_result"))
   )
 }

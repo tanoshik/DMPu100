@@ -43,24 +43,92 @@ ANY_CODE <- 9999L
   req <- c("SampleID","Locus","Allele1","Allele2")
   stopifnot(is.data.frame(db_prep), all(req %in% names(db_prep)))
   SIDs <- unique(db_prep$SampleID)
-  LIDs <- as.character(locus_order)
+  LIDs <- as.character(locus_order %||% unique(as.character(db_prep$Locus)))
   S <- length(SIDs); L <- length(LIDs)
-  A1 <- matrix(any_code, nrow = S, ncol = L)
-  A2 <- matrix(any_code, nrow = S, ncol = L)
+  A1 <- matrix(any_code, nrow = S, ncol = L, dimnames = list(NULL, LIDs))
+  A2 <- matrix(any_code, nrow = S, ncol = L, dimnames = list(NULL, LIDs))
   sid2i <- setNames(seq_len(S), SIDs)
   loc2j <- setNames(seq_len(L), LIDs)
-  for (i in seq_len(nrow(db_prep))) {
-    si <- sid2i[[ db_prep$SampleID[i] ]]
-    lj <- loc2j[[ db_prep$Locus[i] ]]
-    if (!is.na(si) && !is.na(lj)) {
-      A1[si, lj] <- as.integer(db_prep$Allele1[i])
-      A2[si, lj] <- as.integer(db_prep$Allele2[i])
-    }
+  for (k in seq_len(nrow(db_prep))) {
+    sid <- db_prep$SampleID[k]
+    loc <- as.character(db_prep$Locus[k])
+    i <- sid2i[[sid]]; j <- loc2j[[loc]]
+    if (is.na(i) || is.na(j)) next
+    A1[i, j] <- .map_any(db_prep$Allele1[k], any_code)
+    A2[i, j] <- .map_any(db_prep$Allele2[k], any_code)
   }
   list(sample_ids = SIDs, locus_ids = LIDs, A1 = A1, A2 = A2)
 }
 
-# ---- module server ----
+## 追加：安全な取り出し・正規化
+.as_int1 <- function(x) {
+  if (is.null(x) || length(x) < 1L) return(NA_integer_)
+  v <- suppressWarnings(as.integer(x[1]))
+  if (is.na(v)) NA_integer_ else v
+}
+.norm_filter_type <- function(x) {
+  if (is.null(x) || length(x) < 1L) return("all")
+  v <- tolower(as.character(x[1]))
+  # よくある値を正規化
+  if (v %in% c("all","none","no_filter","all_items")) return("all")
+  if (v %in% c("top_n","topn","top","top-n"))        return("top_n")
+  if (v %in% c("score","score_min","score_ge","ge")) return("score")
+  "all"
+}
+
+## 置き換え：単一選択仕様のフィルタ適用
+.apply_summary_filters <- function(df) {
+  if (!is.data.frame(df) || !nrow(df)) return(df)
+  
+  # Confirm → rv に入っている想定（最新ZIP準拠）
+  ft <- .norm_filter_type(rv$filter_type)
+  tn <- .as_int1(rv$top_n)
+  ms <- .as_int1(rv$score_min)
+  
+  # Score列の同定＆数値化
+  scn <- "Score"
+  if (!(scn %in% names(df))) {
+    ix <- which(tolower(names(df)) == "score")
+    if (length(ix) == 1L) scn <- names(df)[ix]
+  }
+  if (scn %in% names(df)) {
+    suppressWarnings(df[[scn]] <- as.integer(df[[scn]]))
+  }
+  
+  # 並びは一貫して Score 降順 → SampleID 昇順（安定化）
+  if (scn %in% names(df)) {
+    sid <- if ("SampleID" %in% names(df)) "SampleID" else names(df)[1L]
+    o <- order(-df[[scn]], df[[sid]], na.last = TRUE)
+    df <- df[o, , drop = FALSE]
+  }
+  
+  # --- 単一選択で分岐（ANDにはしない） ---
+  if (ft == "all") {
+    # 何もしない（TopN/Score入力は無視）
+    return(df)
+  }
+  
+  if (ft == "top_n") {
+    if (is.na(tn) || tn <= 0L) return(df)            # 入力無効なら素通し
+    if (nrow(df) > tn) df <- df[seq_len(tn), , drop = FALSE]
+    rownames(df) <- NULL
+    return(df)
+  }
+  
+  if (ft == "score") {
+    if (is.na(ms)) return(df)                        # 入力無効なら素通し
+    if (scn %in% names(df)) {
+      df <- df[df[[scn]] >= ms, , drop = FALSE]
+      # Score降順→SampleID昇順は維持（上で並べ直しているのでそのまま）
+    }
+    rownames(df) <- NULL
+    return(df)
+  }
+  
+  # 不明値はALL扱い
+  df
+}
+
 server_match_logic <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     
@@ -150,11 +218,11 @@ server_match_logic <- function(id, rv) {
           return(.prepare_query_min(qdf, .get_locus_order()))
         }
       }
-      if (!is.null(rv$query_profile) && is.list(rv$query_profile)) {
-        loci <- names(rv$query_profile)
-        alle <- do.call(rbind, lapply(rv$query_profile, function(v) {
-          v <- as.character(v); if (length(v) < 2) v <- c("any","any")
-          v[is.na(v) | v==""] <- "any"; v[1:2]
+      # 4) list形式（将来拡張）: list(Locus=..., alleles=list(c(a1,a2),...))
+      if (!is.null(rv$query_list) && is.list(rv$query_list)) {
+        loci <- as.character(rv$query_list$Locus)
+        alle <- do.call(rbind, lapply(rv$query_list$alleles, function(p) {
+          p <- as.integer(p); if (length(p) < 2L) p <- c(p, ANY_CODE); p[1:2]
         }))
         q_raw <- data.frame(Locus = loci, allele1 = alle[,1], allele2 = alle[,2], stringsAsFactors = FALSE)
         return(.prepare_query_min(q_raw, .get_locus_order()))
@@ -198,6 +266,7 @@ server_match_logic <- function(id, rv) {
       }
       
       # run matcher
+      t0 <- Sys.time()
       rs <- tryCatch(
         run_match_fast(q, idx, pre_add_for_any_any = 2L, include_bits_in_detail = TRUE),
         error = function(e) {
@@ -209,11 +278,13 @@ server_match_logic <- function(id, rv) {
       )
       if (is.null(rs)) return(invisible(FALSE))
       
-      # set results
+      # set results (apply Confirm filters here)
       rv$match_detail <- rs$detail
-      rv$match_scores <- rs$summary
-      rv$status_msg <- paste0("Run OK (", rs$used, "). N=", nrow(rs$summary))
-      .logf("[run] OK N_summary=", nrow(rs$summary), " N_detail=", nrow(rs$detail))
+      df_sum <- .apply_summary_filters(rs$summary)
+      rv$match_scores <- df_sum
+      el <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
+      rv$status_msg <- paste0("Run OK (", rs$used, "). rows=", nrow(df_sum), " (from ", nrow(rs$summary), "). elapsed=", sprintf("%.2fs", el))
+      .logf("[run] OK rows=", nrow(df_sum), " from=", nrow(rs$summary), " elapsed=", sprintf("%.2fs", el))
       rv$result_ready <- Sys.time()  # optional trigger
       invisible(TRUE)
     }
@@ -240,7 +311,6 @@ server_match_logic <- function(id, rv) {
         df <- rv$match_detail
       }
       if (is.null(df)) df <- .empty_df()
-      # 空でも描画する（reqで落とさない）
       DT::datatable(
         df,
         rownames = FALSE,
@@ -248,7 +318,7 @@ server_match_logic <- function(id, rv) {
       )
     })
     
-    # どこか moduleServer 内のDLハンドラ直前に置く小関数
+    # safe DF flattener for CSV
     .write_safe_df <- function(df) {
       if (is.null(df)) return(data.frame())
       if (!is.data.frame(df)) df <- as.data.frame(df, stringsAsFactors = FALSE)
@@ -272,25 +342,19 @@ server_match_logic <- function(id, rv) {
       format(Sys.time(), "%Y%m%d_%H%M%S")
     }
     
-    # Summary (match_scores.csv)
-    output$dl_scores <- downloadHandler(
-      filename = function() {
-        paste0("match_scores_", .ts(), ".csv")
-      },
+    output$dl_scores <- shiny::downloadHandler(
+      filename = function() paste0("match_scores_", .ts(), ".csv"),
       content = function(file) {
-        x <- rv$match_scores
+        x <- .write_safe_df(rv$match_scores)
         if (is.null(x) || !nrow(x)) {
-          x <- data.frame(SampleID = character(0), Score = integer(0), stringsAsFactors = FALSE)
+          x <- data.frame(SampleID=character(0), Score=integer(0), stringsAsFactors = FALSE)
         }
         utils::write.table(x, file = file, sep = ",", row.names = FALSE, col.names = TRUE, fileEncoding = "UTF-8")
       }
     )
     
-    # Detail (match_log.csv)
-    output$dl_detail <- downloadHandler(
-      filename = function() {
-        paste0("match_log_", .ts(), ".csv")
-      },
+    output$dl_detail <- shiny::downloadHandler(
+      filename = function() paste0("match_log_", .ts(), ".csv"),
       content = function(file) {
         x <- rv$match_detail
         if (is.null(x) || !nrow(x)) {

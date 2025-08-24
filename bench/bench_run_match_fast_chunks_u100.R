@@ -209,6 +209,12 @@ run_one_chunk <- function(cs, k, db_index, q, tag, db_rds_path) {
     include_bits_in_detail = include_bits_in_detail
   )
   t_work1 <- proc.time()[3L]
+  gc_before <- gc(reset = TRUE)
+  invisible(gc())
+  gc_after  <- gc()
+  had_gc <- any(gc_after[, "used"] < gc_before[, "used"])  # 簡易判定
+  row$gc_triggered <- had_gc
+  
   # ---------------------------------------------------
   
   ms_worker <- (t_work1 - t_work0) * 1000

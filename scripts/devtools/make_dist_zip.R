@@ -47,20 +47,21 @@ is_text_like <- function(path) {
 }
 
 # --- main ---------------------------------------------------------------------
+# 呼び出し例： make_dist_zip(include_dirs = c("scripts", "data", "bench"))
 make_dist_zip <- function(
     project_root      = getwd(),
     zip_prefix        = "DMP_dist",
-    parent_dir        = dirname(getwd()),  # one level above project root
-    head_lines        = 50,                # number of lines for head capture
-    max_head_kb       = 128,               # per-file cap for head capture
+    parent_dir        = dirname(getwd()),
+    head_lines        = 50,
+    max_head_kb       = 128,
     include_dirs      = c("scripts", "data"),
-    include_data_rds  = FALSE,             # <- NEW: TRUE で data/*.rds も同梱できる
-    extra_include     = character(0),      # <- NEW: 明示的に追加したいファイル/ディレクトリ
-    extra_exclude_dirs    = character(0),  # <- NEW: 除外ディレクトリの追加
-    extra_exclude_patterns= character(0),  # <- NEW: 除外パターンの追加
+    include_data_rds  = FALSE,
+    extra_include     = character(0),
+    extra_exclude_dirs    = character(0),
+    extra_exclude_patterns= character(0),
     dry_run           = FALSE,
     verbose           = TRUE
-) {
+){
   olwd <- getwd()
   on.exit(setwd(olwd), add = TRUE)
   setwd(project_root)
