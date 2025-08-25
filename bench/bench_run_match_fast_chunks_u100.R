@@ -14,12 +14,12 @@ include_bits_in_detail <- FALSE
 bench_type    <- "vdb_gf"
 seed          <- 1L
 
-# デフォルト（RUN_PLAN または --plan 指定が無ければ使用）
+# default plan (used when RUN_PLAN/--plan not provided)
 chunk_sizes   <- c(100000L, 200000L, 250000L, 500000L)
 parallel_workers <- max(1L, parallel::detectCores() - 1L)
 
-manual_run_tag <- ""       # 空ならタイムスタンプ
-chunk_timeout_sec <- 1800L # --timeout= で上書き可
+manual_run_tag <- ""       # empty => timestamp
+chunk_timeout_sec <- 1800L # can be overridden by --timeout=
 
 ########################################
 # ========== DEPS / SOURCES ==========
@@ -27,6 +27,7 @@ chunk_timeout_sec <- 1800L # --timeout= で上書き可
 suppressWarnings(suppressMessages({
   library(future)
   library(future.apply)
+  library(ps)   # <- added
 }))
 options(future.globals.maxSize = 8 * 1024^3)
 Sys.setenv(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", VECLIB_MAXIMUM_THREADS="1")
@@ -148,18 +149,37 @@ make_slice <- function(db_index, cs, k) {
   )
 }
 
-make_start_row <- function(cs, k, N, tag, dataset_id, wk) {
+.make_common_cols <- function() {
   data.frame(
-    ts = format(Sys.time(), "%Y%m%d%H%M%S"),
-    N = N, seed = seed, type = paste0(bench_type, "_START"),
-    cores = wk, chunk_size = cs, include_io = FALSE,
-    ms_prep = NA_real_, ms_io = NA_real_, ms_sched = NA_real_,
-    ms_worker = NA_real_, ms_reduce = NA_real_, ms_total = NA_real_,
-    rows = NA_integer_, note = "START",
-    run_id = tag, dataset_id = dataset_id, chunk_index = k,
-    throughput_samples_per_sec = NA_real_, throughput_loci_per_sec = NA_real_,
-    workers = wk, stringsAsFactors = FALSE
+    ts = character(), N = integer(), seed = integer(), type = character(),
+    cores = integer(), chunk_size = integer(), include_io = logical(),
+    ms_prep = numeric(), ms_io = numeric(), ms_sched = numeric(),
+    ms_worker = numeric(), ms_reduce = numeric(), ms_total = numeric(),
+    rows = integer(), note = character(), run_id = character(),
+    dataset_id = character(), chunk_index = integer(),
+    throughput_samples_per_sec = numeric(), throughput_loci_per_sec = numeric(),
+    workers = integer(),
+    # === added metrics ===
+    mem_rss_mb_before = numeric(), mem_rss_mb_after = numeric(), mem_peak_mb = numeric(),
+    cpu_user_sec = numeric(), cpu_system_sec = numeric(), cpu_total_sec = numeric(),
+    cpu_util_pct_of_one_core = numeric(), cpu_util_pct_per_core_est = numeric(),
+    io_read_bytes = numeric(), io_write_bytes = numeric(),
+    io_read_MBps = numeric(), io_write_MBps = numeric(),
+    pid = integer(), host = character(),
+    stringsAsFactors = FALSE
   )
+}
+
+make_start_row <- function(cs, k, N, tag, dataset_id, wk) {
+  # Create a single-row DF with all columns (including new metrics) initialized
+  df <- .make_common_cols()
+  df[1, ] <- NA
+  df$ts[1] <- format(Sys.time(), "%Y%m%d%H%M%S")
+  df$N[1] <- N; df$seed[1] <- seed; df$type[1] <- paste0(bench_type, "_START")
+  df$cores[1] <- wk; df$chunk_size[1] <- cs; df$include_io[1] <- FALSE
+  df$note[1] <- "START"; df$run_id[1] <- tag; df$dataset_id[1] <- dataset_id
+  df$chunk_index[1] <- k; df$workers[1] <- wk
+  df
 }
 
 get_rows <- function(res) {
@@ -189,15 +209,43 @@ apply_overrides <- function() {
   for (a in args) {
     if (startsWith(a,"--plan=")) plan_cli <- sub("^--plan=","",a)
     else if (startsWith(a,"--db="))  db_rds_path <<- sub("^--db=","",a)
-    else if (startsWith(a,"--out=")) result_dir  <<- sub("^--out=","",a)
     else if (startsWith(a,"--tag=")) manual_run_tag <<- sub("^--tag=","",a)
     else if (startsWith(a,"--timeout=")) chunk_timeout_sec <<- as.integer(sub("^--timeout=","",a))
+    # NOTE: --out= は無視して test/bench に固定
   }
   plan_env <- Sys.getenv("RUN_PLAN","")
   plan <- parse_plan_string(plan_cli %||% plan_env)
   if (!is.null(plan)) return(plan)
-  # fallback: from chunk_sizes and parallel_workers
   data.frame(chunk_size=chunk_sizes, workers=parallel_workers, stringsAsFactors=FALSE)
+}
+
+########################################
+# ========== PROCESS METRICS (FIX) ==========
+########################################
+.get_proc_metrics <- function() {
+  h <- ps::ps_handle(Sys.getpid())
+  
+  # ps_* は OS により「名前付きベクトル（atomic）」として返ることがある
+  mem <- ps::ps_memory_info(h)
+  cpu <- ps::ps_cpu_times(h)
+  io  <- tryCatch(ps::ps_io_counters(h), error=function(e) NULL)
+  
+  get_num <- function(x, key) {
+    if (is.null(x)) return(NA_real_)
+    v <- tryCatch(x[[key]], error=function(e) NA)
+    if (is.null(v)) return(NA_real_)
+    suppressWarnings(as.numeric(v))
+  }
+  
+  list(
+    rss = get_num(mem, "rss"),                 # bytes
+    user = get_num(cpu, "user"),               # sec (cumulative)
+    system = get_num(cpu, "system"),           # sec (cumulative)
+    read_bytes  = if (!is.null(io)) get_num(io, "read_bytes")  else NA_real_,
+    write_bytes = if (!is.null(io)) get_num(io, "write_bytes") else NA_real_,
+    pid  = ps::ps_pid(h),
+    host = (Sys.info()[["nodename"]] %||% Sys.getenv("COMPUTERNAME", "unknown-host"))
+  )
 }
 
 ########################################
@@ -210,13 +258,16 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
   source("scripts/scoring_fast.R", local=FALSE)
   source("scripts/matcher_fast.R", local=FALSE)
   
-  ## ★ 追加：壁時計タイムアウト（秒）
   on.exit(setTimeLimit(cpu = Inf, elapsed = Inf, transient = TRUE), add = TRUE)
   setTimeLimit(cpu = Inf, elapsed = timeout_sec, transient = TRUE)
   
   k <- if (!is.null(attr(slice, "chunk_index"))) attr(slice, "chunk_index") else NA_integer_
   
-  t0 <- proc.time()[3L]
+  # capture process metrics before
+  gc()
+  m0 <- .get_proc_metrics()
+  t0_wall <- proc.time()[3L]
+  
   ok <- TRUE; err <- NA_character_; res_row <- NULL
   
   tryCatch({
@@ -229,14 +280,39 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       include_bits_in_detail = include_bits_in_detail
     )
     t_work1 <- proc.time()[3L]
+    
+    # capture after metrics
+    gc()
+    m1 <- .get_proc_metrics()
+    
     ms_total <- (t_work1 - t_work0) * 1000
     
     N <- length(slice$sample_ids)
     L <- length(slice$locus_ids)
-    elapsed <- (t_work1 - t0)
+    elapsed <- (t_work1 - t0_wall)
+    
+    # throughput
     thr_s <- if (elapsed>0) N/elapsed else NA_real_
     thr_L <- if (elapsed>0) (N*L)/elapsed else NA_real_
     rows <- get_rows(res)
+    
+    # deltas
+    cpu_user   <- if (is.finite(m1$user) && is.finite(m0$user))   m1$user   - m0$user   else NA_real_
+    cpu_system <- if (is.finite(m1$system) && is.finite(m0$system)) m1$system - m0$system else NA_real_
+    cpu_total  <- if (is.finite(cpu_user) && is.finite(cpu_system)) cpu_user + cpu_system else NA_real_
+    
+    rbytes <- if (is.finite(m1$read_bytes) && is.finite(m0$read_bytes)) m1$read_bytes - m0$read_bytes else NA_real_
+    wbytes <- if (is.finite(m1$write_bytes) && is.finite(m0$write_bytes)) m1$write_bytes - m0$write_bytes else NA_real_
+    
+    rss_before_mb <- if (is.finite(m0$rss)) m0$rss / (1024^2) else NA_real_
+    rss_after_mb  <- if (is.finite(m1$rss)) m1$rss / (1024^2) else NA_real_
+    mem_peak_mb   <- max(rss_before_mb, rss_after_mb, na.rm = TRUE)
+    
+    cpu_util_pct_of_one_core <- if (elapsed > 0 && is.finite(cpu_total)) (cpu_total / elapsed) * 100 else NA_real_
+    cpu_util_pct_per_core_est <- if (elapsed > 0 && is.finite(cpu_total) && wk > 0) (cpu_total / elapsed / wk) * 100 else NA_real_
+    
+    io_read_MBps  <- if (elapsed > 0 && is.finite(rbytes)) (rbytes / (1024^2)) / elapsed else NA_real_
+    io_write_MBps <- if (elapsed > 0 && is.finite(wbytes)) (wbytes / (1024^2)) / elapsed else NA_real_
     
     res_row <- data.frame(
       ts = format(Sys.time(), "%Y%m%d%H%M%S"),
@@ -247,23 +323,30 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       rows = rows, note = "OK",
       run_id = tag, dataset_id = dataset_id, chunk_index = k,
       throughput_samples_per_sec = thr_s, throughput_loci_per_sec = thr_L,
-      workers = wk, stringsAsFactors = FALSE
+      workers = wk,
+      mem_rss_mb_before = rss_before_mb, mem_rss_mb_after = rss_after_mb, mem_peak_mb = mem_peak_mb,
+      cpu_user_sec = cpu_user, cpu_system_sec = cpu_system, cpu_total_sec = cpu_total,
+      cpu_util_pct_of_one_core = cpu_util_pct_of_one_core,
+      cpu_util_pct_per_core_est = cpu_util_pct_per_core_est,
+      io_read_bytes = rbytes, io_write_bytes = wbytes,
+      io_read_MBps = io_read_MBps, io_write_MBps = io_write_MBps,
+      pid = as.integer(m1$pid), host = as.character(m1$host),
+      stringsAsFactors = FALSE
     )
   }, error=function(e){ ok <<- FALSE; err <<- conditionMessage(e) })
   
   if (!ok || is.null(res_row)) {
     N <- length(slice$sample_ids)
-    res_row <- data.frame(
-      ts = format(Sys.time(), "%Y%m%d%H%M%S"),
-      N = N, seed = seed_param, type = paste0(bench_type,"_ERR"), cores = wk,
-      chunk_size = cs, include_io = FALSE,
-      ms_prep = NA_real_, ms_io = NA_real_, ms_sched = NA_real_,
-      ms_worker = NA_real_, ms_reduce = NA_real_, ms_total = NA_real_,
-      rows = NA_integer_, note = paste0("ERROR: ", err %||% "unknown"),
-      run_id = tag, dataset_id = dataset_id, chunk_index = k,
-      throughput_samples_per_sec = NA_real_, throughput_loci_per_sec = NA_real_,
-      workers = wk, stringsAsFactors = FALSE
-    )
+    res_row <- .make_common_cols()
+    res_row[1, ] <- NA
+    res_row$ts[1] <- format(Sys.time(), "%Y%m%d%H%M%S")
+    res_row$N[1] <- N; res_row$seed[1] <- seed_param
+    res_row$type[1] <- paste0(bench_type,"_ERR")
+    res_row$cores[1] <- wk; res_row$chunk_size[1] <- cs
+    res_row$include_io[1] <- FALSE; res_row$rows[1] <- NA_integer_
+    res_row$note[1] <- paste0("ERROR: ", err %||% "unknown")
+    res_row$run_id[1] <- tag; res_row$dataset_id[1] <- dataset_id; res_row$chunk_index[1] <- k
+    res_row$workers[1] <- wk
   }
   res_row
 }
@@ -288,7 +371,7 @@ main <- function() {
   out_csv <- file.path(result_dir, sprintf("bench_run_match_fast_%s.csv", tag))
   cat("[BENCH] output CSV: ", out_csv, "\n", sep="")
   
-  # レジューム（OKのみ完了扱い）
+  # resume table: consider OK rows as completed
   completed <- list()
   if (file.exists(out_csv)) {
     done <- tryCatch(read.csv(out_csv, stringsAsFactors=FALSE), error=function(e) NULL)
@@ -311,7 +394,7 @@ main <- function() {
     todo <- which(!vapply(seq_len(n_chunks), function(k) is_done(cs,wk,k), logical(1)))
     if (length(todo)==0L) { cat("  - all chunks already in CSV for this pair\n"); next }
     
-    # STARTを先に書く（可視化）
+    # START rows (visible in CSV)
     for (k in todo) {
       N <- length(((k-1L)*cs+1L):min(S, k*cs))
       append_row(make_start_row(cs,k,N,tag,dataset_id,wk), out_csv)
@@ -338,12 +421,11 @@ main <- function() {
       old <- future::plan(); on.exit(future::plan(old), add=TRUE)
       future::plan(multisession, workers=wk)
       
-      remaining_k <- todo                # 例: k=1..10
-      in_flight   <- list()              # k -> future
+      remaining_k <- todo
+      in_flight   <- list()
       last_ping   <- Sys.time()
       
       submit_next <- function() {
-        # 同時に wk 本まで
         while (length(in_flight) < wk && length(remaining_k) > 0) {
           k <- remaining_k[1]; remaining_k <<- remaining_k[-1]
           sl <- make_slice(db_index, cs, k); attr(sl,"chunk_index") <- k
@@ -356,14 +438,12 @@ main <- function() {
         }
       }
       
-      submit_next()  # 最初の wk 本を投入
+      submit_next()
       log_line(sprintf("[SUBMIT] batch=%d (cs=%d, workers=%d)", length(in_flight), cs, wk))
       
       while (length(in_flight) > 0) {
-        # 終了済みの future を回収
         ready_k <- names(in_flight)[ vapply(in_flight, future::resolved, logical(1)) ]
         if (length(ready_k) == 0) {
-          # 待ちのハートビート
           if (as.numeric(difftime(Sys.time(), last_ping, units="secs")) >= 30) {
             log_line(sprintf("[WAIT] cs=%d workers=%d inflight=%d remain=%d",
                              cs, wk, length(in_flight), length(remaining_k)))
@@ -378,15 +458,16 @@ main <- function() {
           fut <- in_flight[[kk]]
           row <- tryCatch(
             future::value(fut),
-            error = function(e)
-              data.frame(ts=format(Sys.time(),"%Y%m%d%H%M%S"), N=NA_integer_, seed=seed,
-                         type=paste0(bench_type,"_ERR"), cores=wk, chunk_size=cs, include_io=FALSE,
-                         ms_prep=NA_real_, ms_io=NA_real_, ms_sched=NA_real_, ms_worker=NA_real_,
-                         ms_reduce=NA_real_, ms_total=NA_real_, rows=NA_integer_,
-                         note=paste0("ERROR: ", conditionMessage(e)),
-                         run_id=tag, dataset_id=dataset_id, chunk_index=k,
-                         throughput_samples_per_sec=NA_real_, throughput_loci_per_sec=NA_real_,
-                         workers=wk, stringsAsFactors=FALSE)
+            error = function(e) {
+              df <- .make_common_cols(); df[1, ] <- NA
+              df$ts[1] <- format(Sys.time(),"%Y%m%d%H%M%S"); df$seed[1] <- seed
+              df$type[1] <- paste0(bench_type,"_ERR"); df$cores[1] <- wk
+              df$chunk_size[1] <- cs; df$include_io[1] <- FALSE
+              df$note[1] <- paste0("ERROR: ", conditionMessage(e))
+              df$run_id[1] <- tag; df$dataset_id[1] <- dataset_id
+              df$chunk_index[1] <- k; df$workers[1] <- wk
+              df
+            }
           )
           append_row(row, out_csv)
           if (identical(row$note, "OK"))
@@ -400,7 +481,6 @@ main <- function() {
                     as.character(row$throughput_loci_per_sec))
             else sprintf("[CHUNK][FAIL] cs=%d k=%d msg=%s\n", cs,k,row$note))
           
-          # 片付け＆次を投入
           in_flight[[kk]] <- NULL
           submit_next()
         }

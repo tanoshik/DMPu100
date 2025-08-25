@@ -1,0 +1,2 @@
+"plan","chunk_size","workers","chunks","N_total","thr_samples_mean","thr_samples_p95","thr_samples_min","thr_loci_mean","ms_total_mean","mem_peak_mb_mean","mem_peak_mb_p95","mem_before_mb_mean","mem_after_mb_mean","cpu_total_sec_sum","cpu_user_sec_sum","cpu_sys_sec_sum","io_read_MBps_mean","io_write_MBps_mean"
+"1000x1",1000,1,1,1000,144.927536231884,144.927536231884,144.927536231884,3043.47826086957,6900,115.6328125,115.6328125,82.35546875,115.6328125,6.953125,6.890625,0.0625,NA,NA
