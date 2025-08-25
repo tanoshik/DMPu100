@@ -1,141 +1,124 @@
-# No multibyte characters in code/comments.
-
-# DMPu100 bench: incremental CSV append + resume + KPI (+ optional parallel)
-# NOTE: run_match_fast() signature is based on CURRENT RUN LOGS (assumption).
-#       If your local function signature differs, adjust the call near "worker" section.
+# No multibyte characters.
 
 ########################################
-# ========== CONFIG (EDIT HERE) ==========
+# ========== CONFIG ==========
 ########################################
-
-# --- data & output ---
-db_rds_path   <- "data/virtual_db_u100_S1000_seed123.rds"   # <= 1K quick test
+db_rds_path   <- "data/virtual_db_u100_S1000_seed123.rds"
 result_dir    <- "test/bench"
 log_dir       <- "logs"
 
-# --- bench grid (small defaults for quick test) ---
-chunk_sizes   <- c(100, 200, 250, 500)  # <= adjust for bigger DB later
-enable_parallel   <- FALSE               # set TRUE to test parallel
-parallel_workers  <- max(1L, parallel::detectCores() - 1L)   # ex: CPU-1
-
-# --- matcher behavior ---
 ANY_CODE      <- 9999L
-include_bits_in_detail <- FALSE         # fixed FALSE for speed
-pre_add_for_any_any    <- 2L            # design doc default
+pre_add_for_any_any <- 2L
+include_bits_in_detail <- FALSE
 
-# --- metadata for KPI (旧DMP互換) ---
+bench_type    <- "vdb_gf"
 seed          <- 1L
-bench_type    <- "gf_like"
-cores         <- if (enable_parallel) parallel_workers else 1L
-include_io    <- FALSE                  # change to TRUE if measuring IO separately
 
-# --- optional: reuse same CSV file name to resume across sessions ---
-# leave empty "" to auto-generate time-stamped name each run.
-manual_run_tag <- ""   # e.g., "resume_1M_try1" to append into same CSV
+# デフォルト（RUN_PLAN または --plan 指定が無ければ使用）
+chunk_sizes   <- c(100000L, 200000L, 250000L, 500000L)
+parallel_workers <- max(1L, parallel::detectCores() - 1L)
+
+manual_run_tag <- ""       # 空ならタイムスタンプ
+chunk_timeout_sec <- 1800L # --timeout= で上書き可
 
 ########################################
-# ======== PROJECT SOURCES (REQUIRED) ========
+# ========== DEPS / SOURCES ==========
 ########################################
+suppressWarnings(suppressMessages({
+  library(future)
+  library(future.apply)
+}))
+options(future.globals.maxSize = 8 * 1024^3)
+Sys.setenv(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", VECLIB_MAXIMUM_THREADS="1")
 
-# These scripts must exist in your repo. If not, please provide them before running.
-# - scripts/scoring_fast.R
-# - scripts/matcher_fast.R
 source("scripts/scoring_fast.R",  local = TRUE)
 source("scripts/matcher_fast.R",  local = TRUE)
 
 ########################################
-# ========== OPTIONAL DEPENDENCIES ==========
+# ========== UTILS ==========
 ########################################
-if (enable_parallel) {
-  suppressWarnings(suppressMessages({
-    library(future)
-    library(future.apply)
-  }))
+`%||%` <- function(x,y) if (is.null(x)) y else x
+.ensure_dir <- function(d) dir.create(d, recursive = TRUE, showWarnings = FALSE)
+ts_tag <- function() format(Sys.time(), "%Y%m%d_%H%M%S")
+
+log_file <- function() { .ensure_dir(log_dir); file.path(log_dir,"bench.log") }
+log_line <- function(...) {
+  msg <- paste0(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), " ", paste0(..., collapse=""))
+  cat(msg,"\n"); cat(msg,"\n", file=log_file(), append=TRUE)
 }
 
-########################################
-# ========== HELPERS ==========
-########################################
+append_row <- function(row, csv_path, retries=25L, sleep_sec=0.2) {
+  .ensure_dir(dirname(csv_path))
+  has_file <- file.exists(csv_path) && (file.info(csv_path)$size %||% 0) > 0
+  tmp <- tempfile("bench_row_", tmpdir=dirname(csv_path), fileext=".csv")
+  on.exit(try(unlink(tmp), silent=TRUE), add=TRUE)
+  write.table(row, file=tmp, sep=",", row.names=FALSE, col.names=!has_file, append=FALSE)
+  for (i in seq_len(retries)) {
+    ok <- try({
+      if (!has_file) file.rename(tmp, csv_path) else { file.append(csv_path, tmp); TRUE }
+    }, silent=TRUE)
+    if (!inherits(ok,"try-error") && isTRUE(ok)) { if (file.exists(tmp)) try(unlink(tmp), silent=TRUE); return(invisible(TRUE)) }
+    Sys.sleep(sleep_sec)
+  }
+  stop("Failed to append: ", csv_path)
+}
 
-safe_dir_create <- function(d) if (!dir.exists(d)) dir.create(d, recursive = TRUE, showWarnings = FALSE)
-ts_tag <- function() format(Sys.time(), "%Y%m%d%H%M%S")
-
-# map "any" to ANY_CODE (integer), keep integers as-is
-.map_any <- function(x, any_code = ANY_CODE) {
+.map_any <- function(x, any_code=ANY_CODE) {
   if (is.null(x)) return(integer(0))
   if (is.factor(x)) x <- as.character(x)
   out <- suppressWarnings(as.integer(x))
-  is_any <- !is.na(x) & tolower(as.character(x)) == "any"
+  is_any <- !is.na(x) & tolower(as.character(x))=="any"
   out[is_any] <- any_code
   out
 }
 
-# minimal query shape: Locus, allele1, allele2  (+ sorted by locus_order if available)
-.prepare_query_min <- function(q_raw, locus_order = NULL, any_code = ANY_CODE) {
+.prepare_query_min <- function(q_raw, locus_order=NULL, any_code=ANY_CODE) {
   n <- names(q_raw)
   names(q_raw) <- sub("(?i)^locus$","Locus", n, perl=TRUE)
   names(q_raw) <- sub("(?i)^allele1$","allele1", names(q_raw), perl=TRUE)
   names(q_raw) <- sub("(?i)^allele2$","allele2", names(q_raw), perl=TRUE)
   stopifnot(all(c("Locus","allele1","allele2") %in% names(q_raw)))
-  q <- q_raw[, c("Locus","allele1","allele2"), drop = FALSE]
-  q$Locus   <- as.character(q$Locus)
+  q <- q_raw[,c("Locus","allele1","allele2"),drop=FALSE]
+  q$Locus <- as.character(q$Locus)
   q$allele1 <- .map_any(q$allele1, any_code)
   q$allele2 <- .map_any(q$allele2, any_code)
-  if (!is.null(locus_order) && length(locus_order) > 0L) {
-    ord <- match(q$Locus, locus_order)
-    q <- q[order(ord), , drop = FALSE]
+  if (!is.null(locus_order) && length(locus_order)>0L) {
+    ord <- match(q$Locus, locus_order); q <- q[order(ord), , drop=FALSE]
   }
-  rownames(q) <- NULL
-  q
+  rownames(q) <- NULL; q
 }
 
-# build db_index (list: sample_ids, locus_ids, A1, A2) from long DF
-.build_db_index_v1 <- function(db_prep, locus_order, any_code = ANY_CODE) {
+.build_db_index_v1 <- function(db_prep, locus_order, any_code=ANY_CODE) {
   req <- c("SampleID","Locus","Allele1","Allele2")
   stopifnot(is.data.frame(db_prep), all(req %in% names(db_prep)))
-  SIDs <- unique(db_prep$SampleID)
-  LIDs <- as.character(locus_order)
+  SIDs <- unique(db_prep$SampleID); LIDs <- as.character(locus_order)
   S <- length(SIDs); L <- length(LIDs)
-  A1 <- matrix(any_code, nrow = S, ncol = L, dimnames = list(NULL, LIDs))
-  A2 <- matrix(any_code, nrow = S, ncol = L, dimnames = list(NULL, LIDs))
-  Lmap <- setNames(seq_along(LIDs), LIDs)
-  sid_map <- setNames(seq_along(SIDs), SIDs)
+  A1 <- matrix(any_code, nrow=S, ncol=L, dimnames=list(NULL,LIDs))
+  A2 <- matrix(any_code, nrow=S, ncol=L, dimnames=list(NULL,LIDs))
+  Lmap <- setNames(seq_along(LIDs), LIDs); sid_map <- setNames(seq_along(SIDs), SIDs)
   for (k in seq_len(nrow(db_prep))) {
-    sid <- db_prep$SampleID[k]
-    loc <- as.character(db_prep$Locus[k])
-    i <- sid_map[[sid]]; j <- Lmap[[loc]]
-    if (is.na(i) || is.na(j)) next
-    A1[i, j] <- .map_any(db_prep$Allele1[k], any_code)
-    A2[i, j] <- .map_any(db_prep$Allele2[k], any_code)
+    sid <- db_prep$SampleID[k]; loc <- as.character(db_prep$Locus[k])
+    i <- sid_map[[sid]]; j <- Lmap[[loc]]; if (is.na(i) || is.na(j)) next
+    A1[i,j] <- .map_any(db_prep$Allele1[k], any_code)
+    A2[i,j] <- .map_any(db_prep$Allele2[k], any_code)
   }
-  list(sample_ids = SIDs, locus_ids = LIDs, A1 = A1, A2 = A2)
+  list(sample_ids=SIDs, locus_ids=LIDs, A1=A1, A2=A2)
 }
 
 load_locus_order <- function() {
   if (file.exists("data/locus_order.rds")) {
-    lo <- tryCatch(readRDS("data/locus_order.rds"), error = function(e) NULL)
+    lo <- tryCatch(readRDS("data/locus_order.rds"), error=function(e) NULL)
     if (is.character(lo)) return(lo)
   }
   NULL
 }
 
-# Load either index RDS or long DF RDS; also returns a query builder
-load_db_index_or_df <- function(path) {
-  obj <- readRDS(path)
-  lo <- load_locus_order()
+load_rds_as_index <- function(path) {
+  obj <- readRDS(path); lo <- load_locus_order()
   if (is.list(obj) && all(c("sample_ids","locus_ids","A1","A2") %in% names(obj))) {
-    make_query_from_index <- function(idx) {
-      sidx <- 1L
-      LIDs <- idx$locus_ids
-      q <- data.frame(
-        Locus   = LIDs,
-        allele1 = idx$A1[sidx, ],
-        allele2 = idx$A2[sidx, ],
-        stringsAsFactors = FALSE
-      )
-      .prepare_query_min(q, LIDs, ANY_CODE)
-    }
-    return(list(db_index = obj, make_query = function() make_query_from_index(obj), locus_order = obj$locus_ids))
+    return(list(db_index=obj, make_query=function() {
+      data.frame(Locus=obj$locus_ids, allele1=obj$A1[1,,drop=TRUE], allele2=obj$A2[1,,drop=TRUE], stringsAsFactors=FALSE)
+    }))
   }
   if (is.data.frame(obj)) {
     n <- names(obj)
@@ -145,189 +128,288 @@ load_db_index_or_df <- function(path) {
     names(obj) <- sub("(?i)^allele2$","Allele2", names(obj), perl=TRUE)
     LIDs <- lo; if (is.null(LIDs)) LIDs <- unique(as.character(obj$Locus))
     idx <- .build_db_index_v1(obj, LIDs, ANY_CODE)
-    make_query_from_df <- function(df) {
-      sid <- df$SampleID[1]
-      q <- subset(df, SampleID == sid, c("Locus","Allele1","Allele2"))
-      names(q) <- c("Locus","allele1","allele2")
-      .prepare_query_min(q, LIDs, ANY_CODE)
-    }
-    return(list(db_index = idx, make_query = function() make_query_from_df(obj), locus_order = LIDs))
+    return(list(db_index=idx, make_query=function() {
+      sid <- obj$SampleID[1]
+      q <- subset(obj, SampleID==sid, c("Locus","Allele1","Allele2"))
+      names(q) <- c("Locus","allele1","allele2"); q
+    }))
   }
-  stop("Unsupported RDS format. Expect index list or long data.frame.")
+  stop("Unsupported RDS")
 }
 
-get_result_nrow <- function(res) {
+make_slice <- function(db_index, cs, k) {
+  s_from <- (k-1L)*cs + 1L; s_to <- min(length(db_index$sample_ids), k*cs)
+  sl_id <- s_from:s_to
+  list(
+    sample_ids = db_index$sample_ids[sl_id],
+    locus_ids  = db_index$locus_ids,
+    A1 = db_index$A1[sl_id, , drop=FALSE],
+    A2 = db_index$A2[sl_id, , drop=FALSE]
+  )
+}
+
+make_start_row <- function(cs, k, N, tag, dataset_id, wk) {
+  data.frame(
+    ts = format(Sys.time(), "%Y%m%d%H%M%S"),
+    N = N, seed = seed, type = paste0(bench_type, "_START"),
+    cores = wk, chunk_size = cs, include_io = FALSE,
+    ms_prep = NA_real_, ms_io = NA_real_, ms_sched = NA_real_,
+    ms_worker = NA_real_, ms_reduce = NA_real_, ms_total = NA_real_,
+    rows = NA_integer_, note = "START",
+    run_id = tag, dataset_id = dataset_id, chunk_index = k,
+    throughput_samples_per_sec = NA_real_, throughput_loci_per_sec = NA_real_,
+    workers = wk, stringsAsFactors = FALSE
+  )
+}
+
+get_rows <- function(res) {
   if (is.data.frame(res)) return(nrow(res))
-  if (is.list(res)) {
-    if (!is.null(res$match_scores) && is.data.frame(res$match_scores)) return(nrow(res$match_scores))
-    if (!is.null(res$detail) && is.data.frame(res$detail)) return(nrow(res$detail))
-    if (!is.null(res$scores) && is.atomic(res$scores)) return(length(res$scores))
-    return(NA_integer_)
-  }
-  if (is.atomic(res)) return(length(res))
+  if (is.list(res) && !is.null(res$summary)) return(nrow(res$summary))
   NA_integer_
 }
 
-append_row <- function(df_row, csv_path) {
-  exists <- file.exists(csv_path)
-  utils::write.table(
-    df_row, file = csv_path, sep = ",",
-    row.names = FALSE, col.names = !exists, append = exists, qmethod = "double"
-  )
-  flush.console()
+########################################
+# ========== CLI / PLAN ==========
+########################################
+parse_plan_string <- function(s) {
+  if (is.null(s) || !nzchar(s)) return(NULL)
+  parts <- strsplit(s, ",", fixed=TRUE)[[1]]
+  cs <- integer(); wk <- integer()
+  for (p in parts) {
+    kv <- strsplit(trimws(p), "x", fixed=TRUE)[[1]]
+    if (length(kv)!=2) stop("Bad --plan item: ", p)
+    cs <- c(cs, as.integer(kv[1])); wk <- c(wk, as.integer(kv[2]))
+  }
+  data.frame(chunk_size=cs, workers=wk, stringsAsFactors=FALSE)
 }
 
-# chunk worker (serial callable; also used inside parallel)
-run_one_chunk <- function(cs, k, db_index, q, tag, db_rds_path) {
+apply_overrides <- function() {
+  args <- commandArgs(trailingOnly=TRUE)
+  plan_cli <- NULL
+  for (a in args) {
+    if (startsWith(a,"--plan=")) plan_cli <- sub("^--plan=","",a)
+    else if (startsWith(a,"--db="))  db_rds_path <<- sub("^--db=","",a)
+    else if (startsWith(a,"--out=")) result_dir  <<- sub("^--out=","",a)
+    else if (startsWith(a,"--tag=")) manual_run_tag <<- sub("^--tag=","",a)
+    else if (startsWith(a,"--timeout=")) chunk_timeout_sec <<- as.integer(sub("^--timeout=","",a))
+  }
+  plan_env <- Sys.getenv("RUN_PLAN","")
+  plan <- parse_plan_string(plan_cli %||% plan_env)
+  if (!is.null(plan)) return(plan)
+  # fallback: from chunk_sizes and parallel_workers
+  data.frame(chunk_size=chunk_sizes, workers=parallel_workers, stringsAsFactors=FALSE)
+}
+
+########################################
+# ========== WORKER ==========
+########################################
+run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
+                             timeout_sec, project_root, seed_param) {
+  setwd(project_root)
+  assign("ANY_CODE", ANY_CODE, envir=globalenv())
+  source("scripts/scoring_fast.R", local=FALSE)
+  source("scripts/matcher_fast.R", local=FALSE)
+  
+  ## ★ 追加：壁時計タイムアウト（秒）
+  on.exit(setTimeLimit(cpu = Inf, elapsed = Inf, transient = TRUE), add = TRUE)
+  setTimeLimit(cpu = Inf, elapsed = timeout_sec, transient = TRUE)
+  
+  k <- if (!is.null(attr(slice, "chunk_index"))) attr(slice, "chunk_index") else NA_integer_
+  
   t0 <- proc.time()[3L]
+  ok <- TRUE; err <- NA_character_; res_row <- NULL
   
-  # slice
-  s_from <- (k-1L)*cs + 1L
-  s_to   <- min(length(db_index$sample_ids), k*cs)
-  sl <- s_from:s_to
-  idx_slice <- list(
-    sample_ids = db_index$sample_ids[sl],
-    locus_ids  = db_index$locus_ids,
-    A1 = db_index$A1[sl, , drop = FALSE],
-    A2 = db_index$A2[sl, , drop = FALSE]
-  )
+  tryCatch({
+    t_work0 <- proc.time()[3L]
+    res <- run_match_fast(
+      q,
+      slice,
+      pre_add_for_any_any = pre_add_for_any_any,
+      any_code = ANY_CODE,
+      include_bits_in_detail = include_bits_in_detail
+    )
+    t_work1 <- proc.time()[3L]
+    ms_total <- (t_work1 - t_work0) * 1000
+    
+    N <- length(slice$sample_ids)
+    L <- length(slice$locus_ids)
+    elapsed <- (t_work1 - t0)
+    thr_s <- if (elapsed>0) N/elapsed else NA_real_
+    thr_L <- if (elapsed>0) (N*L)/elapsed else NA_real_
+    rows <- get_rows(res)
+    
+    res_row <- data.frame(
+      ts = format(Sys.time(), "%Y%m%d%H%M%S"),
+      N = N, seed = seed_param, type = bench_type, cores = wk,
+      chunk_size = cs, include_io = FALSE,
+      ms_prep = NA_real_, ms_io = NA_real_, ms_sched = NA_real_,
+      ms_worker = NA_real_, ms_reduce = NA_real_, ms_total = round(ms_total,3),
+      rows = rows, note = "OK",
+      run_id = tag, dataset_id = dataset_id, chunk_index = k,
+      throughput_samples_per_sec = thr_s, throughput_loci_per_sec = thr_L,
+      workers = wk, stringsAsFactors = FALSE
+    )
+  }, error=function(e){ ok <<- FALSE; err <<- conditionMessage(e) })
   
-  # prep timing (slice + query reuse, so prep is mostly slicing)
-  t_prep1 <- proc.time()[3L]
-  ms_prep <- (t_prep1 - t0) * 1000
-  
-  ms_io <- 0
-  ms_sched <- 0
-  
-  # ---- MATCHER CALL (adjust signature if needed) ----
-  t_work0 <- proc.time()[3L]
-  res <- run_match_fast(
-    q,
-    idx_slice,
-    pre_add_for_any_any = pre_add_for_any_any,
-    any_code = ANY_CODE,
-    include_bits_in_detail = include_bits_in_detail
-  )
-  t_work1 <- proc.time()[3L]
-  gc_before <- gc(reset = TRUE)
-  invisible(gc())
-  gc_after  <- gc()
-  had_gc <- any(gc_after[, "used"] < gc_before[, "used"])  # 簡易判定
-  row$gc_triggered <- had_gc
-  # ---------------------------------------------------
-  
-  ms_worker <- (t_work1 - t_work0) * 1000
-  ms_reduce <- 0
-  ms_total  <- (t_work1 - t0) * 1000
-  elapsed   <- as.numeric(t_work1 - t0)
-  
-  samples <- length(sl)
-  loci_total <- samples * length(idx_slice$locus_ids)
-  thr_samples_sec <- if (elapsed > 0) samples / elapsed else NA_real_
-  thr_loci_sec    <- if (elapsed > 0) loci_total / elapsed else NA_real_
-  res_rows <- get_result_nrow(res)
-  
-  row <- data.frame(
-    ts = format(Sys.time(), "%Y%m%d%H%M%S"),
-    N = samples,
-    seed = seed,
-    type = bench_type,
-    cores = if (enable_parallel) parallel_workers else 1L,
-    chunk_size = cs,
-    include_io = include_io,
-    ms_prep = round(ms_prep, 3),
-    ms_io = round(ms_io, 3),
-    ms_sched = round(ms_sched, 3),
-    ms_worker = round(ms_worker, 3),
-    ms_reduce = round(ms_reduce, 3),
-    ms_total = round(ms_total, 3),
-    rows = res_rows,
-    note = "bench_u100",
-    # extensions
-    run_id = tag,
-    dataset_id = basename(db_rds_path),
-    chunk_index = k,
-    throughput_samples_per_sec = thr_samples_sec,
-    throughput_loci_per_sec    = thr_loci_sec,
-    workers = if (enable_parallel) parallel_workers else 1L,
-    stringsAsFactors = FALSE
-  )
-  
-  logline <- sprintf(
-    "  [done] size=%6d idx=%4d  N=%6d  worker=%.2fs total=%.2fs  thr=%.0f samp/s, %.0f loci/s  rows=%d\n",
-    cs, k, samples, row$ms_worker/1000, row$ms_total/1000,
-    thr_samples_sec, thr_loci_sec, res_rows
-  )
-  
-  list(row = row, logline = logline)
+  if (!ok || is.null(res_row)) {
+    N <- length(slice$sample_ids)
+    res_row <- data.frame(
+      ts = format(Sys.time(), "%Y%m%d%H%M%S"),
+      N = N, seed = seed_param, type = paste0(bench_type,"_ERR"), cores = wk,
+      chunk_size = cs, include_io = FALSE,
+      ms_prep = NA_real_, ms_io = NA_real_, ms_sched = NA_real_,
+      ms_worker = NA_real_, ms_reduce = NA_real_, ms_total = NA_real_,
+      rows = NA_integer_, note = paste0("ERROR: ", err %||% "unknown"),
+      run_id = tag, dataset_id = dataset_id, chunk_index = k,
+      throughput_samples_per_sec = NA_real_, throughput_loci_per_sec = NA_real_,
+      workers = wk, stringsAsFactors = FALSE
+    )
+  }
+  res_row
 }
 
 ########################################
 # ========== MAIN ==========
 ########################################
-
-safe_dir_create(result_dir); safe_dir_create(log_dir)
-
-info <- load_db_index_or_df(db_rds_path)
-db_index   <- info$db_index
-locus_order <- info$locus_order
-make_query <- info$make_query
-
-S <- length(db_index$sample_ids)
-L <- length(db_index$locus_ids)
-cat("[BENCH] DB index S=", S, " L=", L, "\n", sep="")
-
-# Query externalization (build ONCE)
-q <- make_query()
-
-# CSV target (support manual tag to truly resume across sessions)
-tag <- if (nzchar(manual_run_tag)) manual_run_tag else ts_tag()
-out_csv <- file.path(result_dir, sprintf("bench_run_match_fast_%s.csv", tag))
-cat("[BENCH] output CSV: ", out_csv, "\n", sep="")
-
-# resume map for this run (if appending to same CSV, previous rows are respected)
-completed <- list()
-if (file.exists(out_csv)) {
-  done <- tryCatch(read.csv(out_csv, stringsAsFactors = FALSE), error = function(e) NULL)
-  if (!is.null(done) && nrow(done) > 0) {
-    keys <- paste(done$chunk_size, done$chunk_index, sep=":")
-    completed <- as.list(stats::setNames(rep(TRUE, length(keys)), keys))
-  }
-}
-is_done <- function(cs, k) {
-  key <- paste(cs, k, sep=":")
-  isTRUE(completed[[key]])
-}
-
-for (cs in chunk_sizes) {
-  n_chunks <- max(1L, ceiling(S / cs))
-  cat("[BENCH] chunk_size=", cs, " chunks=", n_chunks, "\n", sep="")
+main <- function() {
+  .ensure_dir(result_dir); .ensure_dir(log_dir)
+  plan <- apply_overrides()
   
-  if (!enable_parallel) {
-    for (k in seq_len(n_chunks)) {
-      key <- paste(cs, k, sep=":")
-      if (is_done(cs, k)) { cat("  - skip chunk (already in CSV): size=", cs, " idx=", k, "\n", sep=""); next }
-      out <- run_one_chunk(cs, k, db_index, q, tag, db_rds_path)
-      append_row(out$row, out_csv); cat(out$logline); completed[[key]] <- TRUE; gc()
-    }
-  } else {
-    old_plan <- future::plan()
-    on.exit(future::plan(old_plan), add = TRUE)
-    future::plan(multisession, workers = parallel_workers)
-    
-    todo <- which(!vapply(seq_len(n_chunks), function(k) is_done(cs, k), logical(1)))
-    if (length(todo) > 0) {
-      res_list <- future_lapply(todo, function(k)
-        run_one_chunk(cs, k, db_index, q, tag, db_rds_path))
-      for (i in seq_along(todo)) {
-        k <- todo[i]; key <- paste(cs, k, sep=":")
-        append_row(res_list[[i]]$row, out_csv); cat(res_list[[i]]$logline); completed[[key]] <- TRUE
+  project_root <- normalizePath(".", winslash="/", mustWork=FALSE)
+  dataset_id <- basename(db_rds_path)
+  
+  info <- load_rds_as_index(db_rds_path)
+  db_index <- info$db_index
+  q <- .prepare_query_min(info$make_query(), db_index$locus_ids, ANY_CODE)
+  
+  S <- length(db_index$sample_ids); L <- length(db_index$locus_ids)
+  cat("[BENCH] DB index S=",S," L=",L,"\n", sep="")
+  tag <- if (nzchar(manual_run_tag)) manual_run_tag else ts_tag()
+  out_csv <- file.path(result_dir, sprintf("bench_run_match_fast_%s.csv", tag))
+  cat("[BENCH] output CSV: ", out_csv, "\n", sep="")
+  
+  # レジューム（OKのみ完了扱い）
+  completed <- list()
+  if (file.exists(out_csv)) {
+    done <- tryCatch(read.csv(out_csv, stringsAsFactors=FALSE), error=function(e) NULL)
+    if (!is.null(done) && nrow(done)>0) {
+      ok_rows <- subset(done, type==bench_type & (is.na(note) | note=="OK"))
+      if (nrow(ok_rows)>0) {
+        ok_rows$workers <- ok_rows$workers %||% NA_integer_
+        keys <- paste(ok_rows$chunk_size, ok_rows$workers, ok_rows$chunk_index, sep=":")
+        completed <- as.list(stats::setNames(rep(TRUE,length(keys)), keys))
       }
-      gc()
-    } else {
-      cat("  - all chunks already in CSV\n")
     }
   }
+  is_done <- function(cs,wk,k) isTRUE(completed[[paste(cs,wk,k,sep=":")]])
+  
+  for (i in seq_len(nrow(plan))) {
+    cs <- as.integer(plan$chunk_size[i]); wk <- as.integer(plan$workers[i])
+    n_chunks <- max(1L, ceiling(S/cs))
+    log_line(sprintf("[PAIR] chunk=%d workers=%d chunks=%d", cs, wk, n_chunks))
+    
+    todo <- which(!vapply(seq_len(n_chunks), function(k) is_done(cs,wk,k), logical(1)))
+    if (length(todo)==0L) { cat("  - all chunks already in CSV for this pair\n"); next }
+    
+    # STARTを先に書く（可視化）
+    for (k in todo) {
+      N <- length(((k-1L)*cs+1L):min(S, k*cs))
+      append_row(make_start_row(cs,k,N,tag,dataset_id,wk), out_csv)
+      cat(sprintf("[CHUNK][START] cs=%d k=%d N=%d\n", cs, k, N))
+    }
+    
+    if (wk <= 1L) {
+      for (k in todo) {
+        sl <- make_slice(db_index, cs, k); attr(sl,"chunk_index") <- k
+        row <- run_slice_worker(sl, q, tag, dataset_id, cs, wk,
+                                chunk_timeout_sec, project_root, seed_param = seed)
+        append_row(row, out_csv)
+        if (identical(row$note, "OK")) completed[[paste(cs,wk,k,sep=":")]] <- TRUE
+        cat(if (identical(row$note,"OK"))
+          sprintf("[CHUNK] cs=%d k=%d N=%d rows=%s ms_total=%s thr_s=%s thr_L=%s\n",
+                  cs,k,row$N, ifelse(is.na(row$rows),"NA",as.character(row$rows)),
+                  as.character(row$ms_total),
+                  as.character(row$throughput_samples_per_sec),
+                  as.character(row$throughput_loci_per_sec))
+          else sprintf("[CHUNK][FAIL] cs=%d k=%d msg=%s\n", cs,k,row$note))
+        gc()
+      }
+    } else {
+      old <- future::plan(); on.exit(future::plan(old), add=TRUE)
+      future::plan(multisession, workers=wk)
+      
+      remaining_k <- todo                # 例: k=1..10
+      in_flight   <- list()              # k -> future
+      last_ping   <- Sys.time()
+      
+      submit_next <- function() {
+        # 同時に wk 本まで
+        while (length(in_flight) < wk && length(remaining_k) > 0) {
+          k <- remaining_k[1]; remaining_k <<- remaining_k[-1]
+          sl <- make_slice(db_index, cs, k); attr(sl,"chunk_index") <- k
+          fut <- future::future(
+            run_slice_worker(sl, q, tag, dataset_id, cs, wk,
+                             chunk_timeout_sec, project_root, seed_param = seed),
+            globals = TRUE
+          )
+          in_flight[[as.character(k)]] <<- fut
+        }
+      }
+      
+      submit_next()  # 最初の wk 本を投入
+      log_line(sprintf("[SUBMIT] batch=%d (cs=%d, workers=%d)", length(in_flight), cs, wk))
+      
+      while (length(in_flight) > 0) {
+        # 終了済みの future を回収
+        ready_k <- names(in_flight)[ vapply(in_flight, future::resolved, logical(1)) ]
+        if (length(ready_k) == 0) {
+          # 待ちのハートビート
+          if (as.numeric(difftime(Sys.time(), last_ping, units="secs")) >= 30) {
+            log_line(sprintf("[WAIT] cs=%d workers=%d inflight=%d remain=%d",
+                             cs, wk, length(in_flight), length(remaining_k)))
+            last_ping <- Sys.time()
+          }
+          Sys.sleep(1)
+          next
+        }
+        
+        for (kk in ready_k) {
+          k <- as.integer(kk)
+          fut <- in_flight[[kk]]
+          row <- tryCatch(
+            future::value(fut),
+            error = function(e)
+              data.frame(ts=format(Sys.time(),"%Y%m%d%H%M%S"), N=NA_integer_, seed=seed,
+                         type=paste0(bench_type,"_ERR"), cores=wk, chunk_size=cs, include_io=FALSE,
+                         ms_prep=NA_real_, ms_io=NA_real_, ms_sched=NA_real_, ms_worker=NA_real_,
+                         ms_reduce=NA_real_, ms_total=NA_real_, rows=NA_integer_,
+                         note=paste0("ERROR: ", conditionMessage(e)),
+                         run_id=tag, dataset_id=dataset_id, chunk_index=k,
+                         throughput_samples_per_sec=NA_real_, throughput_loci_per_sec=NA_real_,
+                         workers=wk, stringsAsFactors=FALSE)
+          )
+          append_row(row, out_csv)
+          if (identical(row$note, "OK"))
+            completed[[paste(cs,wk,k,sep=":")]] <- TRUE
+          
+          cat(if (identical(row$note,"OK"))
+            sprintf("[CHUNK] cs=%d k=%d N=%d rows=%s ms_total=%s thr_s=%s thr_L=%s\n",
+                    cs,k,row$N, ifelse(is.na(row$rows),"NA",as.character(row$rows)),
+                    as.character(row$ms_total),
+                    as.character(row$throughput_samples_per_sec),
+                    as.character(row$throughput_loci_per_sec))
+            else sprintf("[CHUNK][FAIL] cs=%d k=%d msg=%s\n", cs,k,row$note))
+          
+          # 片付け＆次を投入
+          in_flight[[kk]] <- NULL
+          submit_next()
+        }
+        gc()
+      }
+      log_line(sprintf("[BATCH DONE] cs=%d workers=%d", cs, wk))
+    }
+  }
+  cat("[BENCH DONE] summary => ", out_csv, "\n", sep="")
 }
 
-cat("[BENCH DONE] summary => ", out_csv, "\n", sep="")
+if (sys.nframe()==0L) main()

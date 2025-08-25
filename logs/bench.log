@@ -1,0 +1,735 @@
+2025-08-24 17:32:04 [PAIR] chunk=100 workers=8 chunks=10 
+2025-08-24 17:50:36 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 17:55:33 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 19:33:49 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 19:37:46 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 19:43:09 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 19:51:43 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 20:02:21 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 20:08:24 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 22:51:54 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-24 23:41:41 [PAIR] chunk=100000 workers=8 chunks=10 
+2025-08-25 00:17:14 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 00:17:27 [SUBMIT] 10 futures (cs=100000, workers=4) 
+2025-08-25 00:17:27 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 00:17:32 [SUBMIT] 4 futures (cs=250000, workers=2) 
+2025-08-25 00:31:03 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 00:31:03 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 00:31:56 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 00:31:56 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 00:32:05 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 00:32:05 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 00:36:49 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 00:36:50 [SUBMIT] 10 futures (cs=100000, workers=4) 
+2025-08-25 00:43:57 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 00:43:58 [SUBMIT] 10 futures (cs=100000, workers=4) 
+2025-08-25 00:56:43 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 00:56:44 [SUBMIT] 10 futures (cs=100000, workers=4) 
+2025-08-25 00:56:56 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 00:56:57 [SUBMIT] 4 futures (cs=250000, workers=2) 
+2025-08-25 01:17:26 [PAIR] chunk=100000 workers=1 chunks=10 
+2025-08-25 04:43:23 [PAIR] chunk=100000 workers=2 chunks=10 
+2025-08-25 04:43:24 [SUBMIT] 10 futures (cs=100000, workers=2) 
+2025-08-25 04:43:26 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 04:43:27 [SUBMIT] 4 futures (cs=250000, workers=2) 
+2025-08-25 04:57:19 [PAIR] chunk=100000 workers=2 chunks=10 
+2025-08-25 04:57:20 [SUBMIT] 10 futures (cs=100000, workers=2) 
+2025-08-25 05:27:37 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 05:27:38 [SUBMIT] 4 futures (cs=250000, workers=2) 
+2025-08-25 05:31:23 [PAIR] chunk=100000 workers=1 chunks=10 
+2025-08-25 05:50:06 [PAIR] chunk=100 workers=2 chunks=10 
+2025-08-25 05:50:08 [SUBMIT] batch=2 (cs=100, workers=2) 
+2025-08-25 05:50:17 [BATCH DONE] cs=100 workers=2 
+2025-08-25 05:50:30 [PAIR] chunk=100 workers=2 chunks=10 
+2025-08-25 05:50:31 [SUBMIT] batch=2 (cs=100, workers=2) 
+2025-08-25 05:50:40 [BATCH DONE] cs=100 workers=2 
+2025-08-25 05:50:40 [PAIR] chunk=200 workers=2 chunks=5 
+2025-08-25 05:50:41 [SUBMIT] batch=2 (cs=200, workers=2) 
+2025-08-25 05:50:47 [BATCH DONE] cs=200 workers=2 
+2025-08-25 05:55:32 [PAIR] chunk=50 workers=4 chunks=20 
+2025-08-25 05:55:35 [SUBMIT] batch=4 (cs=50, workers=4) 
+2025-08-25 05:55:46 [BATCH DONE] cs=50 workers=4 
+2025-08-25 05:55:46 [PAIR] chunk=50 workers=8 chunks=20 
+2025-08-25 05:55:52 [SUBMIT] batch=8 (cs=50, workers=8) 
+2025-08-25 05:56:00 [BATCH DONE] cs=50 workers=8 
+2025-08-25 06:06:06 [PAIR] chunk=50 workers=4 chunks=20 
+2025-08-25 06:06:06 [PAIR] chunk=50 workers=8 chunks=20 
+2025-08-25 06:07:43 [PAIR] chunk=50 workers=4 chunks=20 
+2025-08-25 06:07:46 [SUBMIT] batch=4 (cs=50, workers=4) 
+2025-08-25 06:07:56 [BATCH DONE] cs=50 workers=4 
+2025-08-25 06:07:56 [PAIR] chunk=50 workers=8 chunks=20 
+2025-08-25 06:08:03 [SUBMIT] batch=8 (cs=50, workers=8) 
+2025-08-25 06:08:12 [BATCH DONE] cs=50 workers=8 
+2025-08-25 06:11:52 [PAIR] chunk=50 workers=4 chunks=20 
+2025-08-25 06:11:56 [SUBMIT] batch=4 (cs=50, workers=4) 
+2025-08-25 06:12:06 [BATCH DONE] cs=50 workers=4 
+2025-08-25 06:12:06 [PAIR] chunk=50 workers=8 chunks=20 
+2025-08-25 06:12:12 [SUBMIT] batch=8 (cs=50, workers=8) 
+2025-08-25 06:12:20 [BATCH DONE] cs=50 workers=8 
+2025-08-25 06:24:37 [PAIR] chunk=100000 workers=4 chunks=10 
+2025-08-25 06:24:47 [SUBMIT] batch=4 (cs=100000, workers=4) 
+2025-08-25 06:25:08 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:25:39 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:26:11 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:26:42 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:27:14 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:27:45 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:28:16 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:28:48 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:29:19 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:29:50 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:30:22 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:30:53 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:31:24 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:31:56 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:32:27 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:32:59 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:33:30 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:34:01 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:34:33 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:35:04 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:35:36 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:36:07 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:36:38 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:37:10 [WAIT] cs=100000 workers=4 inflight=4 remain=6 
+2025-08-25 06:37:47 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:38:19 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:38:50 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:39:21 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:39:53 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:40:24 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:40:55 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:41:26 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:41:57 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:42:28 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:43:00 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:43:31 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:44:02 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:44:33 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:45:04 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:45:35 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:46:07 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:46:38 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:47:10 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:47:41 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:48:12 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:48:44 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:49:15 [WAIT] cs=100000 workers=4 inflight=4 remain=2 
+2025-08-25 06:49:46 [WAIT] cs=100000 workers=4 inflight=3 remain=0 
+2025-08-25 06:50:17 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:50:47 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:51:17 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:51:47 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:52:17 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:52:48 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:53:18 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:53:48 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:54:18 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:54:48 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:55:18 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:55:49 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:56:19 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:56:49 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:57:19 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:57:49 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:58:19 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:58:49 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:59:20 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 06:59:50 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 07:00:20 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 07:00:50 [WAIT] cs=100000 workers=4 inflight=2 remain=0 
+2025-08-25 07:01:01 [BATCH DONE] cs=100000 workers=4 
+2025-08-25 07:01:01 [PAIR] chunk=150000 workers=4 chunks=7 
+2025-08-25 07:01:20 [SUBMIT] batch=4 (cs=150000, workers=4) 
+2025-08-25 07:01:32 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:02:03 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:02:34 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:03:06 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:03:37 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:04:08 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:04:40 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:05:11 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:05:42 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:06:13 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:06:45 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:07:16 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:07:47 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:08:19 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:08:50 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:09:22 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:09:53 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:10:24 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:10:56 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:11:27 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:11:58 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:12:30 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:13:01 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:13:32 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:14:04 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:14:35 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:15:06 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:15:38 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:16:09 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:16:40 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:17:12 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:17:43 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:18:14 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:18:46 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:19:17 [WAIT] cs=150000 workers=4 inflight=4 remain=3 
+2025-08-25 07:20:20 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:20:51 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:21:22 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:21:53 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:22:24 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:22:55 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:23:26 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:23:57 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:24:29 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:25:00 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:25:31 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:26:02 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:26:33 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:27:04 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:27:35 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:28:06 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:28:38 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:29:09 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:29:40 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:30:11 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:30:42 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:31:13 [WAIT] cs=150000 workers=4 inflight=3 remain=0 
+2025-08-25 07:31:44 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:32:14 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:32:44 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:33:14 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:33:44 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:34:15 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:34:45 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:35:15 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:35:45 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:36:15 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:36:45 [WAIT] cs=150000 workers=4 inflight=2 remain=0 
+2025-08-25 07:37:16 [WAIT] cs=150000 workers=4 inflight=1 remain=0 
+2025-08-25 07:37:21 [BATCH DONE] cs=150000 workers=4 
+2025-08-25 07:37:21 [PAIR] chunk=200000 workers=4 chunks=5 
+2025-08-25 07:37:49 [SUBMIT] batch=4 (cs=200000, workers=4) 
+2025-08-25 07:37:52 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:38:23 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:38:54 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:39:26 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:39:57 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:40:28 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:41:00 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:41:31 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:42:02 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:42:34 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:43:05 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:43:36 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:44:08 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:44:39 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:45:11 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:45:42 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:46:13 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:46:45 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:47:16 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:47:47 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:48:19 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:48:50 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:49:21 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:49:53 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:50:24 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:50:55 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:51:27 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:51:58 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:52:30 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:53:01 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:53:32 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:54:04 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:54:35 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:55:06 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:55:38 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:56:09 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:56:40 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:57:12 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:57:43 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:58:14 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:58:46 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:59:17 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 07:59:48 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:00:19 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:00:51 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:01:21 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:01:52 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:02:24 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:02:55 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:03:26 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:03:57 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:04:28 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:04:59 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:05:30 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:06:01 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:06:32 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:07:04 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:07:35 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:08:06 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:08:38 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:09:08 [WAIT] cs=200000 workers=4 inflight=4 remain=1 
+2025-08-25 08:09:39 [WAIT] cs=200000 workers=4 inflight=4 remain=0 
+2025-08-25 08:10:10 [WAIT] cs=200000 workers=4 inflight=4 remain=0 
+2025-08-25 08:10:42 [WAIT] cs=200000 workers=4 inflight=4 remain=0 
+2025-08-25 08:11:13 [WAIT] cs=200000 workers=4 inflight=4 remain=0 
+2025-08-25 08:11:44 [WAIT] cs=200000 workers=4 inflight=4 remain=0 
+2025-08-25 08:12:14 [WAIT] cs=200000 workers=4 inflight=3 remain=0 
+2025-08-25 08:12:46 [WAIT] cs=200000 workers=4 inflight=2 remain=0 
+2025-08-25 08:13:17 [WAIT] cs=200000 workers=4 inflight=2 remain=0 
+2025-08-25 08:13:47 [WAIT] cs=200000 workers=4 inflight=2 remain=0 
+2025-08-25 08:14:17 [WAIT] cs=200000 workers=4 inflight=2 remain=0 
+2025-08-25 08:14:47 [WAIT] cs=200000 workers=4 inflight=2 remain=0 
+2025-08-25 08:15:17 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:15:48 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:16:18 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:16:49 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:17:20 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:17:50 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:18:21 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:18:51 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:19:22 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:19:53 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:20:23 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:20:54 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:21:25 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:21:55 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:22:26 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:22:56 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:23:27 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:23:58 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:24:28 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:24:59 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:25:30 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:26:00 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:26:31 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:27:02 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:27:32 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:28:03 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:28:33 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:29:04 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:29:35 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:30:05 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:30:36 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:31:06 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:31:37 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:32:08 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:32:38 [WAIT] cs=200000 workers=4 inflight=1 remain=0 
+2025-08-25 08:32:41 [BATCH DONE] cs=200000 workers=4 
+2025-08-25 08:32:41 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 08:32:48 [SUBMIT] batch=2 (cs=250000, workers=2) 
+2025-08-25 08:33:13 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:33:43 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:34:13 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:34:43 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:35:13 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:35:44 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:36:14 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:36:44 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:37:14 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:37:44 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:38:14 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:38:45 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:39:15 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:39:45 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:40:15 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:40:45 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:41:15 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:41:45 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:42:15 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:42:46 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:43:16 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:43:46 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:44:16 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:44:46 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:45:16 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:45:46 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:46:17 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:46:47 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:47:17 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:47:47 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:48:17 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:48:47 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:49:17 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:49:48 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:50:18 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:50:48 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:51:18 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:51:48 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:52:18 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:52:48 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:53:19 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:53:49 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:54:19 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:54:49 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:55:19 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:55:49 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:56:19 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:56:50 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:57:20 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:57:50 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:58:20 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:58:50 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:59:20 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 08:59:50 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 09:00:20 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 09:00:50 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 09:01:21 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 09:01:51 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 09:02:21 [WAIT] cs=250000 workers=2 inflight=2 remain=2 
+2025-08-25 09:02:54 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:03:24 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:03:54 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:04:24 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:04:54 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:05:25 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:05:55 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:06:25 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:06:55 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:07:25 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:07:55 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:08:25 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:08:56 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:09:26 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:09:56 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:10:26 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:10:56 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:11:26 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:11:56 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:12:27 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:12:57 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:13:27 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:13:57 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:14:27 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:14:57 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:15:28 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:15:58 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:16:28 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:16:58 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:17:28 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:17:58 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:18:28 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:18:59 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:19:29 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:19:59 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:20:29 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:20:59 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:21:29 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:22:00 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:22:30 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:23:00 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:23:30 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:24:00 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:24:30 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:25:00 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:25:31 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:26:01 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:26:31 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:27:01 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:27:31 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:28:01 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:28:32 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:29:02 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:29:32 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:30:02 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:30:32 [WAIT] cs=250000 workers=2 inflight=2 remain=0 
+2025-08-25 09:31:03 [WAIT] cs=250000 workers=2 inflight=1 remain=0 
+2025-08-25 09:31:09 [BATCH DONE] cs=250000 workers=2 
+2025-08-25 09:31:09 [PAIR] chunk=250000 workers=2 chunks=4 
+2025-08-25 19:40:05 [PAIR] chunk=125000 workers=4 chunks=8 
+2025-08-25 19:40:16 [SUBMIT] batch=4 (cs=125000, workers=4) 
+2025-08-25 19:40:36 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:41:07 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:41:38 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:42:10 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:42:41 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:43:12 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:43:44 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:44:15 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:44:47 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:45:18 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:45:49 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:46:21 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:46:52 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:47:24 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:47:55 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:48:26 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:48:58 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:49:29 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:50:01 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:50:32 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:51:03 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:51:35 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:52:06 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:52:38 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:53:09 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:53:40 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:54:12 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:54:43 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:55:15 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:55:46 [WAIT] cs=125000 workers=4 inflight=4 remain=4 
+2025-08-25 19:56:21 [WAIT] cs=125000 workers=4 inflight=4 remain=1 
+2025-08-25 19:56:52 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 19:57:23 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 19:57:55 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 19:58:26 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 19:58:57 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 19:59:29 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:00:00 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:00:32 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:01:03 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:01:34 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:02:06 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:02:37 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:03:08 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:03:40 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:04:11 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:04:42 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:05:14 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:05:45 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:06:16 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:06:48 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:07:19 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:07:50 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:08:22 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:08:53 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:09:25 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:09:56 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:10:27 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:10:59 [WAIT] cs=125000 workers=4 inflight=4 remain=0 
+2025-08-25 20:11:28 [BATCH DONE] cs=125000 workers=4 
+2025-08-25 20:11:28 [PAIR] chunk=180000 workers=4 chunks=6 
+2025-08-25 20:11:49 [SUBMIT] batch=4 (cs=180000, workers=4) 
+2025-08-25 20:11:59 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:12:30 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:13:02 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:13:33 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:14:05 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:14:36 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:15:07 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:15:39 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:16:10 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:16:41 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:17:13 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:17:44 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:18:15 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:18:47 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:19:18 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:19:49 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:20:21 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:20:52 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:21:23 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:21:55 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:22:26 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:22:57 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:23:29 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:24:00 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:24:32 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:25:03 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:25:34 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:26:06 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:26:37 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:27:08 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:27:40 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:28:11 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:28:42 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:29:14 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:29:45 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:30:16 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:30:48 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:31:18 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:31:49 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:32:21 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:32:52 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:33:23 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:33:55 [WAIT] cs=180000 workers=4 inflight=4 remain=2 
+2025-08-25 20:34:25 [WAIT] cs=180000 workers=4 inflight=4 remain=1 
+2025-08-25 20:34:56 [WAIT] cs=180000 workers=4 inflight=4 remain=1 
+2025-08-25 20:35:48 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:36:18 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:36:48 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:37:18 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:37:48 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:38:18 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:38:48 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:39:18 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:39:49 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:40:19 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:40:49 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:41:19 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:41:49 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:42:19 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:42:49 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:43:20 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:43:50 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:44:20 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:44:50 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:45:20 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:45:50 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:46:20 [WAIT] cs=180000 workers=4 inflight=2 remain=0 
+2025-08-25 20:46:51 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:47:22 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:47:53 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:48:23 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:48:54 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:49:25 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:49:55 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:50:26 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:50:56 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:51:27 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:51:58 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:52:28 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:52:59 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:53:29 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:54:00 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:54:31 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:55:01 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:55:32 [WAIT] cs=180000 workers=4 inflight=1 remain=0 
+2025-08-25 20:55:39 [BATCH DONE] cs=180000 workers=4 
+2025-08-25 20:55:39 [PAIR] chunk=300000 workers=2 chunks=4 
+2025-08-25 20:55:46 [SUBMIT] batch=2 (cs=300000, workers=2) 
+2025-08-25 20:56:10 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 20:56:41 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 20:57:11 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 20:57:41 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 20:58:11 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 20:58:41 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 20:59:11 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 20:59:41 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:00:12 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:00:42 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:01:12 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:01:42 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:02:12 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:02:42 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:03:12 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:03:42 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:04:12 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:04:43 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:05:13 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:05:43 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:06:13 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:06:43 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:07:13 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:07:44 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:08:14 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:08:44 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:09:14 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:09:44 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:10:14 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:10:44 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:11:14 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:11:44 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:12:15 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:12:45 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:13:15 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:13:45 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:14:15 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:14:45 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:15:15 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:15:45 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:16:16 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:16:46 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:17:16 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:17:46 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:18:16 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:18:46 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:19:17 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:19:47 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:20:17 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:20:47 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:21:17 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:21:47 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:22:17 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:22:48 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:23:18 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:23:48 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:24:18 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:24:48 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:25:18 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:25:48 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:26:19 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:26:49 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:27:19 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:27:49 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:28:19 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:28:49 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:29:19 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:29:50 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:30:20 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:30:50 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:31:20 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:31:50 [WAIT] cs=300000 workers=2 inflight=2 remain=2 
+2025-08-25 21:32:20 [WAIT] cs=300000 workers=2 inflight=2 remain=1 
+2025-08-25 21:32:52 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:33:23 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:33:53 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:34:23 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:34:53 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:35:23 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:35:53 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:36:24 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:36:54 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:37:24 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:37:54 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:38:24 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:38:54 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:39:24 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:39:54 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:40:24 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:40:55 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:41:25 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:41:55 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:42:25 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:42:55 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:43:25 [WAIT] cs=300000 workers=2 inflight=2 remain=0 
+2025-08-25 21:43:56 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:44:26 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:44:57 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:45:28 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:45:58 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:46:29 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:46:59 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:47:30 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:48:01 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:48:31 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:49:02 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:49:32 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:50:03 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:50:34 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:51:04 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:51:35 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:52:05 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:52:36 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:53:07 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:53:37 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:54:08 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:54:38 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:55:09 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:55:40 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:56:10 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:56:41 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:57:12 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:57:42 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:58:13 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:58:43 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:59:14 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 21:59:45 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:00:15 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:00:46 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:01:16 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:01:47 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:02:18 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:02:48 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:03:19 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:03:49 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:04:20 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:04:50 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:05:21 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:05:51 [WAIT] cs=300000 workers=2 inflight=1 remain=0 
+2025-08-25 22:06:12 [BATCH DONE] cs=300000 workers=2 
