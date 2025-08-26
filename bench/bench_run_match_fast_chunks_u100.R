@@ -159,13 +159,16 @@ make_slice <- function(db_index, cs, k) {
     dataset_id = character(), chunk_index = integer(),
     throughput_samples_per_sec = numeric(), throughput_loci_per_sec = numeric(),
     workers = integer(),
-    # === added metrics ===
+    # existing metrics
     mem_rss_mb_before = numeric(), mem_rss_mb_after = numeric(), mem_peak_mb = numeric(),
     cpu_user_sec = numeric(), cpu_system_sec = numeric(), cpu_total_sec = numeric(),
     cpu_util_pct_of_one_core = numeric(), cpu_util_pct_per_core_est = numeric(),
     io_read_bytes = numeric(), io_write_bytes = numeric(),
     io_read_MBps = numeric(), io_write_MBps = numeric(),
     pid = integer(), host = character(),
+    # NEW:
+    elapsed_sec = numeric(),           # 実測経過（worker内での t_work1 - t0）
+    iowait_est_pct = numeric(),        # ≈ max(0, (elapsed - cpu_total)/elapsed*100)
     stringsAsFactors = FALSE
   )
 }
@@ -313,6 +316,8 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
     
     io_read_MBps  <- if (elapsed > 0 && is.finite(rbytes)) (rbytes / (1024^2)) / elapsed else NA_real_
     io_write_MBps <- if (elapsed > 0 && is.finite(wbytes)) (wbytes / (1024^2)) / elapsed else NA_real_
+    iowait_est_pct <- if (elapsed > 0 && is.finite(cpu_total))
+      max(0, (elapsed - cpu_total) / elapsed * 100) else NA_real_
     
     res_row <- data.frame(
       ts = format(Sys.time(), "%Y%m%d%H%M%S"),
@@ -331,6 +336,8 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       io_read_bytes = rbytes, io_write_bytes = wbytes,
       io_read_MBps = io_read_MBps, io_write_MBps = io_write_MBps,
       pid = as.integer(m1$pid), host = as.character(m1$host),
+      elapsed_sec = elapsed,                 # NEW
+      iowait_est_pct = iowait_est_pct,       # NEW
       stringsAsFactors = FALSE
     )
   }, error=function(e){ ok <<- FALSE; err <<- conditionMessage(e) })
