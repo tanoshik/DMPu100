@@ -1,5 +1,6 @@
 # bench/summarize_bench_kpi.R
 # No multibyte characters in code/comments.
+# in R-Terminal, use like: Rscript bench/summarize_bench_kpi.R --src=test/bench/bench_run_match_fast_stress_2129.csv
 
 suppressWarnings(suppressMessages({
   # base only
