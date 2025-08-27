@@ -53,7 +53,8 @@ run_match_fast <- function(q_prep,
                            db_index,
                            pre_add_for_any_any = 2L,
                            any_code = ANY_CODE,
-                           include_bits_in_detail = TRUE) {
+                           include_bits_in_detail = TRUE,
+                           use_cpp = FALSE) {
   .assert_db_index(db_index)
   .assert_query_df(q_prep)
   
@@ -64,25 +65,11 @@ run_match_fast <- function(q_prep,
   q$preadd <- ifelse(is_any_any, as.integer(pre_add_for_any_any), 0L)
   pre_add_total <- sum(q$preadd)
   
-  # Map query loci to db_index columns; keep only existing loci
-  Lmap <- .match_locus_to_col(db_index$locus_ids)
-  keep <- q$Locus %in% names(Lmap)
-  if (!all(keep)) {
-    # drop unknown loci on DB side
-    q <- q[keep, , drop = FALSE]
-    row.names(q) <- NULL
-  }
-  if (nrow(q) == 0L) {
-    return(list(
-      detail  = data.frame(SampleID=character(0), Locus=character(0),
-                           DB_Allele1=integer(0), DB_Allele2=integer(0), Score=integer(0),
-                           Bits=character(0), Code=integer(0), stringsAsFactors = FALSE),
-      summary = data.frame(SampleID=character(0), Score=integer(0), stringsAsFactors = FALSE),
-      used = "fast"
-    ))
-  }
+  # Map locus -> column index
+  LIDs <- as.character(db_index$locus_ids)
+  Lmap <- setNames(seq_along(LIDs), LIDs)
   
-  # Pre-allocate holders (list of data.frame rows) —— ここが重要：行ごとに data.frame を積む
+  # Pre-allocate holders
   detail_rows  <- vector("list", length = 0L)
   summary_rows <- vector("list", length = length(db_index$sample_ids))
   
@@ -93,9 +80,8 @@ run_match_fast <- function(q_prep,
     
     # Iterate query loci
     for (k in seq_len(nrow(q))) {
-      if (q$skip[k]) {
-        next  # (any,any) locus: skipped and already pre-added
-      }
+      if (q$skip[k]) next  # (any,any) locus: skipped and already pre-added
+      
       j <- Lmap[[ q$Locus[k] ]]
       if (is.null(j) || is.na(j)) next
       
@@ -104,60 +90,95 @@ run_match_fast <- function(q_prep,
       r1 <- as.integer(db_index$A1[sidx, j])
       r2 <- as.integer(db_index$A2[sidx, j])
       
-      # score 2x2
-      sp <- score_2x2(q1, q2, r1, r2)
-      sc <- as.integer(sp$score)
+      # --- スコア計算（切替ポイント） ---
+      # use_cpp=TRUE のときは Rcpp, FALSE のときは既存R実装を使う
+      if (use_cpp) {
+        # Rcpp: 長さ1ベクトルでもOK
+        sc <- compute_scores_uint16(
+          q1 = q1, q2 = q2, r1 = r1, r2 = r2, any_code = as.integer(any_code)
+        )[1L]
+        # ビット列/コードが必要なら、ここだけR実装で再計算（軽量）
+        if (include_bits_in_detail) {
+          sp <- score_2x2(q1, q2, r1, r2)
+          bits0123 <- sp$bits0123
+          code     <- sp$code
+        } else {
+          bits0123 <- NA_character_
+          code     <- NA_integer_
+        }
+      } else {
+        # 既存R実装
+        sp <- score_2x2(q1, q2, r1, r2)
+        sc <- as.integer(sp$score)
+        bits0123 <- sp$bits0123
+        code     <- sp$code
+      }
+      # -------------------------------
+      
       tot <- tot + sc
       
-      # append row as **data.frame** (atomic) to avoid list-columns
-      if (isTRUE(include_bits_in_detail)) {
-        detail_rows[[length(detail_rows)+1L]] <- data.frame(
+      # detail row（必要に応じてBits/Codeを含める）
+      if (include_bits_in_detail) {
+        detail_rows[[ length(detail_rows) + 1L ]] <- data.frame(
           SampleID   = as.character(db_index$sample_ids[sidx]),
           Locus      = as.character(q$Locus[k]),
-          DB_Allele1 = r1,
-          DB_Allele2 = r2,
-          Score      = sc,
-          Bits       = as.character(sp$bits0123),
-          Code       = as.integer(sp$code),
+          DB_Allele1 = as.integer(r1),
+          DB_Allele2 = as.integer(r2),
+          Score      = as.integer(sc),
+          Bits       = as.character(bits0123),
+          Code       = as.integer(code),
           stringsAsFactors = FALSE
         )
       } else {
-        detail_rows[[length(detail_rows)+1L]] <- data.frame(
+        detail_rows[[ length(detail_rows) + 1L ]] <- data.frame(
           SampleID   = as.character(db_index$sample_ids[sidx]),
           Locus      = as.character(q$Locus[k]),
-          DB_Allele1 = r1,
-          DB_Allele2 = r2,
-          Score      = sc,
+          DB_Allele1 = as.integer(r1),
+          DB_Allele2 = as.integer(r2),
+          Score      = as.integer(sc),
           stringsAsFactors = FALSE
         )
       }
     }
     
-    # summary row as data.frame（こちらも atomic で積む）
-    summary_rows[[sidx]] <- data.frame(
+    # pre-add for (any,any) loci
+    tot <- tot + pre_add_total
+    
+    summary_rows[[ sidx ]] <- data.frame(
       SampleID = as.character(db_index$sample_ids[sidx]),
-      Score    = as.integer(tot + pre_add_total),
+      Score    = as.integer(tot),
       stringsAsFactors = FALSE
     )
   }
   
-  # Bind to data.frames（list of data.frame → data.frame, list列にならない）
+  # Bind to data.frames
   detail <- if (length(detail_rows)) {
     do.call(rbind, detail_rows)
   } else {
-    data.frame(SampleID=character(0), Locus=character(0),
-               DB_Allele1=integer(0), DB_Allele2=integer(0), Score=integer(0),
-               Bits=character(0), Code=integer(0), stringsAsFactors = FALSE)
+    # empty
+    if (include_bits_in_detail) {
+      data.frame(SampleID=character(0), Locus=character(0),
+                 DB_Allele1=integer(0), DB_Allele2=integer(0), Score=integer(0),
+                 Bits=character(0), Code=integer(0), stringsAsFactors = FALSE)
+    } else {
+      data.frame(SampleID=character(0), Locus=character(0),
+                 DB_Allele1=integer(0), DB_Allele2=integer(0), Score=integer(0),
+                 stringsAsFactors = FALSE)
+    }
   }
   summary <- do.call(rbind, summary_rows)
   
-  # Types and ordering
-  detail$SampleID <- as.character(detail$SampleID)
-  detail$Locus    <- as.character(detail$Locus)
-  suppressWarnings(detail$DB_Allele1 <- as.integer(detail$DB_Allele1))
-  suppressWarnings(detail$DB_Allele2 <- as.integer(detail$DB_Allele2))
-  suppressWarnings(detail$Score      <- as.integer(detail$Score))
-  if ("Code" %in% names(detail)) suppressWarnings(detail$Code <- as.integer(detail$Code))
+  # type normalization / ordering（既存と同等）
+  if (!nrow(detail)) {
+    # nothing
+  } else {
+    detail$SampleID <- as.character(detail$SampleID)
+    suppressWarnings(detail$Locus      <- as.character(detail$Locus))
+    suppressWarnings(detail$DB_Allele1 <- as.integer(detail$DB_Allele1))
+    suppressWarnings(detail$DB_Allele2 <- as.integer(detail$DB_Allele2))
+    suppressWarnings(detail$Score      <- as.integer(detail$Score))
+    if ("Code" %in% names(detail)) suppressWarnings(detail$Code <- as.integer(detail$Code))
+  }
   summary$SampleID <- as.character(summary$SampleID)
   suppressWarnings(summary$Score <- as.integer(summary$Score))
   
@@ -167,5 +188,7 @@ run_match_fast <- function(q_prep,
   row.names(summary) <- NULL
   row.names(detail)  <- NULL
   
-  list(detail = detail, summary = summary, used = "fast")
+  # used フラグに "fast_cpp"/"fast" を埋め分け（確認用）
+  used_flag <- if (use_cpp) "fast_cpp" else "fast"
+  list(detail = detail, summary = summary, used = used_flag)
 }
