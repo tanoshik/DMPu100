@@ -9,7 +9,7 @@ log_dir       <- "logs"
 
 ANY_CODE      <- 9999L
 pre_add_for_any_any <- 2L
-include_bits_in_detail <- FALSE
+include_bits_in_detail <- FALSE   # keep I/O small for bench
 
 bench_type    <- "vdb_gf"
 seed          <- 1L
@@ -21,13 +21,17 @@ parallel_workers <- max(1L, parallel::detectCores() - 1L)
 manual_run_tag <- ""       # empty => timestamp
 chunk_timeout_sec <- 1800L # can be overridden by --timeout=
 
+# NEW: query and engine toggles
+query_mode_default <- "db_first"   # "db_first" (legacy) or "csv"
+use_cpp_default    <- FALSE        # FALSE=R, TRUE=Rcpp
+
 ########################################
 # ========== DEPS / SOURCES ==========
 ########################################
 suppressWarnings(suppressMessages({
   library(future)
   library(future.apply)
-  library(ps)   # <- added
+  library(ps)
 }))
 options(future.globals.maxSize = 8 * 1024^3)
 Sys.setenv(OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1", VECLIB_MAXIMUM_THREADS="1")
@@ -89,6 +93,17 @@ append_row <- function(row, csv_path, retries=25L, sleep_sec=0.2) {
   rownames(q) <- NULL; q
 }
 
+# NEW: read query from CSV (data/query_profile_seed123.csv)
+.read_query_csv_min <- function(csv = "data/query_profile_seed123.csv", locus_order=NULL, any_code=ANY_CODE) {
+  if (!file.exists(csv)) stop(sprintf("Missing query CSV: %s", csv))
+  q <- read.csv(csv, stringsAsFactors = FALSE)
+  names(q) <- sub("(?i)^locus$","Locus",    names(q), perl=TRUE)
+  names(q) <- sub("(?i)^allele1$","allele1",names(q), perl=TRUE)
+  names(q) <- sub("(?i)^allele2$","allele2",names(q), perl=TRUE)
+  stopifnot(all(c("Locus","allele1","allele2") %in% names(q)))
+  .prepare_query_min(q, locus_order, any_code)
+}
+
 .build_db_index_v1 <- function(db_prep, locus_order, any_code=ANY_CODE) {
   req <- c("SampleID","Locus","Allele1","Allele2")
   stopifnot(is.data.frame(db_prep), all(req %in% names(db_prep)))
@@ -117,9 +132,12 @@ load_locus_order <- function() {
 load_rds_as_index <- function(path) {
   obj <- readRDS(path); lo <- load_locus_order()
   if (is.list(obj) && all(c("sample_ids","locus_ids","A1","A2") %in% names(obj))) {
-    return(list(db_index=obj, make_query=function() {
-      data.frame(Locus=obj$locus_ids, allele1=obj$A1[1,,drop=TRUE], allele2=obj$A2[1,,drop=TRUE], stringsAsFactors=FALSE)
-    }))
+    return(list(
+      db_index=obj,
+      make_query=function() {
+        data.frame(Locus=obj$locus_ids, allele1=obj$A1[1,,drop=TRUE], allele2=obj$A2[1,,drop=TRUE], stringsAsFactors=FALSE)
+      }
+    ))
   }
   if (is.data.frame(obj)) {
     n <- names(obj)
@@ -129,11 +147,14 @@ load_rds_as_index <- function(path) {
     names(obj) <- sub("(?i)^allele2$","Allele2", names(obj), perl=TRUE)
     LIDs <- lo; if (is.null(LIDs)) LIDs <- unique(as.character(obj$Locus))
     idx <- .build_db_index_v1(obj, LIDs, ANY_CODE)
-    return(list(db_index=idx, make_query=function() {
-      sid <- obj$SampleID[1]
-      q <- subset(obj, SampleID==sid, c("Locus","Allele1","Allele2"))
-      names(q) <- c("Locus","allele1","allele2"); q
-    }))
+    return(list(
+      db_index=idx,
+      make_query=function() {
+        sid <- obj$SampleID[1]
+        q <- subset(obj, SampleID==sid, c("Locus","Allele1","Allele2"))
+        names(q) <- c("Locus","allele1","allele2"); q
+      }
+    ))
   }
   stop("Unsupported RDS")
 }
@@ -159,22 +180,20 @@ make_slice <- function(db_index, cs, k) {
     dataset_id = character(), chunk_index = integer(),
     throughput_samples_per_sec = numeric(), throughput_loci_per_sec = numeric(),
     workers = integer(),
-    # existing metrics
     mem_rss_mb_before = numeric(), mem_rss_mb_after = numeric(), mem_peak_mb = numeric(),
     cpu_user_sec = numeric(), cpu_system_sec = numeric(), cpu_total_sec = numeric(),
     cpu_util_pct_of_one_core = numeric(), cpu_util_pct_per_core_est = numeric(),
     io_read_bytes = numeric(), io_write_bytes = numeric(),
     io_read_MBps = numeric(), io_write_MBps = numeric(),
     pid = integer(), host = character(),
-    # NEW:
-    elapsed_sec = numeric(),           # 実測経過（worker内での t_work1 - t0）
-    iowait_est_pct = numeric(),        # ≈ max(0, (elapsed - cpu_total)/elapsed*100)
+    elapsed_sec = numeric(), iowait_est_pct = numeric(),
+    engine = character(), query_src = character(),   
     stringsAsFactors = FALSE
   )
 }
 
-make_start_row <- function(cs, k, N, tag, dataset_id, wk) {
-  # Create a single-row DF with all columns (including new metrics) initialized
+make_start_row <- function(cs, k, N, tag, dataset_id, wk,
+                           engine_label, query_src_label) {
   df <- .make_common_cols()
   df[1, ] <- NA
   df$ts[1] <- format(Sys.time(), "%Y%m%d%H%M%S")
@@ -182,6 +201,8 @@ make_start_row <- function(cs, k, N, tag, dataset_id, wk) {
   df$cores[1] <- wk; df$chunk_size[1] <- cs; df$include_io[1] <- FALSE
   df$note[1] <- "START"; df$run_id[1] <- tag; df$dataset_id[1] <- dataset_id
   df$chunk_index[1] <- k; df$workers[1] <- wk
+  df$engine[1] <- engine_label
+  df$query_src[1] <- query_src_label
   df
 }
 
@@ -214,7 +235,8 @@ apply_overrides <- function() {
     else if (startsWith(a,"--db="))  db_rds_path <<- sub("^--db=","",a)
     else if (startsWith(a,"--tag=")) manual_run_tag <<- sub("^--tag=","",a)
     else if (startsWith(a,"--timeout=")) chunk_timeout_sec <<- as.integer(sub("^--timeout=","",a))
-    # NOTE: --out= は無視して test/bench に固定
+    else if (startsWith(a,"--query="))  assign("query_mode_default", sub("^--query=","",a), inherits=TRUE) # "db_first" | "csv"
+    else if (startsWith(a,"--use_cpp=")) assign("use_cpp_default",  as.logical(sub("^--use_cpp=","",a)), inherits=TRUE)
   }
   plan_env <- Sys.getenv("RUN_PLAN","")
   plan <- parse_plan_string(plan_cli %||% plan_env)
@@ -223,27 +245,23 @@ apply_overrides <- function() {
 }
 
 ########################################
-# ========== PROCESS METRICS (FIX) ==========
+# ========== PROCESS METRICS ==========
 ########################################
 .get_proc_metrics <- function() {
   h <- ps::ps_handle(Sys.getpid())
-  
-  # ps_* は OS により「名前付きベクトル（atomic）」として返ることがある
   mem <- ps::ps_memory_info(h)
   cpu <- ps::ps_cpu_times(h)
   io  <- tryCatch(ps::ps_io_counters(h), error=function(e) NULL)
-  
   get_num <- function(x, key) {
     if (is.null(x)) return(NA_real_)
     v <- tryCatch(x[[key]], error=function(e) NA)
     if (is.null(v)) return(NA_real_)
     suppressWarnings(as.numeric(v))
   }
-  
   list(
-    rss = get_num(mem, "rss"),                 # bytes
-    user = get_num(cpu, "user"),               # sec (cumulative)
-    system = get_num(cpu, "system"),           # sec (cumulative)
+    rss = get_num(mem, "rss"),
+    user = get_num(cpu, "user"),
+    system = get_num(cpu, "system"),
     read_bytes  = if (!is.null(io)) get_num(io, "read_bytes")  else NA_real_,
     write_bytes = if (!is.null(io)) get_num(io, "write_bytes") else NA_real_,
     pid  = ps::ps_pid(h),
@@ -255,18 +273,26 @@ apply_overrides <- function() {
 # ========== WORKER ==========
 ########################################
 run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
-                             timeout_sec, project_root, seed_param) {
+                             timeout_sec, project_root, seed_param,
+                             use_cpp_flag,
+                             engine_label, query_src_label) {
   setwd(project_root)
   assign("ANY_CODE", ANY_CODE, envir=globalenv())
   source("scripts/scoring_fast.R", local=FALSE)
   source("scripts/matcher_fast.R", local=FALSE)
+  if (isTRUE(use_cpp_flag)) {
+    if (!requireNamespace("Rcpp", quietly = TRUE)) stop("Rcpp not installed in worker")
+    # Load without rebuild to avoid parallel compile races on Windows multisession
+    Rcpp::sourceCpp("src/matcher_fast.cpp", rebuild = FALSE, cacheDir = "src/.rcpp_cache")
+    if (!exists("compute_scores_uint16", mode="function"))
+      stop("compute_scores_uint16 not available in worker after sourceCpp(rebuild=FALSE)")
+  }
   
   on.exit(setTimeLimit(cpu = Inf, elapsed = Inf, transient = TRUE), add = TRUE)
   setTimeLimit(cpu = Inf, elapsed = timeout_sec, transient = TRUE)
   
   k <- if (!is.null(attr(slice, "chunk_index"))) attr(slice, "chunk_index") else NA_integer_
   
-  # capture process metrics before
   gc()
   m0 <- .get_proc_metrics()
   t0_wall <- proc.time()[3L]
@@ -280,26 +306,23 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       slice,
       pre_add_for_any_any = pre_add_for_any_any,
       any_code = ANY_CODE,
-      include_bits_in_detail = include_bits_in_detail
+      include_bits_in_detail = include_bits_in_detail,
+      use_cpp = isTRUE(use_cpp_flag)
     )
     t_work1 <- proc.time()[3L]
     
-    # capture after metrics
     gc()
     m1 <- .get_proc_metrics()
     
     ms_total <- (t_work1 - t_work0) * 1000
-    
     N <- length(slice$sample_ids)
     L <- length(slice$locus_ids)
     elapsed <- (t_work1 - t0_wall)
     
-    # throughput
     thr_s <- if (elapsed>0) N/elapsed else NA_real_
     thr_L <- if (elapsed>0) (N*L)/elapsed else NA_real_
     rows <- get_rows(res)
     
-    # deltas
     cpu_user   <- if (is.finite(m1$user) && is.finite(m0$user))   m1$user   - m0$user   else NA_real_
     cpu_system <- if (is.finite(m1$system) && is.finite(m0$system)) m1$system - m0$system else NA_real_
     cpu_total  <- if (is.finite(cpu_user) && is.finite(cpu_system)) cpu_user + cpu_system else NA_real_
@@ -336,16 +359,16 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       io_read_bytes = rbytes, io_write_bytes = wbytes,
       io_read_MBps = io_read_MBps, io_write_MBps = io_write_MBps,
       pid = as.integer(m1$pid), host = as.character(m1$host),
-      elapsed_sec = elapsed,                 # NEW
-      iowait_est_pct = iowait_est_pct,       # NEW
+      elapsed_sec = elapsed, iowait_est_pct = iowait_est_pct,
+      engine = engine_label,
+      query_src = query_src_label,  
       stringsAsFactors = FALSE
     )
   }, error=function(e){ ok <<- FALSE; err <<- conditionMessage(e) })
   
   if (!ok || is.null(res_row)) {
     N <- length(slice$sample_ids)
-    res_row <- .make_common_cols()
-    res_row[1, ] <- NA
+    res_row <- .make_common_cols(); res_row[1, ] <- NA
     res_row$ts[1] <- format(Sys.time(), "%Y%m%d%H%M%S")
     res_row$N[1] <- N; res_row$seed[1] <- seed_param
     res_row$type[1] <- paste0(bench_type,"_ERR")
@@ -354,6 +377,8 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
     res_row$note[1] <- paste0("ERROR: ", err %||% "unknown")
     res_row$run_id[1] <- tag; res_row$dataset_id[1] <- dataset_id; res_row$chunk_index[1] <- k
     res_row$workers[1] <- wk
+    res_row$engine[1] <- engine_label
+    res_row$query_src[1] <- query_src_label
   }
   res_row
 }
@@ -370,15 +395,33 @@ main <- function() {
   
   info <- load_rds_as_index(db_rds_path)
   db_index <- info$db_index
-  q <- .prepare_query_min(info$make_query(), db_index$locus_ids, ANY_CODE)
   
+  # NEW: decide query source
+  query_mode <- match.arg(tolower(query_mode_default), c("db_first","csv"))
+  if (identical(query_mode, "csv")) {
+    q <- .read_query_csv_min("data/query_profile_seed123.csv", db_index$locus_ids, ANY_CODE)
+  } else {
+    q <- .prepare_query_min(info$make_query(), db_index$locus_ids, ANY_CODE)  # legacy
+  }
+  
+  use_cpp_flag <- isTRUE(use_cpp_default)
+  if (use_cpp_flag) {
+    # Compile once on master; workers will load without rebuild to avoid races on Windows
+    if (!requireNamespace("Rcpp", quietly = TRUE)) stop("Rcpp not installed")
+    Rcpp::sourceCpp("src/matcher_fast.cpp", rebuild = TRUE,  cacheDir = "src/.rcpp_cache")
+    if (!exists("compute_scores_uint16", mode="function"))
+      stop("compute_scores_uint16 not available on master after sourceCpp()")
+  }
+  
+  engine_label <- if (use_cpp_flag) "Rcpp" else "R"
+  query_src_label <- if (identical(query_mode, "csv")) "csv:data/query_profile_seed123.csv" else "db_first"
   S <- length(db_index$sample_ids); L <- length(db_index$locus_ids)
-  cat("[BENCH] DB index S=",S," L=",L,"\n", sep="")
+  cat("[BENCH] DB index S=",S," L=",L,"  query=",query_mode,"  use_cpp=",use_cpp_flag,"\n", sep="")
   tag <- if (nzchar(manual_run_tag)) manual_run_tag else ts_tag()
   out_csv <- file.path(result_dir, sprintf("bench_run_match_fast_%s.csv", tag))
   cat("[BENCH] output CSV: ", out_csv, "\n", sep="")
   
-  # resume table: consider OK rows as completed
+  # resume table
   completed <- list()
   if (file.exists(out_csv)) {
     done <- tryCatch(read.csv(out_csv, stringsAsFactors=FALSE), error=function(e) NULL)
@@ -386,12 +429,13 @@ main <- function() {
       ok_rows <- subset(done, type==bench_type & (is.na(note) | note=="OK"))
       if (nrow(ok_rows)>0) {
         ok_rows$workers <- ok_rows$workers %||% NA_integer_
-        keys <- paste(ok_rows$chunk_size, ok_rows$workers, ok_rows$chunk_index, sep=":")
+        eng  <- ok_rows$engine %||% "R"
+        keys <- paste(ok_rows$chunk_size, ok_rows$workers, ok_rows$chunk_index, eng, sep=":")
         completed <- as.list(stats::setNames(rep(TRUE,length(keys)), keys))
       }
     }
   }
-  is_done <- function(cs,wk,k) isTRUE(completed[[paste(cs,wk,k,sep=":")]])
+  is_done <- function(cs,wk,k) isTRUE(completed[[paste(cs,wk,k,engine_label,sep=":")]])
   
   for (i in seq_len(nrow(plan))) {
     cs <- as.integer(plan$chunk_size[i]); wk <- as.integer(plan$workers[i])
@@ -401,10 +445,11 @@ main <- function() {
     todo <- which(!vapply(seq_len(n_chunks), function(k) is_done(cs,wk,k), logical(1)))
     if (length(todo)==0L) { cat("  - all chunks already in CSV for this pair\n"); next }
     
-    # START rows (visible in CSV)
+    # START rows
     for (k in todo) {
       N <- length(((k-1L)*cs+1L):min(S, k*cs))
-      append_row(make_start_row(cs,k,N,tag,dataset_id,wk), out_csv)
+      append_row(make_start_row(cs, k, N, tag, dataset_id, wk,
+                                engine_label, query_src_label), out_csv)
       cat(sprintf("[CHUNK][START] cs=%d k=%d N=%d\n", cs, k, N))
     }
     
@@ -412,9 +457,12 @@ main <- function() {
       for (k in todo) {
         sl <- make_slice(db_index, cs, k); attr(sl,"chunk_index") <- k
         row <- run_slice_worker(sl, q, tag, dataset_id, cs, wk,
-                                chunk_timeout_sec, project_root, seed_param = seed)
+                                chunk_timeout_sec, project_root, seed_param = seed,
+                                use_cpp_flag = use_cpp_flag,
+                                engine_label = engine_label,
+                                query_src_label = query_src_label)
         append_row(row, out_csv)
-        if (identical(row$note, "OK")) completed[[paste(cs,wk,k,sep=":")]] <- TRUE
+        if (identical(row$note, "OK")) completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE
         cat(if (identical(row$note,"OK"))
           sprintf("[CHUNK] cs=%d k=%d N=%d rows=%s ms_total=%s thr_s=%s thr_L=%s\n",
                   cs,k,row$N, ifelse(is.na(row$rows),"NA",as.character(row$rows)),
@@ -438,8 +486,12 @@ main <- function() {
           sl <- make_slice(db_index, cs, k); attr(sl,"chunk_index") <- k
           fut <- future::future(
             run_slice_worker(sl, q, tag, dataset_id, cs, wk,
-                             chunk_timeout_sec, project_root, seed_param = seed),
-            globals = TRUE
+                             chunk_timeout_sec, project_root, seed_param = seed,
+                             use_cpp_flag = use_cpp_flag,
+                             engine_label = engine_label,
+                             query_src_label = query_src_label),
+            globals = TRUE,
+            seed = TRUE
           )
           in_flight[[as.character(k)]] <<- fut
         }
@@ -477,7 +529,7 @@ main <- function() {
             }
           )
           append_row(row, out_csv)
-          if (identical(row$note, "OK"))
+          if (identical(row$note,"OK"))
             completed[[paste(cs,wk,k,sep=":")]] <- TRUE
           
           cat(if (identical(row$note,"OK"))
