@@ -21,6 +21,7 @@ parallel_workers <- max(1L, parallel::detectCores() - 1L)
 manual_run_tag <- ""       # empty => timestamp
 chunk_timeout_sec <- 1800L # can be overridden by --timeout=
 block_size_default <- 16000L
+fresh_run <- FALSE
 
 # NEW: query and engine toggles
 query_mode_default <- "db_first"   # "db_first" (legacy) or "csv"
@@ -243,6 +244,8 @@ apply_overrides <- function() {
     else if (startsWith(a,"--query="))  assign("query_mode_default", sub("^--query=","",a), inherits=TRUE) # "db_first" | "csv"
     else if (startsWith(a,"--use_cpp=")) assign("use_cpp_default",  as.logical(sub("^--use_cpp=","",a)), inherits=TRUE)
     else if (startsWith(a,"--block_size=")) assign("block_size_default", as.integer(sub("^--block_size=","",a)), inherits=TRUE)
+    else if (a == "--fresh") assign("fresh_run", TRUE, inherits=TRUE)
+    else if (startsWith(a,"--fresh=")) assign("fresh_run", as.logical(sub("^--fresh=","",a)), inherits=TRUE)
   }
   plan_env <- Sys.getenv("RUN_PLAN","")
   plan <- parse_plan_string(plan_cli %||% plan_env)
@@ -429,6 +432,10 @@ main <- function() {
   tag <- if (nzchar(manual_run_tag)) manual_run_tag else ts_tag()
   out_csv <- file.path(result_dir, sprintf("bench_run_match_fast_%s.csv", tag))
   cat("[BENCH] output CSV: ", out_csv, "\n", sep="")
+  
+  if (isTRUE(fresh_run) && file.exists(out_csv)) {
+    try(unlink(out_csv), silent = TRUE)
+  }
   
   # resume table
   completed <- list()

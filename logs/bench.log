@@ -3317,3 +3317,13 @@
 2025-08-28 23:27:21 [PAIR] chunk=500 workers=2 chunks=2 
 2025-08-28 23:27:24 [SUBMIT] batch=2 (cs=500, workers=2) 
 2025-08-28 23:27:24 [BATCH DONE] cs=500 workers=2 
+2025-08-28 23:37:36 [PAIR] chunk=500 workers=2 chunks=2 
+2025-08-28 23:38:23 [PAIR] chunk=500 workers=2 chunks=2 
+2025-08-28 23:38:26 [SUBMIT] batch=2 (cs=500, workers=2) 
+2025-08-28 23:38:26 [BATCH DONE] cs=500 workers=2 
+2025-08-28 23:38:58 [PAIR] chunk=100000 workers=6 chunks=10 
+2025-08-28 23:38:58 [PAIR] chunk=50000 workers=10 chunks=20 
+2025-08-28 23:38:58 [PAIR] chunk=80000 workers=8 chunks=13 
+2025-08-28 23:39:00 [PAIR] chunk=100000 workers=6 chunks=10 
+2025-08-28 23:39:00 [PAIR] chunk=50000 workers=10 chunks=20 
+2025-08-28 23:39:00 [PAIR] chunk=80000 workers=8 chunks=13 

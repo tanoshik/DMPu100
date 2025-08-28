@@ -3,9 +3,11 @@
 .Rproj.user/
 .Ruserdata
 output/
+# Rcpp build cache
 src/.rcpp_cache/
-.dll
-.o
-.so
-.dylib
-.exe
+# Common build artifacts
+*.o
+*.so
+*.dll
+*.dylib
+*.exe
