@@ -4,3 +4,8 @@
 .Ruserdata
 output/
 src/.rcpp_cache/
+.dll
+.o
+.so
+.dylib
+.exe
