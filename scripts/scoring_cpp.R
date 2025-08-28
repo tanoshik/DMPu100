@@ -1,45 +1,37 @@
 # scripts/scoring_cpp.R
-# Thin R wrapper to compile/load the Rcpp kernel and provide a simple API.
-# No multibyte characters in code/comments.
+# No multibyte characters.
 
-ensure_rcpp_compiled <- function() {
-  # Compile on the fly if not loaded.
-  # You can call this in app startup or before running matches.
+ensure_rcpp_compiled <- function(rebuild = FALSE) {
   src_file <- file.path("src", "matcher_fast.cpp")
-  if (!file.exists(src_file)) {
-    stop(sprintf("Missing source file: %s", src_file))
+  if (!file.exists(src_file)) stop(sprintf("Missing source file: %s", src_file))
+  
+  need <- isTRUE(rebuild) || !exists("compute_scores_uint16", mode = "function")
+  
+  # sanity probe: even if the name exists, the DLL may be unloaded
+  if (!need) {
+    probe_ok <- FALSE
+    try({
+      invisible(compute_scores_uint16(
+        q1 = 9999L, q2 = 9999L,
+        r1 = as.integer(9999L),
+        r2 = as.integer(9999L),
+        any_code = 9999L
+      ))
+      probe_ok <- TRUE
+    }, silent = TRUE)
+    if (!probe_ok) need <- TRUE
   }
-  # If the function is already available, skip compilation
-  if (!exists("compute_scores_uint16", mode = "function")) {
+  
+  if (need) {
     message("[Rcpp] Compiling src/matcher_fast.cpp ...")
-    Rcpp::sourceCpp(src_file, verbose = FALSE, rebuild = TRUE)
+    Rcpp::sourceCpp(src_file, verbose = FALSE, rebuild = TRUE, cacheDir = "src/.rcpp_cache")
     message("[Rcpp] Done.")
   }
 }
 
-# Public helper: score a prepared data.frame by columns.
-# Expect integer columns named q1, q2, r1, r2 (uint16-like).
-# any_code defaults to 9999 (DMP ANY_CODE).
-score_block_cpp <- function(df, any_code = 9999L) {
-  stopifnot(is.data.frame(df))
-  req <- c("q1", "q2", "r1", "r2")
-  miss <- setdiff(req, names(df))
-  if (length(miss) > 0) {
-    stop(sprintf("score_block_cpp(): missing columns: %s", paste(miss, collapse = ", ")))
-  }
-  # Ensure integer type
-  q1 <- as.integer(df$q1); q2 <- as.integer(df$q2)
-  r1 <- as.integer(df$r1); r2 <- as.integer(df$r2)
-  
-  ensure_rcpp_compiled()
+score_block_cpp <- function(q1, q2, r1, r2, any_code = 9999L) {
+  q1 <- as.integer(q1); q2 <- as.integer(q2)
+  r1 <- as.integer(r1); r2 <- as.integer(r2)
+  ensure_rcpp_compiled(rebuild = FALSE)
   compute_scores_uint16(q1, q2, r1, r2, as.integer(any_code))
 }
-
-# Example integration:
-# Replace the inner per-row scoring of run_match_fast() with this call
-# after you have constructed an intermediate data.frame "blk" that has
-# columns q1, q2, r1, r2 (integer-encoded alleles).
-#
-# blk$Score <- score_block_cpp(blk, any_code = 9999L)
-#
-# You can then proceed to aggregate or output as before.

@@ -20,6 +20,7 @@ parallel_workers <- max(1L, parallel::detectCores() - 1L)
 
 manual_run_tag <- ""       # empty => timestamp
 chunk_timeout_sec <- 1800L # can be overridden by --timeout=
+block_size_default <- 16000L
 
 # NEW: query and engine toggles
 query_mode_default <- "db_first"   # "db_first" (legacy) or "csv"
@@ -173,7 +174,9 @@ make_slice <- function(db_index, cs, k) {
 .make_common_cols <- function() {
   data.frame(
     ts = character(), N = integer(), seed = integer(), type = character(),
-    cores = integer(), chunk_size = integer(), include_io = logical(),
+    cores = integer(), chunk_size = integer(),
+    block_size = integer(),                 # ← 追加
+    include_io = logical(),
     ms_prep = numeric(), ms_io = numeric(), ms_sched = numeric(),
     ms_worker = numeric(), ms_reduce = numeric(), ms_total = numeric(),
     rows = integer(), note = character(), run_id = character(),
@@ -187,22 +190,24 @@ make_slice <- function(db_index, cs, k) {
     io_read_MBps = numeric(), io_write_MBps = numeric(),
     pid = integer(), host = character(),
     elapsed_sec = numeric(), iowait_est_pct = numeric(),
-    engine = character(), query_src = character(),   
+    engine = character(), query_src = character(),
+    algo = character(),                     # ← 追加（run_match_fast()$used を格納）
     stringsAsFactors = FALSE
   )
 }
 
 make_start_row <- function(cs, k, N, tag, dataset_id, wk,
-                           engine_label, query_src_label) {
-  df <- .make_common_cols()
-  df[1, ] <- NA
+                           engine_label, query_src_label,
+                           block_size_val) {            # ← 追加
+  df <- .make_common_cols(); df[1, ] <- NA
   df$ts[1] <- format(Sys.time(), "%Y%m%d%H%M%S")
   df$N[1] <- N; df$seed[1] <- seed; df$type[1] <- paste0(bench_type, "_START")
-  df$cores[1] <- wk; df$chunk_size[1] <- cs; df$include_io[1] <- FALSE
+  df$cores[1] <- wk; df$chunk_size[1] <- cs
+  df$block_size[1] <- as.integer(block_size_val)         # ← 追加
+  df$include_io[1] <- FALSE
   df$note[1] <- "START"; df$run_id[1] <- tag; df$dataset_id[1] <- dataset_id
   df$chunk_index[1] <- k; df$workers[1] <- wk
-  df$engine[1] <- engine_label
-  df$query_src[1] <- query_src_label
+  df$engine[1] <- engine_label; df$query_src[1] <- query_src_label
   df
 }
 
@@ -237,6 +242,7 @@ apply_overrides <- function() {
     else if (startsWith(a,"--timeout=")) chunk_timeout_sec <<- as.integer(sub("^--timeout=","",a))
     else if (startsWith(a,"--query="))  assign("query_mode_default", sub("^--query=","",a), inherits=TRUE) # "db_first" | "csv"
     else if (startsWith(a,"--use_cpp=")) assign("use_cpp_default",  as.logical(sub("^--use_cpp=","",a)), inherits=TRUE)
+    else if (startsWith(a,"--block_size=")) assign("block_size_default", as.integer(sub("^--block_size=","",a)), inherits=TRUE)
   }
   plan_env <- Sys.getenv("RUN_PLAN","")
   plan <- parse_plan_string(plan_cli %||% plan_env)
@@ -275,7 +281,8 @@ apply_overrides <- function() {
 run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
                              timeout_sec, project_root, seed_param,
                              use_cpp_flag,
-                             engine_label, query_src_label) {
+                             engine_label, query_src_label,
+                             block_size_param) {   # <--- added
   setwd(project_root)
   assign("ANY_CODE", ANY_CODE, envir=globalenv())
   source("scripts/scoring_fast.R", local=FALSE)
@@ -304,10 +311,10 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
     res <- run_match_fast(
       q,
       slice,
-      pre_add_for_any_any = pre_add_for_any_any,
-      any_code = ANY_CODE,
-      include_bits_in_detail = include_bits_in_detail,
-      use_cpp = isTRUE(use_cpp_flag)
+      pre_add_for_any_any      = pre_add_for_any_any,
+      include_bits_in_detail   = include_bits_in_detail,
+      use_cpp                  = isTRUE(use_cpp_flag),
+      block_size               = as.integer(block_size_param)
     )
     t_work1 <- proc.time()[3L]
     
@@ -345,7 +352,7 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
     res_row <- data.frame(
       ts = format(Sys.time(), "%Y%m%d%H%M%S"),
       N = N, seed = seed_param, type = bench_type, cores = wk,
-      chunk_size = cs, include_io = FALSE,
+      chunk_size = cs, block_size = as.integer(block_size_param),  include_io = FALSE,
       ms_prep = NA_real_, ms_io = NA_real_, ms_sched = NA_real_,
       ms_worker = NA_real_, ms_reduce = NA_real_, ms_total = round(ms_total,3),
       rows = rows, note = "OK",
@@ -362,6 +369,7 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       elapsed_sec = elapsed, iowait_est_pct = iowait_est_pct,
       engine = engine_label,
       query_src = query_src_label,  
+      algo = as.character(res$used %||% NA_character_),
       stringsAsFactors = FALSE
     )
   }, error=function(e){ ok <<- FALSE; err <<- conditionMessage(e) })
@@ -377,6 +385,7 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
     res_row$note[1] <- paste0("ERROR: ", err %||% "unknown")
     res_row$run_id[1] <- tag; res_row$dataset_id[1] <- dataset_id; res_row$chunk_index[1] <- k
     res_row$workers[1] <- wk
+    res_row$block_size[1] <- as.integer(block_size_param)
     res_row$engine[1] <- engine_label
     res_row$query_src[1] <- query_src_label
   }
@@ -449,20 +458,33 @@ main <- function() {
     for (k in todo) {
       N <- length(((k-1L)*cs+1L):min(S, k*cs))
       append_row(make_start_row(cs, k, N, tag, dataset_id, wk,
-                                engine_label, query_src_label), out_csv)
+                                engine_label, query_src_label,
+                                block_size_default), out_csv)
       cat(sprintf("[CHUNK][START] cs=%d k=%d N=%d\n", cs, k, N))
     }
     
     if (wk <= 1L) {
       for (k in todo) {
         sl <- make_slice(db_index, cs, k); attr(sl,"chunk_index") <- k
+        # single worker path
         row <- run_slice_worker(sl, q, tag, dataset_id, cs, wk,
                                 chunk_timeout_sec, project_root, seed_param = seed,
                                 use_cpp_flag = use_cpp_flag,
                                 engine_label = engine_label,
-                                query_src_label = query_src_label)
+                                query_src_label = query_src_label,
+                                block_size_param = block_size_default)
+        
+        # # parallel path
+        # future::future(run_slice_worker(sl, q, tag, dataset_id, cs, wk,
+        #                                 chunk_timeout_sec, project_root, seed_param = seed,
+        #                                 use_cpp_flag = use_cpp_flag,
+        #                                 engine_label = engine_label,
+        #                                 query_src_label = query_src_label,
+        #                                 block_size_param = block_size_default),
+        #                seed = TRUE)
         append_row(row, out_csv)
-        if (identical(row$note, "OK")) completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE
+        if (identical(row$note,"OK"))
+          completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE   # ← engine_labelを含める
         cat(if (identical(row$note,"OK"))
           sprintf("[CHUNK] cs=%d k=%d N=%d rows=%s ms_total=%s thr_s=%s thr_L=%s\n",
                   cs,k,row$N, ifelse(is.na(row$rows),"NA",as.character(row$rows)),
@@ -489,7 +511,8 @@ main <- function() {
                              chunk_timeout_sec, project_root, seed_param = seed,
                              use_cpp_flag = use_cpp_flag,
                              engine_label = engine_label,
-                             query_src_label = query_src_label),
+                             query_src_label = query_src_label,
+                             block_size_param = block_size_default),   # ← これを追加
             globals = TRUE,
             seed = TRUE
           )
@@ -530,7 +553,7 @@ main <- function() {
           )
           append_row(row, out_csv)
           if (identical(row$note,"OK"))
-            completed[[paste(cs,wk,k,sep=":")]] <- TRUE
+            completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE   # ← engine_labelを含める
           
           cat(if (identical(row$note,"OK"))
             sprintf("[CHUNK] cs=%d k=%d N=%d rows=%s ms_total=%s thr_s=%s thr_L=%s\n",

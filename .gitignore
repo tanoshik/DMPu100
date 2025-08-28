@@ -3,3 +3,4 @@
 .Rproj.user/
 .Ruserdata
 output/
+src/.rcpp_cache/
