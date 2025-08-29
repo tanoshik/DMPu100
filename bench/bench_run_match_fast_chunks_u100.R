@@ -21,11 +21,13 @@ parallel_workers <- max(1L, parallel::detectCores() - 1L)
 manual_run_tag <- ""       # empty => timestamp
 chunk_timeout_sec <- 1800L # can be overridden by --timeout=
 block_size_default <- 16000L
-fresh_run <- FALSE
 
-# NEW: query and engine toggles
-query_mode_default <- "db_first"   # "db_first" (legacy) or "csv"
+# NEW: query/engine/consistency toggles
+query_mode_default <- "db_first"   # "db_first" or "csv"
 use_cpp_default    <- FALSE        # FALSE=R, TRUE=Rcpp
+fresh_run          <- FALSE        # --fresh to recreate CSV
+consistency_default <- FALSE       # --consistency=true|false
+consistency_rows_default <- 1000L  # --consistency_rows=N (rows per slice to check)
 
 ########################################
 # ========== DEPS / SOURCES ==========
@@ -95,7 +97,6 @@ append_row <- function(row, csv_path, retries=25L, sleep_sec=0.2) {
   rownames(q) <- NULL; q
 }
 
-# NEW: read query from CSV (data/query_profile_seed123.csv)
 .read_query_csv_min <- function(csv = "data/query_profile_seed123.csv", locus_order=NULL, any_code=ANY_CODE) {
   if (!file.exists(csv)) stop(sprintf("Missing query CSV: %s", csv))
   q <- read.csv(csv, stringsAsFactors = FALSE)
@@ -176,7 +177,7 @@ make_slice <- function(db_index, cs, k) {
   data.frame(
     ts = character(), N = integer(), seed = integer(), type = character(),
     cores = integer(), chunk_size = integer(),
-    block_size = integer(),                 # ← 追加
+    block_size = integer(),
     include_io = logical(),
     ms_prep = numeric(), ms_io = numeric(), ms_sched = numeric(),
     ms_worker = numeric(), ms_reduce = numeric(), ms_total = numeric(),
@@ -192,19 +193,22 @@ make_slice <- function(db_index, cs, k) {
     pid = integer(), host = character(),
     elapsed_sec = numeric(), iowait_est_pct = numeric(),
     engine = character(), query_src = character(),
-    algo = character(),                     # ← 追加（run_match_fast()$used を格納）
+    algo = character(),
+    consistency = logical(),                 # NEW
+    consistency_checked_rows = integer(),    # NEW
+    mismatch_count = integer(),              # NEW
     stringsAsFactors = FALSE
   )
 }
 
 make_start_row <- function(cs, k, N, tag, dataset_id, wk,
                            engine_label, query_src_label,
-                           block_size_val) {            # ← 追加
+                           block_size_val) {
   df <- .make_common_cols(); df[1, ] <- NA
   df$ts[1] <- format(Sys.time(), "%Y%m%d%H%M%S")
   df$N[1] <- N; df$seed[1] <- seed; df$type[1] <- paste0(bench_type, "_START")
   df$cores[1] <- wk; df$chunk_size[1] <- cs
-  df$block_size[1] <- as.integer(block_size_val)         # ← 追加
+  df$block_size[1] <- as.integer(block_size_val)
   df$include_io[1] <- FALSE
   df$note[1] <- "START"; df$run_id[1] <- tag; df$dataset_id[1] <- dataset_id
   df$chunk_index[1] <- k; df$workers[1] <- wk
@@ -216,6 +220,16 @@ get_rows <- function(res) {
   if (is.data.frame(res)) return(nrow(res))
   if (is.list(res) && !is.null(res$summary)) return(nrow(res$summary))
   NA_integer_
+}
+
+.extract_scores <- function(res) {
+  # expect res$summary has SampleID and Score
+  if (is.null(res) || is.null(res$summary)) return(NULL)
+  S <- res$summary
+  if (!all(c("SampleID","Score") %in% names(S))) return(NULL)
+  S <- S[, c("SampleID","Score"), drop=FALSE]
+  S$SampleID <- as.character(S$SampleID)
+  S[order(S$SampleID), , drop=FALSE]
 }
 
 ########################################
@@ -241,11 +255,13 @@ apply_overrides <- function() {
     else if (startsWith(a,"--db="))  db_rds_path <<- sub("^--db=","",a)
     else if (startsWith(a,"--tag=")) manual_run_tag <<- sub("^--tag=","",a)
     else if (startsWith(a,"--timeout=")) chunk_timeout_sec <<- as.integer(sub("^--timeout=","",a))
-    else if (startsWith(a,"--query="))  assign("query_mode_default", sub("^--query=","",a), inherits=TRUE) # "db_first" | "csv"
+    else if (startsWith(a,"--query="))  assign("query_mode_default", sub("^--query=","",a), inherits=TRUE)
     else if (startsWith(a,"--use_cpp=")) assign("use_cpp_default",  as.logical(sub("^--use_cpp=","",a)), inherits=TRUE)
     else if (startsWith(a,"--block_size=")) assign("block_size_default", as.integer(sub("^--block_size=","",a)), inherits=TRUE)
     else if (a == "--fresh") assign("fresh_run", TRUE, inherits=TRUE)
     else if (startsWith(a,"--fresh=")) assign("fresh_run", as.logical(sub("^--fresh=","",a)), inherits=TRUE)
+    else if (startsWith(a,"--consistency_rows=")) assign("consistency_rows_default", as.integer(sub("^--consistency_rows=","",a)), inherits=TRUE)
+    else if (startsWith(a,"--consistency=")) assign("consistency_default", as.logical(sub("^--consistency=","",a)), inherits=TRUE)
   }
   plan_env <- Sys.getenv("RUN_PLAN","")
   plan <- parse_plan_string(plan_cli %||% plan_env)
@@ -285,14 +301,15 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
                              timeout_sec, project_root, seed_param,
                              use_cpp_flag,
                              engine_label, query_src_label,
-                             block_size_param) {   # <--- added
+                             block_size_param,
+                             consistency_flag,
+                             consistency_rows_param) {
   setwd(project_root)
   assign("ANY_CODE", ANY_CODE, envir=globalenv())
   source("scripts/scoring_fast.R", local=FALSE)
   source("scripts/matcher_fast.R", local=FALSE)
-  if (isTRUE(use_cpp_flag)) {
+  if (isTRUE(use_cpp_flag) || isTRUE(consistency_flag)) {
     if (!requireNamespace("Rcpp", quietly = TRUE)) stop("Rcpp not installed in worker")
-    # Load without rebuild to avoid parallel compile races on Windows multisession
     Rcpp::sourceCpp("src/matcher_fast.cpp", rebuild = FALSE, cacheDir = "src/.rcpp_cache")
     if (!exists("compute_scores_uint16", mode="function"))
       stop("compute_scores_uint16 not available in worker after sourceCpp(rebuild=FALSE)")
@@ -311,6 +328,7 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
   
   tryCatch({
     t_work0 <- proc.time()[3L]
+    # primary run (honor use_cpp_flag)
     res <- run_match_fast(
       q,
       slice,
@@ -320,6 +338,50 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       block_size               = as.integer(block_size_param)
     )
     t_work1 <- proc.time()[3L]
+    
+    # optional consistency check (R vs Rcpp on head N rows by SampleID order)
+    mismatch_count <- NA_integer_; consistent_ok <- NA
+    checked_rows <- NA_integer_
+    
+    if (isTRUE(consistency_flag)) {
+      # run both engines on the same slice
+      # R path
+      res_R <- run_match_fast(q, slice,
+                              pre_add_for_any_any = pre_add_for_any_any,
+                              include_bits_in_detail = FALSE,
+                              use_cpp = FALSE,
+                              block_size = as.integer(block_size_param))
+      # Rcpp path
+      res_CPP <- run_match_fast(q, slice,
+                                pre_add_for_any_any = pre_add_for_any_any,
+                                include_bits_in_detail = FALSE,
+                                use_cpp = TRUE,
+                                block_size = as.integer(block_size_param))
+      
+      sR <- .extract_scores(res_R); sC <- .extract_scores(res_CPP)
+      if (!is.null(sR) && !is.null(sC)) {
+        # align by SampleID
+        mm <- merge(sR, sC, by="SampleID", suffixes = c("_R","_CPP"), all=FALSE)
+        if (nrow(mm) > 0L) {
+          nchk <- min(as.integer(consistency_rows_param %||% consistency_rows_default), nrow(mm))
+          mm_chk <- mm[seq_len(nchk), , drop=FALSE]
+          dif <- which(!(mm_chk$Score_R == mm_chk$Score_CPP))
+          mismatch_count <- length(dif)
+          consistent_ok <- mismatch_count == 0L
+          checked_rows <- nchk
+          if (!consistent_ok) {
+            .ensure_dir("test")
+            out_path <- file.path("test", sprintf("consistency_miss_%s_cs%d_k%d.csv",
+                                                  dataset_id, as.integer(cs), as.integer(k)))
+            utils::write.csv(mm_chk[ dif, , drop=FALSE ], out_path, row.names=FALSE)
+          }
+        } else {
+          consistent_ok <- NA
+          mismatch_count <- NA_integer_
+          checked_rows <- 0L
+        }
+      }
+    }
     
     gc()
     m1 <- .get_proc_metrics()
@@ -371,8 +433,11 @@ run_slice_worker <- function(slice, q, tag, dataset_id, cs, wk,
       pid = as.integer(m1$pid), host = as.character(m1$host),
       elapsed_sec = elapsed, iowait_est_pct = iowait_est_pct,
       engine = engine_label,
-      query_src = query_src_label,  
+      query_src = query_src_label,
       algo = as.character(res$used %||% NA_character_),
+      consistency = if (exists("consistent_ok")) consistent_ok else NA,
+      consistency_checked_rows = if (exists("checked_rows")) as.integer(checked_rows) else NA_integer_,
+      mismatch_count = if (exists("mismatch_count")) as.integer(mismatch_count) else NA_integer_,
       stringsAsFactors = FALSE
     )
   }, error=function(e){ ok <<- FALSE; err <<- conditionMessage(e) })
@@ -408,17 +473,15 @@ main <- function() {
   info <- load_rds_as_index(db_rds_path)
   db_index <- info$db_index
   
-  # NEW: decide query source
   query_mode <- match.arg(tolower(query_mode_default), c("db_first","csv"))
   if (identical(query_mode, "csv")) {
     q <- .read_query_csv_min("data/query_profile_seed123.csv", db_index$locus_ids, ANY_CODE)
   } else {
-    q <- .prepare_query_min(info$make_query(), db_index$locus_ids, ANY_CODE)  # legacy
+    q <- .prepare_query_min(info$make_query(), db_index$locus_ids, ANY_CODE)
   }
   
   use_cpp_flag <- isTRUE(use_cpp_default)
-  if (use_cpp_flag) {
-    # Compile once on master; workers will load without rebuild to avoid races on Windows
+  if (use_cpp_flag || isTRUE(consistency_default)) {
     if (!requireNamespace("Rcpp", quietly = TRUE)) stop("Rcpp not installed")
     Rcpp::sourceCpp("src/matcher_fast.cpp", rebuild = TRUE,  cacheDir = "src/.rcpp_cache")
     if (!exists("compute_scores_uint16", mode="function"))
@@ -432,12 +495,8 @@ main <- function() {
   tag <- if (nzchar(manual_run_tag)) manual_run_tag else ts_tag()
   out_csv <- file.path(result_dir, sprintf("bench_run_match_fast_%s.csv", tag))
   cat("[BENCH] output CSV: ", out_csv, "\n", sep="")
+  if (isTRUE(fresh_run) && file.exists(out_csv)) try(unlink(out_csv), silent = TRUE)
   
-  if (isTRUE(fresh_run) && file.exists(out_csv)) {
-    try(unlink(out_csv), silent = TRUE)
-  }
-  
-  # resume table
   completed <- list()
   if (file.exists(out_csv)) {
     done <- tryCatch(read.csv(out_csv, stringsAsFactors=FALSE), error=function(e) NULL)
@@ -473,25 +532,17 @@ main <- function() {
     if (wk <= 1L) {
       for (k in todo) {
         sl <- make_slice(db_index, cs, k); attr(sl,"chunk_index") <- k
-        # single worker path
         row <- run_slice_worker(sl, q, tag, dataset_id, cs, wk,
                                 chunk_timeout_sec, project_root, seed_param = seed,
                                 use_cpp_flag = use_cpp_flag,
                                 engine_label = engine_label,
                                 query_src_label = query_src_label,
-                                block_size_param = block_size_default)
-        
-        # # parallel path
-        # future::future(run_slice_worker(sl, q, tag, dataset_id, cs, wk,
-        #                                 chunk_timeout_sec, project_root, seed_param = seed,
-        #                                 use_cpp_flag = use_cpp_flag,
-        #                                 engine_label = engine_label,
-        #                                 query_src_label = query_src_label,
-        #                                 block_size_param = block_size_default),
-        #                seed = TRUE)
+                                block_size_param = block_size_default,
+                                consistency_flag = consistency_default,
+                                consistency_rows_param = consistency_rows_default)
         append_row(row, out_csv)
         if (identical(row$note,"OK"))
-          completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE   # ← engine_labelを含める
+          completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE
         cat(if (identical(row$note,"OK"))
           sprintf("[CHUNK] cs=%d k=%d N=%d rows=%s ms_total=%s thr_s=%s thr_L=%s\n",
                   cs,k,row$N, ifelse(is.na(row$rows),"NA",as.character(row$rows)),
@@ -519,7 +570,9 @@ main <- function() {
                              use_cpp_flag = use_cpp_flag,
                              engine_label = engine_label,
                              query_src_label = query_src_label,
-                             block_size_param = block_size_default),   # ← これを追加
+                             block_size_param = block_size_default,
+                             consistency_flag = consistency_default,
+                             consistency_rows_param = consistency_rows_default),
             globals = TRUE,
             seed = TRUE
           )
@@ -560,7 +613,7 @@ main <- function() {
           )
           append_row(row, out_csv)
           if (identical(row$note,"OK"))
-            completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE   # ← engine_labelを含める
+            completed[[paste(cs,wk,k,engine_label,sep=":")]] <- TRUE
           
           cat(if (identical(row$note,"OK"))
             sprintf("[CHUNK] cs=%d k=%d N=%d rows=%s ms_total=%s thr_s=%s thr_L=%s\n",
