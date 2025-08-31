@@ -1,40 +1,45 @@
 # scripts/devtools/inspect_rds.R
-# Simple RDS inspector for virtual DB objects.
-# No multibyte chars in code/comments.
+# No multibyte chars. Minimal RDS inspector.
 
-inspect_rds <- function(path) {
-  if (!file.exists(path)) stop("File not found: ", path)
-  obj <- readRDS(path)
-  cat("== class(obj): ", paste(class(obj), collapse = ", "), "\n")
-  cat("== typeof(obj): ", typeof(obj), "\n")
-  
-  if (is.data.frame(obj)) {
-    cat("== data.frame dim: ", nrow(obj), " x ", ncol(obj), "\n", sep = "")
-    cat("== names: ", paste(names(obj), collapse = ", "), "\n")
-    print(utils::head(obj, 5))
-  } else if (is.list(obj)) {
-    cat("== list length: ", length(obj), "\n", sep = "")
-    nm <- names(obj)
-    if (!is.null(nm)) cat("== names[1:10]: ", paste(utils::head(nm, 10), collapse = ", "), "\n")
-    cat("== element[[1]] class: ", paste(class(obj[[1]]), collapse = ", "), "\n")
-    if (is.data.frame(obj[[1]])) {
-      cat("-- element[[1]] is data.frame with names: ",
-          paste(names(obj[[1]]), collapse = ", "), "\n")
-      print(utils::head(obj[[1]], 5))
-    } else if (is.list(obj[[1]])) {
-      cat("-- element[[1]] is list; showing str(elem[[1]])...\n")
-      print(utils::str(obj[[1]], max.level = 1))
-    } else {
-      cat("-- element[[1]] typeof: ", typeof(obj[[1]]), "\n")
-      print(utils::str(obj[[1]], max.level = 1))
-    }
-  } else {
-    cat("== Unsupported top-level type; showing str(obj) level 1...\n")
-    print(utils::str(obj, max.level = 1))
-  }
-  invisible(obj)
+args <- commandArgs(trailingOnly = TRUE)
+opt <- list(
+  path = "data/freq_table.rds",
+  out  = "output/dev/inspect_freq_table.txt"
+)
+for (a in args) {
+  kv <- strsplit(a, "=", fixed = TRUE)[[1]]
+  if (length(kv) == 2) opt[[sub("^--?","",kv[1])]] <- kv[2]
 }
 
-# run
-path <- "data/virtual_db_u100_S1000_seed123.rds"
-obj <- inspect_rds(path)
+if (!file.exists(opt$path)) {
+  stop("file not found: ", opt$path)
+}
+
+if (!is.null(opt$out) && nzchar(opt$out)) {
+  dir.create(dirname(opt$out), recursive = TRUE, showWarnings = FALSE)
+  sink(opt$out); on.exit(sink(), add = TRUE)
+}
+
+cat("[inspect_rds] file: ", opt$path, "\n", sep = "")
+x <- readRDS(opt$path)
+cat("class: ", paste(class(x), collapse = ", "), "\n", sep = "")
+cat("type : ", typeof(x), "\n", sep = "")
+
+if (is.data.frame(x)) {
+  cat("data.frame: rows=", nrow(x), " cols=", ncol(x), "\n", sep = "")
+  cat("names: ", paste(names(x), collapse = ", "), "\n", sep = "")
+  print(utils::head(x, 5))
+} else if (is.list(x)) {
+  cat("list: length=", length(x), "\n", sep = "")
+  cat("names: ", paste(names(x), collapse = ", "), "\n", sep = "")
+  str(x, max.level = 1)
+} else if (is.matrix(x)) {
+  d <- dim(x); cat("matrix: dim=", d[1], "x", d[2], " type=", typeof(x), "\n", sep = "")
+  print(x[1:min(5, nrow(x)), 1:min(5, ncol(x)), drop = FALSE])
+} else {
+  str(x, max.level = 1)
+}
+
+if (!is.null(opt$out) && nzchar(opt$out)) {
+  cat("[OK] wrote: ", opt$out, "\n", sep = "")
+}
