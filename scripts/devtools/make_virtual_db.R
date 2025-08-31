@@ -18,8 +18,8 @@ library(tools)  # md5sum 用
 # ====== config ======
 ANY_CODE   <- 9999L
 SEED       <- 123L
-N_TOTAL    <- 2_000_000L     # デフォルトは 2M
-CHUNK_SIZE <- 100_000L
+N_TOTAL    <- 2000000L     # デフォルトは 2M
+CHUNK_SIZE <- 100000L
 AUTO_RUN   <- FALSE          # 手動呼び出しを基本に
 
 # 出力パス

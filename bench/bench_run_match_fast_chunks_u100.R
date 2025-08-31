@@ -255,7 +255,8 @@ apply_overrides <- function() {
     else if (startsWith(a,"--db="))  db_rds_path <<- sub("^--db=","",a)
     else if (startsWith(a,"--tag=")) manual_run_tag <<- sub("^--tag=","",a)
     else if (startsWith(a,"--timeout=")) chunk_timeout_sec <<- as.integer(sub("^--timeout=","",a))
-    else if (startsWith(a,"--query="))  assign("query_mode_default", sub("^--query=","",a), inherits=TRUE)
+    else if (startsWith(a,"--query="))  assign("query_csv_path", sub("^--query=","",a), inherits=TRUE)
+    else if (startsWith(a,"--query_mode=")) assign("query_mode_default", sub("^--query_mode=","",a), inherits=TRUE)
     else if (startsWith(a,"--use_cpp=")) assign("use_cpp_default",  as.logical(sub("^--use_cpp=","",a)), inherits=TRUE)
     else if (startsWith(a,"--block_size=")) assign("block_size_default", as.integer(sub("^--block_size=","",a)), inherits=TRUE)
     else if (a == "--fresh") assign("fresh_run", TRUE, inherits=TRUE)
@@ -474,8 +475,10 @@ main <- function() {
   db_index <- info$db_index
   
   query_mode <- match.arg(tolower(query_mode_default), c("db_first","csv"))
+  
   if (identical(query_mode, "csv")) {
-    q <- .read_query_csv_min("data/query_profile_seed123.csv", db_index$locus_ids, ANY_CODE)
+    q_file <- get0("query_csv_path", ifnotfound="data/query_profile_seed123.csv")
+    q <- .read_query_csv_min(q_file, db_index$locus_ids, ANY_CODE)
   } else {
     q <- .prepare_query_min(info$make_query(), db_index$locus_ids, ANY_CODE)
   }

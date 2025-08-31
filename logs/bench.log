@@ -3567,3 +3567,2607 @@
 2025-08-29 21:08:18 [BATCH DONE] cs=200000 workers=10 
 2025-08-29 21:08:23 [PAIR] chunk=250000 workers=8 chunks=8 
 2025-08-29 21:08:23 [PAIR] chunk=200000 workers=10 chunks=10 
+2025-08-30 07:05:56 [PAIR] chunk=1000 workers=1 chunks=1 
+2025-08-30 07:10:34 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 07:11:07 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 07:12:09 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 07:12:10 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 07:21:50 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:22:28 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:24:08 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:24:16 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:24:53 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:26:37 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:26:45 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:27:24 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:29:15 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:29:22 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:29:59 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:31:43 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:31:50 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:32:28 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:34:14 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:34:22 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:35:00 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:36:46 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:36:53 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:37:29 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:39:16 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:39:23 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:40:00 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:41:47 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:41:55 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:42:32 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:44:16 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:44:23 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:45:00 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:46:50 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:46:57 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:47:35 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:49:25 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:49:32 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:50:10 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:51:51 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:51:59 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:52:35 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:54:21 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:54:28 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:55:05 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:56:48 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:56:55 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 07:57:32 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 07:59:18 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 07:59:25 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:00:01 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:01:47 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:01:54 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:02:30 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:04:17 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:04:25 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:05:01 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:06:48 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:06:55 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:07:32 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:09:21 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:09:28 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:10:05 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:11:48 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:11:55 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:12:32 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:14:19 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:14:27 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:15:02 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:16:55 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:17:02 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:17:38 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:19:25 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:19:32 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:20:08 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:21:53 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:22:00 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:22:37 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:24:23 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:24:30 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:25:06 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:26:47 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:26:54 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:27:30 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:29:14 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:29:21 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:29:58 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:31:45 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:31:52 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:32:30 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:34:19 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:34:26 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:35:04 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:36:54 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:37:01 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:37:37 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:39:21 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:39:28 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:40:04 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:41:58 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:42:05 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:42:42 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:44:36 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:44:43 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:45:20 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:47:03 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:47:10 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:47:48 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:49:36 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:49:43 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:50:20 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:52:11 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:52:18 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:52:54 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:54:45 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:54:52 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:55:29 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:57:13 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:57:20 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 08:57:56 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 08:59:41 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 08:59:48 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:00:25 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:02:16 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:02:24 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:03:01 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:04:48 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:04:55 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:05:32 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:07:17 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:07:24 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:08:01 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:09:53 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:10:00 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:10:37 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:12:23 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:12:31 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:13:08 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:14:53 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:15:00 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:15:37 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:17:23 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:17:30 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:18:08 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:19:55 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:20:02 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:20:38 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:22:28 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:22:35 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:23:11 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:25:00 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:25:07 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:25:43 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:27:32 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:27:40 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:28:17 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:30:06 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:30:13 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:30:49 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:32:34 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:32:41 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:33:17 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:35:07 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:35:15 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:35:50 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:37:37 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:37:44 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:38:20 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:40:07 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:40:14 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:40:50 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:42:40 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:42:47 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:43:25 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:45:08 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:45:15 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:45:52 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:47:33 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:47:40 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:48:18 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:50:03 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:50:11 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:50:47 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:52:27 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:52:34 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:53:12 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:54:56 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:55:03 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:55:40 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:57:23 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 09:57:30 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 09:58:08 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 09:59:53 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:00:00 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:00:38 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:02:25 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:02:32 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:03:08 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:04:52 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:04:59 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:05:36 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:07:18 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:07:25 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:08:01 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:09:50 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:09:57 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:10:35 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:12:21 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:12:28 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:13:06 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:14:50 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:14:57 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:15:32 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:17:20 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:17:27 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:18:04 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:19:51 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:19:58 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:20:35 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:22:17 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:22:24 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:23:02 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:24:46 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:24:53 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:25:30 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:27:15 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:27:22 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:27:59 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:29:42 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:29:49 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:30:25 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:32:11 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:32:18 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:32:55 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:34:45 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:34:57 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:35:35 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:37:17 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:37:25 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:38:04 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:39:58 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:40:06 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:40:42 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:42:31 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:42:38 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:43:15 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:44:58 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:45:05 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:45:44 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:47:31 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:47:38 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:48:15 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:50:03 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:50:10 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:50:46 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:52:29 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:52:37 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:53:14 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:55:00 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:55:08 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:55:44 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:57:29 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 10:57:36 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 10:58:12 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 10:59:59 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:00:06 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:00:42 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:02:27 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:02:34 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:03:11 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:04:58 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:05:05 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:05:42 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:07:29 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:07:37 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:08:15 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:10:01 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:10:08 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:10:46 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:12:29 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:12:37 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:13:14 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:15:01 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:15:08 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:15:46 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:17:33 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:17:40 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:18:17 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:20:00 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:20:07 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:20:42 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:22:25 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:22:32 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:23:08 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:24:52 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:24:59 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:25:36 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:27:21 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:27:28 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:28:06 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:29:50 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:29:58 [PAIR] chunk=50000 workers=10 chunks=40 
+2025-08-30 11:30:36 [SUBMIT] batch=10 (cs=50000, workers=10) 
+2025-08-30 11:32:24 [BATCH DONE] cs=50000 workers=10 
+2025-08-30 11:32:31 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:33:01 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:34:01 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:34:02 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:34:09 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:34:38 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:35:35 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:35:36 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:35:43 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:36:13 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:37:12 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:37:13 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:37:20 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:37:50 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:38:46 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:38:47 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:38:54 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:39:23 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:40:20 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:40:22 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:40:29 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:40:59 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:41:59 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:42:00 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:42:07 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:42:37 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:43:36 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:43:37 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:43:44 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:44:14 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:45:12 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:45:13 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:45:20 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:45:50 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:46:46 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:46:47 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:46:54 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:47:22 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:48:24 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:48:25 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:48:33 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:49:01 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:49:59 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:50:00 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:50:07 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:50:37 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:51:39 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:51:41 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:51:48 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:52:18 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:53:18 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:53:19 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:53:26 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:53:56 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:54:53 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:54:54 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:55:02 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:55:31 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:56:33 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:56:34 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:56:41 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:57:10 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:58:11 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:58:12 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:58:19 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 11:58:49 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 11:59:46 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 11:59:47 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 11:59:55 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:00:24 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:01:21 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:01:22 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:01:29 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:01:59 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:03:00 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:03:01 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:03:09 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:03:39 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:04:37 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:04:38 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:04:45 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:05:15 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:06:13 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:06:14 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:06:21 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:06:50 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:07:49 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:07:56 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:08:25 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:09:23 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:09:24 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:09:31 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:10:01 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:11:00 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:11:02 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:11:09 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:11:38 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:12:37 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:12:39 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:12:46 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:13:17 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:14:15 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:14:16 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:14:24 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:14:53 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:15:49 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:15:51 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:15:58 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:16:28 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:17:27 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:17:28 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:17:35 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:18:05 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:19:07 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:19:08 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:19:15 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:19:46 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:20:43 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:20:44 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:20:51 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:21:20 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:22:20 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:22:21 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:22:28 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:22:57 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:23:53 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:23:54 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:24:01 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:24:31 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:25:33 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:25:34 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:25:41 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:26:11 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:27:11 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:27:12 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:27:19 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:27:49 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:28:47 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:28:48 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:28:55 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:29:25 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:30:24 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:30:25 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:30:32 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:31:02 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:32:02 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:32:03 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:32:11 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:32:39 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:33:34 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:33:35 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:33:42 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:34:11 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:35:10 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:35:11 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:35:18 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:35:47 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:36:46 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:36:47 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:36:54 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:37:24 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:38:27 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:38:28 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:38:35 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:39:04 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:40:02 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:40:03 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:40:10 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:40:40 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:41:35 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:41:36 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:41:43 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:42:13 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:43:11 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:43:12 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:43:19 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:43:48 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:44:43 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:44:44 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:44:51 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:45:23 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:46:18 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:46:19 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:46:26 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:46:56 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:47:53 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:47:55 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:48:02 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:48:30 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:49:31 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:49:32 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:49:39 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:50:08 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:51:05 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:51:06 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:51:13 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:51:43 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:52:39 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:52:41 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:52:48 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:53:16 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:54:18 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:54:19 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:54:26 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:54:56 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:55:57 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:55:58 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:56:05 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:56:35 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:57:31 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:57:32 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:57:39 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:58:07 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 12:59:03 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 12:59:05 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 12:59:12 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 12:59:41 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:00:40 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:00:41 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:00:48 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:01:17 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:02:14 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:02:15 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:02:22 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:02:52 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:03:49 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:03:50 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:03:57 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:04:27 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:05:27 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:05:28 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:05:35 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:06:04 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:07:02 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:07:03 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:07:10 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:07:42 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:08:43 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:08:44 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:08:51 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:09:21 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:10:20 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:10:21 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:10:28 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:10:57 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:11:54 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:11:55 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:12:02 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:12:31 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:13:31 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:13:32 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:13:40 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:14:09 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:15:09 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:15:10 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:15:17 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:15:46 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:16:43 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:16:44 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:16:52 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:17:21 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:18:23 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:18:24 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:18:31 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:19:01 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:20:00 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:20:01 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:20:08 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:20:38 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:21:33 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:21:34 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:21:41 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:22:10 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:23:04 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:23:06 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:23:13 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:23:43 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:24:40 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:24:41 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:24:48 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:25:17 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:26:19 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:26:20 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:26:27 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:26:57 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:27:56 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:27:57 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:28:04 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:28:34 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:29:32 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:29:33 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:29:40 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:30:09 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:31:06 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:31:07 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:31:14 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:31:44 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:32:42 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:32:43 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:32:50 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:33:19 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:34:14 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:34:15 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:34:22 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:34:52 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:35:47 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:35:48 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:35:55 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:36:26 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:37:25 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:37:26 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:37:33 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:38:01 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:38:58 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:38:59 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:39:06 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:39:35 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:40:31 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:40:32 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:40:39 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:41:09 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:42:05 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:42:06 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:42:13 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:42:41 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:43:42 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:43:43 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:43:50 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:44:20 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:45:15 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:45:16 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:45:24 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:45:54 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:46:55 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:46:56 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:47:03 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:47:33 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:48:36 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:48:37 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:48:44 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:49:13 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:50:10 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:50:12 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:50:19 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:50:48 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:51:47 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:51:48 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:51:56 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:52:25 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:53:24 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:53:25 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:53:32 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:54:01 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:54:58 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:55:00 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:55:07 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:55:36 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:56:33 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:56:34 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:56:41 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:57:10 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:58:06 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:58:07 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:58:14 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 13:58:44 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 13:59:41 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 13:59:43 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 13:59:50 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:00:20 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:01:18 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:01:19 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:01:26 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:01:56 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:02:57 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:02:58 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:03:05 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:03:35 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:04:33 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:04:34 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:04:41 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:05:11 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:06:09 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:06:10 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:06:17 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:06:47 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:07:45 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:07:46 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:07:53 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:08:23 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:09:23 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:09:24 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:09:31 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:10:00 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:11:00 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:11:01 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:11:08 [PAIR] chunk=80000 workers=8 chunks=25 
+2025-08-30 14:11:37 [SUBMIT] batch=8 (cs=80000, workers=8) 
+2025-08-30 14:12:32 [WAIT] cs=80000 workers=8 inflight=1 remain=0 
+2025-08-30 14:12:33 [BATCH DONE] cs=80000 workers=8 
+2025-08-30 14:12:41 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:13:02 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:13:46 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:13:47 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:13:55 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:14:17 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:15:03 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:15:04 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:15:11 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:15:33 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:16:18 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:16:19 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:16:27 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:16:49 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:17:33 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:17:34 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:17:41 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:18:04 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:18:50 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:18:51 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:18:58 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:19:20 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:20:06 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:20:07 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:20:14 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:20:37 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:21:24 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:21:26 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:21:33 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:21:56 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:22:43 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:22:44 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:22:51 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:23:13 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:24:01 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:24:02 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:24:09 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:24:30 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:25:17 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:25:18 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:25:25 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:25:48 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:26:35 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:26:36 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:26:43 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:27:06 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:27:53 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:27:54 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:28:01 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:28:23 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:29:09 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:29:10 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:29:17 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:29:39 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:30:23 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:30:24 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:30:31 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:30:53 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:31:36 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:31:38 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:31:45 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:32:07 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:32:52 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:32:53 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:33:00 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:33:22 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:34:10 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:34:12 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:34:19 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:34:41 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:35:28 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:35:29 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:35:36 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:35:58 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:36:42 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:36:43 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:36:51 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:37:13 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:37:58 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:37:59 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:38:06 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:38:27 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:39:16 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:39:17 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:39:24 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:39:46 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:40:35 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:40:36 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:40:43 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:41:05 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:41:52 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:41:53 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:42:00 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:42:23 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:43:09 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:43:10 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:43:17 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:43:39 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:44:24 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:44:25 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:44:32 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:44:55 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:45:41 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:45:42 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:45:49 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:46:12 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:46:57 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:46:59 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:47:06 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:47:28 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:48:16 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:48:17 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:48:24 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:48:46 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:49:34 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:49:35 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:49:42 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:50:03 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:50:50 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:50:51 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:50:59 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:51:21 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:52:09 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:52:10 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:52:17 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:52:40 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:53:26 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:53:28 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:53:35 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:53:57 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:54:42 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:54:44 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:54:51 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:55:13 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:56:00 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:56:01 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:56:08 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:56:29 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:57:18 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:57:19 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:57:26 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:57:48 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:58:37 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:58:38 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 14:58:45 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 14:59:07 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 14:59:53 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 14:59:54 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:00:01 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:00:23 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:01:08 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:01:09 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:01:16 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:01:39 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:02:24 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:02:25 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:02:33 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:02:54 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:03:40 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:03:41 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:03:48 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:04:09 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:04:53 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:04:54 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:05:01 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:05:23 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:06:11 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:06:12 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:06:19 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:06:42 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:07:28 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:07:29 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:07:37 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:08:00 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:08:48 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:08:49 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:08:56 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:09:18 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:10:06 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:10:08 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:10:15 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:10:37 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:11:23 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:11:24 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:11:31 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:11:53 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:12:37 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:12:38 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:12:45 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:13:08 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:13:54 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:13:56 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:14:03 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:14:25 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:15:10 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:15:12 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:15:19 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:15:41 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:16:32 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:16:33 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:16:41 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:17:02 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:17:46 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:17:47 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:17:54 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:18:16 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:19:01 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:19:02 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:19:09 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:19:32 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:20:19 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:20:21 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:20:28 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:20:50 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:21:39 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:21:40 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:21:48 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:22:10 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:22:56 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:22:57 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:23:04 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:23:27 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:24:13 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:24:14 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:24:21 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:24:45 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:25:30 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:25:31 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:25:38 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:26:00 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:26:47 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:26:48 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:26:56 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:27:18 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:28:05 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:28:06 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:28:13 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:28:36 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:29:22 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:29:23 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:29:30 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:29:53 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:30:38 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:30:39 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:30:46 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:31:09 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:31:56 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:31:57 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:32:04 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:32:26 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:33:13 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:33:15 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:33:22 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:33:44 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:34:33 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:34:34 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:34:41 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:35:04 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:35:54 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:35:55 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:36:02 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:36:25 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:37:14 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:37:16 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:37:23 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:37:45 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:38:32 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:38:33 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:38:40 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:39:02 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:39:49 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:39:50 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:39:57 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:40:19 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:41:05 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:41:06 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:41:13 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:41:36 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:42:24 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:42:25 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:42:32 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:42:54 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:43:40 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:43:41 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:43:48 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:44:11 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:44:55 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:44:56 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:45:03 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:45:25 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:46:11 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:46:13 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:46:20 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:46:41 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:47:27 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:47:28 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:47:35 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:47:58 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:48:43 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:48:44 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:48:51 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:49:14 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:49:59 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:50:00 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:50:07 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:50:30 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:51:17 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:51:18 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:51:25 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:51:47 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:52:33 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:52:34 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:52:42 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:53:05 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:53:54 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:53:55 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:54:02 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:54:24 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:55:09 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:55:10 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:55:17 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:55:39 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:56:27 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:56:28 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:56:35 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:56:57 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:57:43 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:57:44 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:57:51 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:58:13 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 15:59:03 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 15:59:04 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 15:59:11 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 15:59:33 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:00:17 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:00:18 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:00:26 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:00:48 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:01:36 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:01:37 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:01:44 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:02:07 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:02:56 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:02:57 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:03:04 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:03:28 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:04:13 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:04:14 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:04:21 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:04:44 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:05:29 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:05:30 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:05:37 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:05:59 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:06:45 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:06:46 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:06:54 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:07:15 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:08:03 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:08:05 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:08:12 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:08:34 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:09:22 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:09:23 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:09:30 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:09:54 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:10:40 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:10:42 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:10:49 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:11:10 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:11:58 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:11:59 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:12:06 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:12:28 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:13:14 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:13:15 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:13:22 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:13:44 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:14:31 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:14:32 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:14:39 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:15:01 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:15:48 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:15:50 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:15:57 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:16:20 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:17:05 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:17:06 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:17:13 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:17:36 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:18:22 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:18:23 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:18:30 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:18:52 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:19:40 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:19:41 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:19:48 [PAIR] chunk=100000 workers=6 chunks=20 
+2025-08-30 16:20:10 [SUBMIT] batch=6 (cs=100000, workers=6) 
+2025-08-30 16:20:59 [WAIT] cs=100000 workers=6 inflight=1 remain=0 
+2025-08-30 16:21:00 [BATCH DONE] cs=100000 workers=6 
+2025-08-30 16:21:07 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 16:22:25 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 16:27:51 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 16:27:59 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 16:29:16 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 16:34:37 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 16:34:45 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 16:36:01 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 16:41:27 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 16:41:35 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 16:42:52 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 16:48:18 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 16:48:26 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 16:49:44 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 16:55:15 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 16:55:23 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 16:56:42 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:02:08 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:02:16 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:03:33 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:09:02 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:09:10 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:10:28 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:15:42 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:15:50 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:17:05 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:22:23 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:22:31 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:23:52 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:29:19 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:29:27 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:30:44 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:36:09 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:36:17 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:37:35 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:42:59 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:43:07 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:44:27 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:49:52 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:50:00 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:51:17 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 17:56:48 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 17:56:56 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 17:58:14 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:03:35 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:03:43 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:04:58 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:10:35 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:10:43 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:12:01 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:17:32 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:17:40 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:18:59 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:24:28 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:24:36 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:25:54 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:31:20 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:31:28 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:32:44 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:38:15 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:38:23 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:39:41 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:45:06 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:45:14 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:46:32 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:51:56 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:52:03 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 18:53:19 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 18:58:52 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 18:59:00 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:00:12 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:05:38 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:05:45 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:07:02 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:12:30 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:12:38 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:13:53 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:19:18 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:19:26 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:20:42 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:26:09 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:26:17 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:27:33 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:33:02 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:33:10 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:34:26 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:39:39 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:39:47 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:41:09 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:46:30 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:46:38 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:47:54 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 19:53:26 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 19:53:33 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 19:54:52 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:00:12 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:00:20 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:01:37 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:07:00 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:07:08 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:08:24 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:13:39 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:13:46 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:15:06 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:20:33 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:20:41 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:22:00 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:27:27 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:27:34 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:28:49 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:34:21 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:34:28 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:35:45 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:41:15 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:41:22 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:42:39 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:48:10 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:48:17 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:49:33 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 20:54:59 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 20:55:07 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 20:56:21 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:01:53 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:02:01 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:03:20 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:08:41 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:08:49 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:10:07 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:15:33 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:15:41 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:16:55 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:22:15 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:22:23 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:23:40 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:29:13 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:29:21 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:30:40 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:36:11 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:36:19 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:37:36 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:43:01 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:43:09 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:44:25 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:50:00 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:50:08 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:51:23 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 21:56:54 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 21:57:02 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 21:58:19 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:03:44 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:03:52 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:05:11 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:10:31 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:10:39 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:11:57 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:17:31 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:17:39 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:18:55 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:24:32 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:24:39 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:25:57 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:31:28 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:31:35 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:32:52 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:38:26 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:38:34 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:39:51 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:45:18 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:45:26 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:46:43 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:52:13 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:52:21 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 22:53:38 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 22:59:11 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 22:59:18 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:00:33 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:05:53 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:06:01 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:07:18 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:12:46 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:12:54 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:14:08 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:19:33 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:19:41 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:20:57 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:26:26 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:26:33 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:27:52 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:33:24 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:33:36 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:34:53 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:40:39 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:40:47 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:42:03 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:47:41 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:47:49 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:49:06 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-30 23:54:42 [BATCH DONE] cs=20000 workers=20 
+2025-08-30 23:54:50 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-30 23:56:06 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:01:42 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:01:50 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:03:06 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:08:36 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:08:44 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:10:01 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:15:36 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:15:43 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:17:01 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:22:35 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:22:43 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:23:59 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:29:36 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:29:44 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:31:02 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:36:28 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:36:36 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:37:54 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:43:12 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:43:19 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:44:38 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:50:03 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:50:11 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:51:29 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 00:56:59 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 00:57:07 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 00:58:24 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:03:47 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:03:55 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:05:12 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:10:42 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:10:50 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:12:06 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:17:31 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:17:38 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:18:54 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:24:13 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:24:21 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:25:38 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:31:13 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:31:21 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:32:38 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:38:10 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:38:17 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:39:36 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:44:58 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:45:05 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:46:26 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:52:11 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:52:19 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 01:53:34 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 01:59:13 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 01:59:20 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:00:38 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:06:13 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:06:21 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:07:36 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:13:05 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:13:12 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:14:30 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:19:57 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:20:05 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:21:21 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:26:40 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:26:48 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:28:07 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:33:43 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:33:51 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:35:09 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:40:33 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:40:40 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:41:59 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:47:26 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:47:33 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:48:52 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 02:54:15 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 02:54:23 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 02:55:41 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:01:10 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:01:17 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 03:02:36 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:07:59 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:08:07 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 03:09:24 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:14:55 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:15:03 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 03:16:20 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:21:47 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:21:55 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 03:23:12 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:28:34 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:28:45 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 03:30:04 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:35:31 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:35:39 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 03:36:57 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:42:31 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:42:39 [PAIR] chunk=20000 workers=20 chunks=100 
+2025-08-31 03:43:55 [SUBMIT] batch=20 (cs=20000, workers=20) 
+2025-08-31 03:49:19 [BATCH DONE] cs=20000 workers=20 
+2025-08-31 03:49:27 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 03:50:12 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 03:52:27 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 03:52:34 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 03:53:18 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 03:55:37 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 03:55:44 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 03:56:27 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 03:58:41 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 03:58:48 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 03:59:34 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:01:54 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:02:02 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:02:46 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:05:06 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:05:13 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:05:58 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:08:18 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:08:25 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:09:08 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:11:24 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:11:31 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:12:16 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:14:39 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:14:46 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:15:29 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:17:49 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:17:56 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:18:40 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:21:01 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:21:08 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:21:52 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:24:08 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:24:15 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:25:00 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:27:17 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:27:24 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:28:09 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:30:19 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:30:27 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:31:11 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:33:24 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:33:31 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:34:15 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:36:38 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:36:45 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:37:29 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:39:46 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:39:53 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:40:39 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:43:04 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:43:11 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:43:56 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:46:15 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:46:22 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:47:05 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:49:18 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:49:25 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:50:09 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:52:30 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:52:37 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:53:21 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:55:41 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:55:48 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:56:32 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 04:58:55 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 04:59:02 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 04:59:45 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:02:08 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:02:15 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:03:01 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:05:19 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:05:26 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:06:11 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:08:31 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:08:39 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:09:24 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:11:39 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:11:46 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:12:30 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:14:57 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:15:04 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:15:49 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:18:08 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:18:15 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:18:59 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:21:23 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:21:30 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:22:16 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:24:41 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:24:48 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:25:31 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:27:54 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:28:01 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:28:46 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:31:11 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:31:18 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:32:03 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:34:13 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:34:20 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:35:03 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:37:21 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:37:28 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:38:13 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:40:28 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:40:35 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:41:19 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:43:37 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:43:44 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:44:29 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:46:43 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:46:50 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:47:33 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:49:54 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:50:02 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:50:45 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:53:11 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:53:18 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:54:04 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:56:19 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:56:26 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 05:57:10 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 05:59:27 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 05:59:34 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:00:18 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:02:36 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:02:43 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:03:27 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:05:46 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:05:53 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:06:37 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:08:54 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:09:01 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:09:44 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:12:00 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:12:07 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:12:52 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:15:16 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:15:23 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:16:07 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:18:24 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:18:31 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:19:14 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:21:25 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:21:32 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:22:16 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:24:33 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:24:40 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:25:25 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:27:48 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:27:55 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:28:40 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:30:55 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:31:02 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:31:47 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:34:07 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:34:14 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:34:59 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:37:18 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:37:25 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:38:11 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:40:32 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:40:39 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:41:26 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:43:46 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:43:53 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:44:36 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:46:55 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:47:02 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:47:45 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:50:00 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:50:07 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:50:52 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:53:18 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:53:25 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:54:08 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:56:31 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:56:39 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 06:57:22 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 06:59:45 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 06:59:52 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:00:38 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:02:55 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:03:02 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:03:45 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:06:08 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:06:15 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:06:59 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:09:18 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:09:25 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:10:09 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:12:34 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:12:41 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:13:25 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:15:46 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:15:53 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:16:39 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:18:57 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:19:04 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:19:49 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:22:04 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:22:11 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:22:57 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:25:12 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:25:19 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:26:03 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:28:19 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:28:26 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:29:10 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:31:29 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:31:36 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:32:21 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:34:47 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:34:54 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:35:40 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:38:07 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:38:14 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:38:56 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:41:14 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:41:21 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:42:07 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:44:20 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:44:27 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:45:12 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:47:28 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:47:35 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:48:18 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:50:38 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:50:45 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:51:29 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:53:48 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:53:55 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:54:38 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 07:56:56 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 07:57:03 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 07:57:47 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:00:01 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:00:08 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:00:51 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:03:10 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:03:17 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:04:02 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:06:24 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:06:31 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:07:17 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:09:44 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:09:51 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:10:35 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:12:52 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:12:59 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:13:42 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:16:03 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:16:10 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:16:56 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:19:12 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:19:19 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:20:03 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:22:26 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:22:33 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:23:18 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:25:33 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:25:40 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:26:24 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:28:53 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:29:01 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:29:44 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:32:01 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:32:08 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:32:53 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:35:15 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:35:22 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:36:06 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:38:32 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:38:39 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:39:24 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:41:43 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:41:50 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:42:35 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:44:54 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:45:02 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:45:47 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:48:09 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:48:16 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:49:01 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:51:14 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:51:21 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:52:06 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:54:26 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:54:33 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:55:18 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 08:57:33 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 08:57:40 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 08:58:24 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 09:00:36 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 09:00:43 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 09:01:27 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 09:03:48 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 09:03:55 [PAIR] chunk=40000 workers=12 chunks=50 
+2025-08-31 09:04:38 [SUBMIT] batch=12 (cs=40000, workers=12) 
+2025-08-31 09:06:53 [BATCH DONE] cs=40000 workers=12 
+2025-08-31 09:07:01 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:07:16 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:07:58 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:07:59 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:08:06 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:08:21 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:09:03 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:09:04 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:09:11 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:09:26 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:10:08 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:10:09 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:10:16 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:10:31 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:11:13 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:11:14 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:11:21 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:11:36 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:12:17 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:12:18 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:12:25 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:12:40 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:13:24 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:13:25 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:13:32 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:13:47 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:14:29 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:14:30 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:14:37 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:14:52 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:15:33 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:15:34 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:15:41 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:15:56 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:16:39 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:16:40 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:16:47 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:17:02 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:17:45 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:17:46 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:17:53 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:18:08 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:18:49 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:18:51 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:18:58 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:19:13 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:19:54 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:19:55 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:20:02 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:20:17 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:20:59 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:21:00 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:21:08 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:21:23 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:22:06 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:22:07 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:22:14 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:22:29 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:23:12 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:23:13 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:23:20 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:23:35 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:24:16 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:24:17 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:24:24 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:24:39 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:25:23 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:25:24 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:25:31 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:25:45 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:26:28 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:26:29 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:26:36 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:26:52 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:27:33 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:27:35 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:27:42 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:27:58 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:28:39 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:28:40 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:28:47 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:29:02 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:29:45 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:29:46 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:29:53 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:30:09 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:30:52 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:30:53 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:31:00 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:31:16 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:31:56 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:31:57 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:32:04 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:32:21 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:33:04 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:33:05 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:33:12 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:33:27 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:34:11 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:34:12 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:34:19 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:34:35 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:35:17 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:35:18 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:35:25 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:35:40 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:36:22 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:36:23 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:36:30 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:36:45 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:37:27 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:37:28 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:37:35 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:37:50 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:38:32 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:38:33 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:38:40 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:38:56 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:39:38 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:39:39 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:39:47 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:40:02 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:40:49 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:40:51 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:40:58 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:41:12 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:41:56 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:41:57 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:42:04 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:42:20 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:43:03 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:43:04 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:43:11 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:43:27 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:44:09 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:44:10 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:44:17 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:44:32 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:45:15 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:45:16 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:45:23 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:45:38 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:46:21 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:46:22 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:46:29 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:46:45 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:47:29 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:47:31 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:47:38 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:47:52 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:48:35 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:48:36 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:48:43 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:48:58 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:49:40 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:49:41 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:49:48 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:50:03 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:50:44 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:50:45 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:50:53 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:51:09 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:51:50 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:51:51 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:51:58 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:52:13 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:52:55 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:52:56 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:53:03 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:53:19 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:53:59 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:54:00 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:54:07 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:54:22 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:55:02 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:55:03 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:55:10 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:55:26 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:56:07 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:56:08 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:56:15 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:56:30 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:57:15 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:57:16 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:57:23 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:57:39 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:58:22 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:58:23 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:58:30 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:58:45 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 09:59:30 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 09:59:31 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 09:59:38 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 09:59:52 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:00:33 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:00:34 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:00:41 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:00:57 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:01:39 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:01:41 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:01:48 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:02:03 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:02:47 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:02:48 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:02:55 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:03:11 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:03:52 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:03:53 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:04:00 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:04:15 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:04:57 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:04:59 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:05:06 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:05:21 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:06:05 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:06:06 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:06:13 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:06:28 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:07:11 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:07:12 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:07:19 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:07:34 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:08:16 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:08:18 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:08:25 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:08:40 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:09:21 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:09:22 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:09:29 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:09:44 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:10:28 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:10:29 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:10:36 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:10:51 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:11:34 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:11:35 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:11:42 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:11:58 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:12:42 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:12:43 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:12:50 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:13:06 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:13:49 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:13:50 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:13:57 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:14:13 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:14:56 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:14:57 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:15:04 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:15:19 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:15:59 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:16:00 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:16:07 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:16:22 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:17:02 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:17:03 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:17:10 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:17:26 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:18:09 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:18:10 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:18:17 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:18:32 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:19:14 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:19:15 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:19:22 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:19:37 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:20:18 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:20:19 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:20:27 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:20:42 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:21:24 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:21:25 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:21:32 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:21:46 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:22:27 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:22:28 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:22:35 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:22:50 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:23:31 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:23:32 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:23:39 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:23:54 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:24:37 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:24:38 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:24:45 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:25:00 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:25:40 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:25:41 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:25:49 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:26:04 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:26:46 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:26:47 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:26:54 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:27:09 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:27:50 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:27:51 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:27:58 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:28:14 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:28:55 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:28:56 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:29:03 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:29:18 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:30:01 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:30:02 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:30:09 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:30:24 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:31:07 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:31:08 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:31:16 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:31:30 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:32:13 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:32:14 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:32:22 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:32:37 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:33:22 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:33:23 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:33:30 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:33:45 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:34:28 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:34:29 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:34:37 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:34:52 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:35:35 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:35:36 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:35:43 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:35:59 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:36:39 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:36:41 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:36:47 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:37:03 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:37:47 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:37:48 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:37:55 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:38:10 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:38:51 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:38:52 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:38:59 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:39:15 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:39:57 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:39:58 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:40:05 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:40:20 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:41:02 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:41:03 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:41:10 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:41:25 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:42:09 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:42:10 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:42:17 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:42:32 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:43:16 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:43:17 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:43:24 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:43:40 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:44:22 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:44:23 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:44:30 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:44:44 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:45:28 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:45:30 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:45:37 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:45:51 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:46:33 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:46:34 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:46:41 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:46:56 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:47:38 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:47:39 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:47:46 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:48:00 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:48:43 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:48:44 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:48:51 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:49:06 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:49:51 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:49:52 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:49:59 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:50:14 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:50:55 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:50:56 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:51:03 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:51:18 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:52:02 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:52:03 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:52:10 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:52:26 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:53:09 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:53:10 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:53:17 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:53:32 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:54:14 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:54:16 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:54:23 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:54:39 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:55:22 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:55:23 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:55:30 [PAIR] chunk=120000 workers=4 chunks=17 
+2025-08-31 10:55:45 [SUBMIT] batch=4 (cs=120000, workers=4) 
+2025-08-31 10:56:26 [WAIT] cs=120000 workers=4 inflight=1 remain=0 
+2025-08-31 10:56:27 [BATCH DONE] cs=120000 workers=4 
+2025-08-31 10:56:34 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 10:56:42 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 10:57:10 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 10:57:11 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 10:57:18 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 10:57:26 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 10:57:54 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 10:57:55 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 10:58:02 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 10:58:10 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 10:58:39 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 10:58:40 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 10:58:47 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 10:58:55 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 10:59:21 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 10:59:22 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 10:59:29 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 10:59:37 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:00:04 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:00:05 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:00:12 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:00:21 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:00:49 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:00:51 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:00:58 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:01:06 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:01:31 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:01:33 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:01:40 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:01:47 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:02:13 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:02:14 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:02:21 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:02:29 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:02:57 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:02:58 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:03:05 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:03:13 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:03:40 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:03:41 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:03:48 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:03:56 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:04:23 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:04:24 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:04:31 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:04:38 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:05:06 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:05:07 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:05:14 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:05:21 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:05:47 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:05:48 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:05:55 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:06:03 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:06:29 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:06:30 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:06:37 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:06:45 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:07:11 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:07:12 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:07:19 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:07:27 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:07:55 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:07:56 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:08:03 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:08:11 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:08:38 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:08:39 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:08:46 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:08:55 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:09:21 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:09:22 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:09:29 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:09:37 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:10:04 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:10:05 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:10:12 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:10:20 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:10:48 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:10:49 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:10:56 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:11:03 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:11:30 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:11:31 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:11:38 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:11:46 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:12:13 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:12:14 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:12:21 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:12:29 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:12:55 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:12:57 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:13:04 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:13:11 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:13:38 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:13:39 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:13:46 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:13:54 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:14:20 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:14:21 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:14:28 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:14:36 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:15:03 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:15:04 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:15:11 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:15:19 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:15:46 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:15:47 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:15:54 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:16:02 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:16:28 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:16:29 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:16:36 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:16:44 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:17:11 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:17:13 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:17:20 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:17:27 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:17:56 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:17:57 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:18:04 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:18:11 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:18:39 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:18:40 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:18:47 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:18:55 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:19:22 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:19:23 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:19:30 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:19:38 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:20:04 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:20:05 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:20:12 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:20:20 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:20:46 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:20:47 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:20:54 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:21:02 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:21:28 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:21:30 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:21:37 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:21:44 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:22:13 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:22:15 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:22:22 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:22:29 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:22:57 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:22:58 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:23:05 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:23:13 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:23:40 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:23:41 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:23:48 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:23:56 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:24:22 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:24:23 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:24:30 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:24:38 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:25:05 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:25:06 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:25:13 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:25:21 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:25:49 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:25:50 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:25:57 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:26:05 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:26:33 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:26:34 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:26:42 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:26:49 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:27:17 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:27:18 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:27:26 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:27:33 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:28:00 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:28:01 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:28:08 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:28:16 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:28:43 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:28:44 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:28:51 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:28:59 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:29:26 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:29:27 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:29:34 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:29:42 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:30:09 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:30:10 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:30:17 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:30:26 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:30:53 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:30:54 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:31:01 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:31:09 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:31:36 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:31:37 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:31:44 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:31:52 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:32:20 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:32:21 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:32:28 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:32:36 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:33:03 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:33:04 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:33:11 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:33:19 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:33:45 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:33:46 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:33:53 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:34:01 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:34:27 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:34:28 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:34:35 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:34:44 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:35:11 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:35:12 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:35:20 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:35:27 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:35:55 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:35:56 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:36:03 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:36:11 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:36:38 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:36:40 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:36:47 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:36:54 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:37:20 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:37:22 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:37:28 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:37:36 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:38:03 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:38:04 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:38:11 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:38:19 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:38:45 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:38:47 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:38:54 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:39:02 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:39:27 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:39:29 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:39:36 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:39:43 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:40:11 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:40:12 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:40:19 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:40:27 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:40:53 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:40:54 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:41:01 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:41:10 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:41:38 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:41:39 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:41:46 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:41:53 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:42:20 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:42:21 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:42:28 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:42:36 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:43:03 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:43:04 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:43:11 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:43:18 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:43:48 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:43:49 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:43:56 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:44:04 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:44:30 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:44:32 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:44:39 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:44:46 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:45:14 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:45:15 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:45:22 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:45:29 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:45:56 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:45:57 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:46:04 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:46:12 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:46:40 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:46:41 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:46:48 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:46:56 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:47:24 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:47:25 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:47:32 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:47:40 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:48:06 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:48:07 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:48:14 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:48:22 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:48:49 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:48:51 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:48:58 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:49:05 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:49:33 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:49:34 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:49:41 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:49:49 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:50:15 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:50:16 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:50:23 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:50:31 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:50:58 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:50:59 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:51:06 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:51:14 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:51:41 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:51:42 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:51:49 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:51:57 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:52:23 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:52:24 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:52:32 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:52:39 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:53:04 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:53:05 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:53:13 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:53:20 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:53:46 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:53:47 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:53:54 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:54:03 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:54:30 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:54:31 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:54:38 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:54:45 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:55:12 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:55:13 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:55:20 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:55:28 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:55:55 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:55:56 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:56:03 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:56:11 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:56:38 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:56:39 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:56:46 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:56:54 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:57:21 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:57:22 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:57:29 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:57:37 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:58:03 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:58:04 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:58:11 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:58:19 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:58:45 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:58:46 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:58:53 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:59:00 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 11:59:27 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 11:59:28 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 11:59:35 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 11:59:43 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:00:10 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:00:11 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:00:18 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:00:26 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:00:52 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:00:53 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:01:00 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:01:08 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:01:36 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:01:38 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:01:45 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:01:52 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:02:20 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:02:21 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:02:28 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:02:35 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:03:02 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:03:03 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:03:10 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:03:19 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:03:46 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:03:47 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:03:54 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:04:02 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:04:28 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:04:30 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:04:37 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:04:44 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:05:10 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:05:11 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:05:18 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:05:26 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:05:52 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:05:54 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:06:00 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:06:08 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:06:35 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:06:36 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:06:43 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:06:51 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:07:17 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:07:19 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:07:26 [PAIR] chunk=200000 workers=2 chunks=10 
+2025-08-31 12:07:33 [SUBMIT] batch=2 (cs=200000, workers=2) 
+2025-08-31 12:08:00 [WAIT] cs=200000 workers=2 inflight=1 remain=0 
+2025-08-31 12:08:01 [BATCH DONE] cs=200000 workers=2 
+2025-08-31 12:08:08 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:09:26 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:10:44 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:12:02 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:13:19 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:14:37 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:15:55 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:17:12 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:18:30 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:19:48 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:21:06 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:22:24 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:23:42 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:25:00 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:26:17 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:27:35 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:28:53 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:30:11 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:31:35 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:32:54 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:34:12 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:35:30 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:36:48 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:38:06 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:39:24 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:40:43 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:42:01 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:43:19 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:44:37 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:45:56 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:47:14 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:48:32 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:49:50 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:51:08 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:52:26 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:53:44 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:55:01 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:56:19 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:57:37 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 12:58:54 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:00:12 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:01:30 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:02:47 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:04:05 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:05:23 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:06:41 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:07:59 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:09:16 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:10:34 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:11:55 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:13:15 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:14:34 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:15:53 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:17:11 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:18:29 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:19:48 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:21:06 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:22:24 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:23:42 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:25:01 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:26:19 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:27:46 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:29:04 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:30:23 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:31:41 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:32:58 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:34:16 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:35:34 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:36:52 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:38:17 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:39:37 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:40:57 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:42:17 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:43:36 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:44:56 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:46:16 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:47:36 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:48:55 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:50:15 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:51:35 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:52:55 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:54:15 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:55:35 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:56:54 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:58:14 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 13:59:34 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:00:54 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:02:14 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:03:33 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:04:52 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:06:10 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:07:28 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:08:46 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:10:05 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:11:23 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:12:41 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:13:59 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:15:17 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:16:35 [PAIR] chunk=10000 workers=1 chunks=200 
+2025-08-31 14:17:53 [PAIR] chunk=10000 workers=1 chunks=200 

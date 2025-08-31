@@ -10,13 +10,14 @@ opt <- OptionParser() |>
              help="output RDS path (optional: copy of default indexed RDS)") |>
   parse_args()
 
-source("scripts/devtools/make_virtual_db_small.R")  # included in dist :contentReference[oaicite:1]{index=1}
+source("scripts/devtools/make_virtual_db.R")  # included in dist
 
-set.seed(opt$seed)
-invisible(make_virtual_db_small(n = opt$size))  # 既定RDSを自動生成する
+set.seed(opt$seed)  # 任意（内部でもseedを使うなら残してOK）
+invisible(make_virtual_db(n_total = opt$size, seed = opt$seed)) 
 
 # 既定RDS（＝インデックス済み）のパス
 default_rds <- sprintf("data/virtual_db_u100_S%d_seed%d.rds", opt$size, opt$seed)
+
 if (!file.exists(default_rds)) stop("default RDS not found: ", default_rds)
 
 # --out が指定されていればコピーして提供
