@@ -8,7 +8,7 @@ dir.create("output/manifest", recursive = TRUE, showWarnings = FALSE)
 out_csv <- "output/manifest/virtual_db_manifest.csv"
 
 list_vdb <- function() {
-  list.files("output/data", pattern="^virtual_db_u100_S[0-9]+_seed[0-9]+\\.rds$", full.names=TRUE)
+  list.files("data", pattern="^virtual_db_u100_S[0-9]+_seed[0-9]+\\.rds$", full.names=TRUE)
 }
 
 parse_meta <- function(path) {
