@@ -1,4 +1,4 @@
-# scripts/sanity/topn_sum_csv.R
+# scripts/sanity/topN_sum_csv.R
 # No multibyte chars. Write Top-N total scores as CSV (lightweight).
 
 # ----- defaults (house style) -----
