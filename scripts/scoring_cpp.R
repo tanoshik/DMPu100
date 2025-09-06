@@ -7,26 +7,27 @@ ensure_rcpp_compiled <- function(rebuild = FALSE) {
   
   need <- isTRUE(rebuild) || !exists("compute_scores_uint16", mode = "function")
   
-  # sanity probe: even if the name exists, the DLL may be unloaded
-  if (!need) {
-    probe_ok <- FALSE
+  # すでに関数が見えていないなら、まずは静かにキャッシュロードを試す（rebuild=FALSE）
+  if (need && !isTRUE(rebuild)) {
     try({
-      invisible(compute_scores_uint16(
-        q1 = 9999L, q2 = 9999L,
-        r1 = as.integer(9999L),
-        r2 = as.integer(9999L),
-        any_code = 9999L
-      ))
-      probe_ok <- TRUE
+      Rcpp::sourceCpp(src_file, verbose = FALSE, rebuild = FALSE, cacheDir = "src/.rcpp_cache")
     }, silent = TRUE)
-    if (!probe_ok) need <- TRUE
+    # ここでロードできたら need を再評価
+    need <- !exists("compute_scores_uint16", mode = "function")
   }
   
+  # まだ無ければ初回コンパイル（このときのみメッセージを出す）
   if (need) {
     message("[Rcpp] Compiling src/matcher_fast.cpp ...")
     Rcpp::sourceCpp(src_file, verbose = FALSE, rebuild = TRUE, cacheDir = "src/.rcpp_cache")
     message("[Rcpp] Done.")
   }
+  
+  # プローブ（DLLがUnloadされていた等の保険）
+  if (!exists("compute_scores_uint16", mode = "function")) {
+    stop("Failed to load/compile compute_scores_uint16")
+  }
+  invisible(TRUE)
 }
 
 score_block_cpp <- function(q1, q2, r1, r2, any_code = 9999L) {

@@ -1,14 +1,4 @@
-# 自動的にテキストファイルの改行コードを LF に統一
-* text=auto eol=lf
-
-# R関連ファイルは常に LF
+* text=auto
 *.R text eol=lf
-*.Rmd text eol=lf
-
-# Windowsバッチは CRLF のまま
-*.bat text eol=crlf
-
-# バイナリは行末変換しない
-*.png binary
-*.jpg binary
-*.rds binary
+*.r text eol=lf
+*.csv text eol=lf
