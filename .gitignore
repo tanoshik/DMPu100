@@ -11,6 +11,7 @@ src/.rcpp_cache/
 *.dll
 *.dylib
 *.exe
+*.bak
 # Bench / consistency outputs
 test/bench/*.csv
 test/consistency/*.csv

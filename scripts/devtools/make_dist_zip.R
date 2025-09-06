@@ -1,195 +1,287 @@
 # scripts/devtools/make_dist_zip.R
-# Build a distribution zip one level above the project root.
-# Defaults: include scripts/, data/ (stub >1MB), scripts/bench, bench, test (incl. test/bench), output/
-# Options to extend/override via arguments. Writes meta with EXCLUDED_LIST.txt / LARGE_FILES.txt.
-# Windows/mac/Linux 対応（utils::zip 使用）。
+# 日本語コメントOK / 開発・評価共有向け。GPT参照に便利な meta を厚めに同梱。
+# 依存: 'zip' パッケージがあればそれを優先（警告が減ります）。無ければ utils::zip を使用。
 
-# ---- helpers ---------------------------------------------------------------
+# ===== 内部ヘルパ =====
+..norm <- function(x) gsub("\\\\","/",x)
+..now  <- function() format(Sys.time(), "%Y%m%d%H%M")
+..git  <- function(cmd) tryCatch(system(paste("git", cmd), intern=TRUE, ignore.stderr=TRUE), error=function(e) character(0))
+..sha  <- function() { s <- ..git("rev-parse --short HEAD"); if (length(s)==0) "nogit" else s[1] }
+..branch <- function(){ s <- ..git("rev-parse --abbrev-ref HEAD"); if (length(s)==0) "nogit" else s[1] }
 
-bytes_1mb <- 1024L * 1024L
-
-.safe_norm <- function(path) {
-  tryCatch(normalizePath(path, winslash = "/", mustWork = FALSE),
-           error = function(e) path)
+..zip_with_fallback <- function(zipfile, files, root=".", quiet=TRUE){
+  o <- getwd(); setwd(root); on.exit(setwd(o), add=TRUE)
+  ok <- FALSE
+  if (requireNamespace("zip", quietly=TRUE)) {
+    # zip::zipr は静かで高速。Windowsでも安定。
+    zip::zipr(zipfile, files = files, include_directories = TRUE)
+    ok <- TRUE
+  } else {
+    # utils::zip は Windows では外部 zip.exe 依存で警告が出ることあり
+    flags <- if (quiet) "-r9Xq" else "-r9X"
+    z <- try(utils::zip(zipfile = zipfile, files = files, flags = flags), silent = quiet)
+    if (!inherits(z, "try-error")) ok <- TRUE
+  }
+  if (!ok) stop("zip backend not available. install.packages('zip') を推奨。")
 }
 
-.is_under <- function(rel, root) {
-  rel == root || startsWith(rel, paste0(root, "/"))
+..sha256 <- function(path){
+  if (!file.exists(path)) return(NA_character_)
+  if (requireNamespace("openssl", quietly=TRUE)) return(as.character(openssl::sha256(file(path, "rb"))))
+  if (requireNamespace("digest",   quietly=TRUE)) return(digest::digest(file=path, algo="sha256"))
+  "NA (install 'openssl' or 'digest')"
 }
 
-.list_files_recursive <- function(dir) {
-  if (!dir.exists(dir)) return(character())
-  f <- list.files(dir, recursive = TRUE, all.files = TRUE, full.names = TRUE)
-  f[file.info(f)$isdir %in% FALSE]
+..safe_copy <- function(src, dst){
+  dir.create(dirname(dst), recursive=TRUE, showWarnings=FALSE)
+  file.copy(src, dst, overwrite=TRUE, copy.mode=TRUE, copy.date=TRUE)
 }
 
-.copy_with_dirs <- function(src, dst_root, rel) {
-  dst <- file.path(dst_root, rel)
-  dir.create(dirname(dst), recursive = TRUE, showWarnings = FALSE)
-  ok <- file.copy(src, dst, overwrite = TRUE, copy.mode = TRUE, copy.date = TRUE)
-  if (!ok) stop("Failed to copy: ", src, " -> ", dst)
-  dst
-}
-
-.create_empty_stub <- function(dst_root, rel) {
-  dst <- file.path(dst_root, rel)
-  dir.create(dirname(dst), recursive = TRUE, showWarnings = FALSE)
-  con <- file(dst, open = "wb"); close(con); dst
-}
-
-# ---- main ------------------------------------------------------------------
-# 既存の限定版と後方互換: 旧シグネチャだけで呼んでも動くように既定値を広めに設定
+# ===== メイン：配布ZIP作成 =====
 make_dist_zip <- function(
-    project_root = getwd(),
-    zip_prefix   = "DMP_dist",
-    parent_dir   = dirname(getwd()),
-    head_lines   = 50,                        # メタに使う場合の上部コメント行の長さ（互換用・任意）
-    # 追加オプション（汎用化）
-    extra_include       = character(),        # 例: c("bench","scripts/bench","output","test","data")
-    extra_exclude_dirs  = character(),        # 例: c("notes","debug")
-    extra_exclude_globs = character(),        # 例: c("*.rproj","*.tmp")
-    include_root_files  = c("README.md","LICENSE","DESCRIPTION"),
-    default_exclude_dirs = c(".git",".Rproj.user","dist","release"),
-    default_exclude_glob = c("*.zip"),
-    include_data        = TRUE,               # data/ を含めるか
-    data_large_threshold = bytes_1mb,         # data/ のスタブ化閾値
-    stub_large_data     = TRUE,               # TRUE: data/ で閾値超過を空ファイルで stub
-    dry_run             = FALSE               # TRUE: コピー＆zipせず、メタ一覧だけ作る
-) {
-  project_root <- .safe_norm(project_root)
-  parent_dir   <- .safe_norm(parent_dir)
+    project_root   = getwd(),
+    parent_dir     = dirname(getwd()),
+    zip_prefix     = "DMP_dist",
+    mode           = c("dev","review","release"),
+    # RDSの取り扱い：none/s1000/s100000/s1000+s100000/all
+    include_rds    = c("s1000+s100000","none","all","s1000","s100000"),
+    # outputの取り扱い：sample/all/none
+    include_output = c("sample","all","none"),
+    include_test   = TRUE,      # test/ を含む（GPT検証・再現で有用）
+    include_bench  = TRUE,      # bench/ を含む（ベンチログ共有）
+    include_notes  = FALSE,     # notes/ を含む（内部メモも共有したければ TRUE）
+    include_hidden = FALSE,     # .で始まる隠しを拾う（通常 FALSE）
+    bundle_meta    = TRUE,      # meta_*/ をZIP内に同梱
+    meta_level     = c("full","basic"),
+    head_lines     = 120,       # head 抜粋行数
+    dry_run        = FALSE,
+    extra_include  = character(0),
+    extra_exclude  = character(0),
+    # 追加：事前に manifest / SESSIONINFO を自動更新
+    auto_update_manifest = TRUE,
+    auto_update_session  = TRUE
+){
+  mode           <- match.arg(mode)
+  include_rds    <- match.arg(include_rds)
+  include_output <- match.arg(include_output)
+  meta_level     <- match.arg(meta_level)
   
-  # 生成名
-  hash_stub <- substr(as.character(as.integer(as.numeric(Sys.time()))), 1, 8)
-  ts <- format(Sys.time(), "%Y%m%d%H%M")
-  zip_base <- sprintf("%s_%s_%s", zip_prefix, hash_stub, ts)
+  owd <- setwd(project_root); on.exit(setwd(owd), add=TRUE)
   
-  # ステージング先（zip内容の実体）
-  staging <- file.path(tempdir(), paste0("staging_", zip_base))
-  dir.create(staging, recursive = TRUE, showWarnings = FALSE)
+  # ---- 事前更新：manifest / SESSIONINFO ----
+  if (isTRUE(auto_update_manifest) && file.exists("scripts/devtools/write_manifest.R")){
+    try({
+      message("[INFO] update manifest via scripts/devtools/write_manifest.R")
+      system2("Rscript", c("scripts/devtools/write_manifest.R"), stdout=TRUE, stderr=TRUE)
+    }, silent=TRUE)
+  }
+  if (isTRUE(auto_update_session)){
+    try({
+      message("[INFO] write SESSIONINFO to output/dev/SESSIONINFO.txt")
+      dir.create("output/dev", recursive=TRUE, showWarnings=FALSE)
+      writeLines(capture.output(sessionInfo()), "output/dev/SESSIONINFO.txt")
+    }, silent=TRUE)
+  }
   
-  # メタ出力（zipと同階層）
-  meta_dir <- file.path(parent_dir, paste0("meta_", hash_stub, "_", ts))
-  dir.create(meta_dir, recursive = TRUE, showWarnings = FALSE)
-  excluded_list_path <- file.path(meta_dir, "EXCLUDED_LIST.txt")
-  large_list_path    <- file.path(meta_dir, "LARGE_FILES.txt")
-  included_list_path <- file.path(meta_dir, "INCLUDED_LIST.txt")
+  # ---- ZIP/Meta 名 ----
+  hash  <- ..sha(); stamp <- ..now()
+  zname <- sprintf("%s_%s_%s.zip", zip_prefix, hash, stamp)
+  zpath <- ..norm(file.path(parent_dir, zname))
+  metan <- sprintf("meta_%s_%s", hash, stamp)
+  meta_tmp <- file.path(tempdir(), metan)
+  dir.create(meta_tmp, showWarnings=FALSE, recursive=TRUE)
   
-  # 既定の「必ず含める候補」
-  include_roots <- c(
-    "scripts",         # 既定で scripts/ 全体
-    if (include_data) "data",
-    "scripts/bench",
-    "bench",
-    "test",
-    "output"
+  # ---- 除外ポリシ（最小限） ----
+  base_exclude <- c(
+    "^\\.git($|/)", "^\\.Rproj\\.user($|/)",
+    "^dist($|/)", "^release($|/)",
+    "\\.zip$",
+    "^debug_.*\\.R$", "^scratch_.*\\.R$"
   )
-  # ユーザー追加分（重複は後でユニーク化）
-  include_roots <- unique(c(include_roots, extra_include))
+  if (!include_bench) base_exclude <- c(base_exclude, "^bench($|/)")
+  if (!include_test)  base_exclude <- c(base_exclude, "^test($|/)")
+  if (!include_notes) base_exclude <- c(base_exclude, "^notes($|/)")
+  if (include_output=="none") base_exclude <- c(base_exclude, "^output($|/)")
+  if (!include_hidden) base_exclude <- c(base_exclude, "^\\.")
+  if (length(extra_exclude)) base_exclude <- c(base_exclude, extra_exclude)
+  # 原則 .rds は除外（ホワイトリストで戻す）
+  base_exclude <- c(base_exclude, "\\.rds$")
   
-  # プロジェクト内の全ファイル候補
-  all_files <- .list_files_recursive(project_root)
-  rel_all   <- gsub(paste0("^", gsub("\\\\","/", project_root), "/?"), "", gsub("\\\\","/", all_files))
+  list_all <- function(root="."){
+    p <- list.files(root, recursive=TRUE, all.files=include_hidden, include.dirs=TRUE, no..=TRUE)
+    ..norm(p)
+  }
+  all_paths <- list_all(".")
+  is_excl <- function(path, pats) any(vapply(pats, function(rx) grepl(rx, path, perl=TRUE), logical(1)))
   
-  # まず「既定の除外」を適用。ただし include_roots 配下は除外しない（必ず残す）
-  keep <- rep(TRUE, length(all_files))
-  for (i in seq_along(all_files)) {
-    rel <- rel_all[i]
-    top <- strsplit(rel, "/")[[1]]; top <- if (length(top)) top[1] else ""
-    under_include <- any(startsWith(rel, paste0(include_roots, "/")) | rel %in% include_roots)
-    if (!under_include) {
-      if (top %in% default_exclude_dirs) keep[i] <- FALSE
-      if (keep[i] && length(default_exclude_glob)) {
-        for (g in default_exclude_glob) {
-          if (grepl(glob2rx(g), basename(rel), ignore.case = TRUE)) { keep[i] <- FALSE; break }
-        }
-      }
-      if (keep[i] && length(extra_exclude_dirs) && top %in% extra_exclude_dirs) keep[i] <- FALSE
-      if (keep[i] && length(extra_exclude_globs)) {
-        for (g in extra_exclude_globs) {
-          if (grepl(glob2rx(g), basename(rel), ignore.case = TRUE)) { keep[i] <- FALSE; break }
-        }
+  # ---- 初期ホワイトリスト（網羅寄り） ----
+  whitelist <- c("scripts","data","README.md","LICENSE","DESCRIPTION",".gitattributes",".Rprofile")
+  if (include_output=="sample") whitelist <- c(whitelist, "output/sample", "output/manifest", "output/dev/SESSIONINFO.txt")
+  if (include_output=="all")    whitelist <- c(whitelist, "output")
+  whitelist <- unique(c(whitelist, extra_include))
+  
+  # RDSを戻す
+  rds_keep <- character(0)
+  if (include_rds %in% c("s1000","s1000+s100000","all")) rds_keep <- c(rds_keep, "data/virtual_db_u100_S1000_seed123.rds")
+  if (include_rds %in% c("s100000","s1000+s100000","all")) rds_keep <- c(rds_keep, "data/virtual_db_u100_S100000_seed123.rds")
+  if (include_rds=="all" && dir.exists("data")){
+    rds_keep <- unique(c(rds_keep, file.path("data", grep("\\.rds$", list.files("data"), value=TRUE))))
+  }
+  rds_keep <- rds_keep[file.exists(rds_keep)]
+  
+  # ---- 収集 ----
+  cand <- character(0)
+  add_path <- function(p){
+    if (dir.exists(p)) {
+      x <- list.files(p, recursive=TRUE, all.files=include_hidden, include.dirs=FALSE, no..=TRUE, full.names=TRUE)
+      cand <<- c(cand, ..norm(x))
+    } else if (file.exists(p)) {
+      cand <<- c(cand, ..norm(p))
+    }
+  }
+  for (w in whitelist) add_path(w)
+  cand <- unique(cand)
+  
+  keep <- vapply(cand, function(p) !is_excl(p, base_exclude), logical(1))
+  cand <- cand[keep]
+  cand <- unique(c(cand, ..norm(rds_keep)))
+  
+  if (length(cand)==0) stop("収集対象が空です。whitelist/フラグを調整してください。")
+  
+  # ---- ステージング ----
+  stage <- file.path(tempdir(), paste0("stage_", hash, "_", stamp))
+  dir.create(stage, recursive=TRUE, showWarnings=FALSE)
+  for (src in cand) {
+    ..safe_copy(src, file.path(stage, src))
+  }
+  
+  # ---- meta 生成（GPT向けに充実） ----
+  wmeta <- function(rel, lines){
+    out <- file.path(meta_tmp, rel)
+    dir.create(dirname(out), recursive=TRUE, showWarnings=FALSE)
+    writeLines(lines, out, useBytes=TRUE)
+  }
+  # ABOUT
+  wmeta("ABOUT.txt", c(
+    "Bundled meta for development/review/GPT reference.",
+    paste0("branch: ", ..branch()),
+    paste0("git_sha: ", ..sha()),
+    paste0("timestamp: ", stamp),
+    paste0("mode: ", mode),
+    paste0("include_rds: ", include_rds),
+    paste0("include_output: ", include_output)
+  ))
+  # INCLUDED / EXCLUDED
+  included_rel <- ..norm(sub(paste0("^", ..norm(project_root), "/?"), "", ..norm(cand)))
+  wmeta("INCLUDED_LIST.txt", included_rel)
+  excluded_all <- all_paths[!dir.exists(all_paths)]
+  excluded_rel <- setdiff(excluded_all, included_rel)
+  wmeta("EXCLUDED_LIST.txt", excluded_rel)
+  # TREE (ざっくり)
+  wmeta("TREE_DIRS.txt", paste(sort(unique(dirname(included_rel))), collapse="\n"))
+  # FILE_SIZES
+  sizes <- file.info(cand)$size
+  size_tab <- data.frame(path=included_rel, bytes=as.numeric(sizes),
+                         ext=tolower(sub(".*\\.(\\w+)$","\\1", included_rel)), stringsAsFactors=FALSE)
+  write.csv(size_tab, file.path(meta_tmp,"FILE_SIZES.csv"), row.names=FALSE)
+  # CHECKSUMS（上限2000）
+  ch <- c("SHA256  PATH")
+  nmax <- min(2000L, length(cand))
+  for (i in seq_len(nmax)) ch <- c(ch, sprintf("%s  %s", ..sha256(cand[i]), included_rel[i]))
+  wmeta("CHECKSUMS_SHA256.txt", ch)
+  # Git 情報
+  wmeta("GIT_STATUS.txt", ..git("status --short"))
+  if (meta_level=="full"){
+    wmeta("GIT_DIFF_SUMMARY.txt", ..git("diff --stat"))
+    wmeta("GIT_LOG_1line.txt", ..git("log --oneline -n 50"))
+    wmeta("GIT_REMOTE_-v.txt", ..git("remote -v"))
+  }
+  # SESSIONINFO / manifest を meta にもコピー（存在すれば）
+  if (file.exists("output/dev/SESSIONINFO.txt")) {
+    ..safe_copy("output/dev/SESSIONINFO.txt", file.path(meta_tmp,"dev/SESSIONINFO.txt"))
+  }
+  if (file.exists("output/manifest/virtual_db_manifest.csv")) {
+    ..safe_copy("output/manifest/virtual_db_manifest.csv", file.path(meta_tmp,"manifest/virtual_db_manifest.csv"))
+  }
+  # 代表テキストの先頭抜粋
+  if (meta_level=="full"){
+    head_dir <- file.path(meta_tmp,"heads"); dir.create(head_dir, showWarnings=FALSE)
+    text_like <- included_rel[grepl("\\.(r|R|md|txt|csv|tsv|yaml|yml|json|Rmd)$", included_rel)]
+    for (p in utils::head(text_like, 200L)){
+      if (file.exists(p)) {
+        ln <- try(readLines(p, n=head_lines, warn=FALSE), silent=TRUE)
+        if (!inherits(ln,"try-error")) writeLines(ln, file.path(head_dir, paste0(gsub("[/:\\\\]", "__", p), ".head.txt")), useBytes=TRUE)
       }
     }
   }
-  all_files <- all_files[keep]; rel_all <- rel_all[keep]
   
-  # 最終的に含める集合: include_roots配下＋ルート直下の README.md 等
-  want <- logical(length(all_files))
-  for (j in seq_along(all_files)) {
-    rel <- rel_all[j]
-    if (any(vapply(include_roots, function(rt) .is_under(rel, rt), logical(1)))) want[j] <- TRUE
-  }
-  root_paths <- file.path(project_root, include_root_files)
-  root_files <- root_paths[file.exists(root_paths)]
-  root_rel   <- basename(root_files)
-  
-  final_src <- c(all_files[want], root_files)
-  final_rel <- c(rel_all[want],   root_rel)
-  
-  # 重複除去
-  o <- order(final_rel)
-  final_src <- final_src[o]; final_rel <- final_rel[o]
-  dupe <- duplicated(final_rel)
-  if (any(dupe)) { final_src <- final_src[!dupe]; final_rel <- final_rel[!dupe] }
-  
-  # メタ初期化
-  writeLines(character(), excluded_list_path)
-  writeLines(c(
-    "# Files larger than threshold are stubbed in the zip (data/ only when enabled).",
-    paste0("# Threshold: ", data_large_threshold, " bytes"),
-    "# Format: <size_bytes> <relative_path>",
-    ""
-  ), large_list_path)
-  writeLines(c("# Included relative paths:", ""), included_list_path)
-  
-  # ステージングへコピー（data/ 大きいファイルは stub 可）
-  info <- file.info(final_src, extra_cols = FALSE)
-  for (k in seq_along(final_src)) {
-    src <- final_src[k]; rel <- final_rel[k]
-    if (stub_large_data && .is_under(rel, "data")) {
-      sz <- info$size[k]
-      if (!is.na(sz) && sz > data_large_threshold) {
-        .create_empty_stub(staging, rel)
-        cat(sprintf("%d %s\n", as.integer(sz), rel), file = large_list_path, append = TRUE)
-        cat(rel, "\n", file = included_list_path, append = TRUE)
-        next
-      }
+  # ---- meta を stage へ同梱 ----
+  if (isTRUE(bundle_meta)){
+    mf <- list.files(meta_tmp, recursive=TRUE, all.files=TRUE, include.dirs=TRUE, no..=TRUE, full.names=FALSE)
+    for (f in mf){
+      src <- file.path(meta_tmp, f)
+      dst <- file.path(stage, metan, f)
+      if (dir.exists(src)) dir.create(dst, recursive=TRUE, showWarnings=FALSE) else ..safe_copy(src,dst)
     }
-    .copy_with_dirs(src, staging, rel)
-    cat(rel, "\n", file = included_list_path, append = TRUE)
   }
   
-  # 除外一覧（プロジェクトにあるが zip に入っていない実ファイル）
-  staged_all <- list.files(staging, recursive = TRUE, all.files = TRUE, full.names = FALSE)
-  staged_full <- file.path(staging, staged_all)
-  staged_all <- staged_all[file.info(staged_full)$isdir %in% FALSE]
-  
-  all_proj_files <- .list_files_recursive(project_root)
-  all_proj_rel <- gsub(paste0("^", gsub("\\\\","/", project_root), "/?"), "", gsub("\\\\","/", all_proj_files))
-  all_proj_rel <- all_proj_rel[file.info(all_proj_files)$isdir %in% FALSE]
-  
-  excluded_rel <- setdiff(all_proj_rel, staged_all)
-  if (length(excluded_rel)) writeLines(sort(excluded_rel), excluded_list_path, useBytes = TRUE)
-  
-  # dry-run はここまで（zip作成せずにメタだけ出す）
-  if (isTRUE(dry_run)) {
-    message("[DRY RUN] No zip created.")
-    message("[META] Included: ", .safe_norm(included_list_path))
-    message("[META] Large   : ", .safe_norm(large_list_path))
-    message("[META] Excluded: ", .safe_norm(excluded_list_path))
-    return(invisible(list(zip = NULL, meta = meta_dir, staging = staging)))
+  # ---- dry-run ----
+  if (isTRUE(dry_run)){
+    message("[DRY RUN] staged files: ", length(list.files(stage, recursive=TRUE)))
+    message("[DRY RUN] stage dir: ", stage)
+    return(invisible(list(zip=zpath, stage_dir=stage)))
   }
   
-  # zip 作成
-  old_wd <- getwd(); on.exit(setwd(old_wd), add = TRUE)
-  setwd(staging)
-  zip_path <- file.path(parent_dir, paste0(zip_base, ".zip"))
-  files_to_zip <- list.files(".", recursive = TRUE, all.files = TRUE, full.names = FALSE)
-  utils::zip(zipfile = zip_path, files = files_to_zip)
+  # ---- ZIP化 ----
+  files_for_zip <- list.files(stage, recursive=TRUE, include.dirs=TRUE, all.files=TRUE, no..=TRUE)
+  ..zip_with_fallback(zipfile = zpath, files = files_for_zip, root = stage, quiet = TRUE)
+  message("[OK] wrote: ", zpath)
   
-  message("[OK] Wrote zip : ", .safe_norm(zip_path))
-  message("[OK] Wrote meta: ", .safe_norm(meta_dir))
-  invisible(list(zip = zip_path, meta = meta_dir, staging = staging))
+  invisible(zpath)
 }
 
+# ===== プリセット（人間はこれだけ覚えればOK） =====
+
+# 1) “いつもの”：GPT共有向け・最小操作・無引数
+z2g <- function(){
+  # S1000/S100000 RDS・sample出力・test/bench 同梱、metaは full
+  make_dist_zip(mode="dev",
+                include_rds    = "s1000+s100000",
+                include_output = "sample",
+                include_test   = TRUE,
+                include_bench  = TRUE,
+                include_notes  = FALSE,
+                bundle_meta    = TRUE,
+                meta_level     = "full",
+                auto_update_manifest = TRUE,
+                auto_update_session  = TRUE)
+}
+
+# 2) これまでの make_dev_bundle（可変だけど安全な既定値）
+make_dev_bundle <- function(include_rds=c("s1000+s100000","none","all"),
+                            include_output=c("sample","all","none"),
+                            ...){
+  include_rds    <- match.arg(include_rds)
+  include_output <- match.arg(include_output)
+  make_dist_zip(mode="dev",
+                include_rds=include_rds,
+                include_output=include_output,
+                bundle_meta=TRUE, meta_level="full",
+                auto_update_manifest=TRUE, auto_update_session=TRUE,
+                ...)
+}
+
+# 3) 何も省かない“全部入り”のバックアップ（除外ごく最小）
+backup_all <- function(){
+  make_dist_zip(mode="dev",
+                include_rds    = "all",
+                include_output = "all",
+                include_test   = TRUE,
+                include_bench  = TRUE,
+                include_notes  = TRUE,
+                include_hidden = TRUE,    # 隠しも含める
+                bundle_meta    = TRUE,
+                meta_level     = "full",
+                auto_update_manifest = TRUE,
+                auto_update_session  = TRUE)
+}
