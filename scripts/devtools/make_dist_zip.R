@@ -247,7 +247,7 @@ z2g <- function(){
   # S1000/S100000 RDS・sample出力・test/bench 同梱、metaは full
   make_dist_zip(mode="dev",
                 include_rds    = "s1000+s100000",
-                include_output = "sample",
+                include_output = "all",
                 include_test   = TRUE,
                 include_bench  = TRUE,
                 include_notes  = FALSE,
