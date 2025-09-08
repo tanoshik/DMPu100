@@ -31,3 +31,6 @@ nohup.out
 scratch_*.R
 debug_*.R
 notes_*.md
+# Root-level adhoc scripts (temporary)
+/bench_*.sh
+/memlog.ps1
