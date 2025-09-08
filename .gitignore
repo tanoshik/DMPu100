@@ -16,3 +16,18 @@ src/.rcpp_cache/
 test/bench/*.csv
 test/consistency/*.csv
 logs/*.log
+
+# virtual DB snapshots generated for benches
+data/virtual_db_*.rds
+data/*_seed*.rds
+data/legacy
+data/slices
+
+# nohup logs
+nohup.out
+*.log
+
+# safety: local scratch
+scratch_*.R
+debug_*.R
+notes_*.md

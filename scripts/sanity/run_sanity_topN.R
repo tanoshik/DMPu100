@@ -1,6 +1,11 @@
 # scripts/sanity/run_sanity_topN.R
 # No multibyte characters. TopN-only detail extractor (O(TopN * L)).
 
+if (!requireNamespace("peakRAM", quietly=TRUE)) {
+  install.packages("peakRAM", repos="https://cran.rstudio.com")
+}
+library(peakRAM)
+
 # deps: use existing fast matcher and new detail helper
 source("scripts/matcher_fast.R")   # provides run_match_fast()
 source("scripts/matcher_detail.R") # provides build_detail_for_ids()
@@ -58,68 +63,90 @@ if (length(miss)) {
 
 # --- load DB index ---
 if (!file.exists(opt$db)) stop(sprintf("DB not found: %s", opt$db))
+
+# >>> ここから LOAD_SEC <<<
+t0 <- proc.time()[3]
+
 db <- readRDS(opt$db)
+
+t1 <- proc.time()[3]
+load_sec <- t1 - t0
+# >>> ここまで LOAD_SEC <<<
+
 if (is.null(db$A1) || is.null(db$A2)) stop("Invalid DB index RDS (missing A1/A2)")
 
-# --- load query (human-readable or x100 both OK) ---
-q_raw <- read.csv(opt$query, stringsAsFactors = FALSE)
-need_cols <- c("Locus","allele1","allele2")
-if (!all(need_cols %in% names(q_raw))) {
-  stop("Query CSV must have columns: Locus, allele1, allele2")
-}
-enc_one <- function(x, ANY=opt$any_code) {
-  if (is.na(x)) return(NA_integer_)
-  if (is.character(x) && tolower(x) == "any") return(as.integer(ANY))
-  as.integer(round(as.numeric(x) * 100))
-}
-q_df <- data.frame(
-  Locus   = q_raw$Locus,
-  allele1 = vapply(q_raw$allele1, enc_one, 0L),
-  allele2 = vapply(q_raw$allele2, enc_one, 0L),
-  stringsAsFactors = FALSE
-)
+if (!requireNamespace("peakRAM", quietly=TRUE)) install.packages("peakRAM", repos="https://cran.rstudio.com")
+library(peakRAM)
 
-# reorder query to DB locus order if provided
-if (!is.null(db$locus_ids)) {
-  ord <- match(db$locus_ids, q_df$Locus)
-  if (anyNA(ord)) stop("Query loci do not cover DB locus_ids")
-  q_df <- q_df[ord, , drop=FALSE]
-}
+pm <- peakRAM({
+  # --- load query (human-readable or x100 both OK) ---
+  q_raw <- read.csv(opt$query, stringsAsFactors = FALSE)
+  need_cols <- c("Locus","allele1","allele2")
+  if (!all(need_cols %in% names(q_raw))) {
+    stop("Query CSV must have columns: Locus, allele1, allele2")
+  }
+  enc_one <- function(x, ANY=opt$any_code) {
+    if (is.na(x)) return(NA_integer_)
+    if (is.character(x) && tolower(x) == "any") return(as.integer(ANY))
+    as.integer(round(as.numeric(x) * 100))
+  }
+  q_df <- data.frame(
+    Locus   = q_raw$Locus,
+    allele1 = vapply(q_raw$allele1, enc_one, 0L),
+    allele2 = vapply(q_raw$allele2, enc_one, 0L),
+    stringsAsFactors = FALSE
+  )
+  
+  # reorder query to DB locus order if provided
+  if (!is.null(db$locus_ids)) {
+    ord <- match(db$locus_ids, q_df$Locus)
+    if (anyNA(ord)) stop("Query loci do not cover DB locus_ids")
+    q_df <- q_df[ord, , drop=FALSE]
+  }
+  
+  # --- Stage 1: score-only (no detail) to get TopN ---
+  res <- run_match_fast(
+    q_df = q_df,
+    db_index = db,
+    use_cpp = isTRUE(opt$use_cpp),
+    include_bits_in_detail = FALSE
+  )
+  sum_tab <- res$summary
+  if (nrow(sum_tab) < opt$top) {
+    warning(sprintf("Requested top=%d but only %d candidates exist", opt$top, nrow(sum_tab)))
+  }
+  top_ids <- head(sum_tab$SampleID, opt$top)
+  
+  # --- Stage 2: build detail only for TopN (O(TopN * L)) ---
+  det <- build_detail_for_ids(
+    q_df = q_df, db = db, sample_ids = top_ids,
+    any_code = opt$any_code,
+    decode = TRUE, include_code = TRUE, include_bits = TRUE
+  )
+  
+  # --- order: keep TopN score order, then locus order ---
+  # sum_tab は run_match_fast() が返した合計スコアの降順テーブル
+  # top_ids は head(sum_tab$SampleID, opt$top) なので、これが「Score降順」の正解順
+  score_order <- top_ids  # already in score-desc / tie-broken by SampleID
+  det$SampleID <- factor(as.character(det$SampleID),
+                         levels = score_order, ordered = TRUE)
+  
+  if (!is.null(db$locus_ids)) {
+    det <- det[order(det$SampleID, match(det$Locus, db$locus_ids)), , drop = FALSE]
+  } else {
+    det <- det[order(det$SampleID, det$Locus), , drop = FALSE]
+  }
+  
+  # write
+  dir.create(dirname(opt$out), recursive = TRUE, showWarnings = FALSE)
+  write.csv(det, opt$out, row.names = FALSE)
+  cat("[OK] wrote (TopN detail):", opt$out, "rows=", nrow(det), "\n")
+})
 
-# --- Stage 1: score-only (no detail) to get TopN ---
-res <- run_match_fast(
-  q_df = q_df,
-  db_index = db,
-  use_cpp = isTRUE(opt$use_cpp),
-  include_bits_in_detail = FALSE
-)
-sum_tab <- res$summary
-if (nrow(sum_tab) < opt$top) {
-  warning(sprintf("Requested top=%d but only %d candidates exist", opt$top, nrow(sum_tab)))
-}
-top_ids <- head(sum_tab$SampleID, opt$top)
+comp_sec <- pm$Elapsed_Time_sec
+peak_mib <- pm$Peak_RAM_Used_MiB
 
-# --- Stage 2: build detail only for TopN (O(TopN * L)) ---
-det <- build_detail_for_ids(
-  q_df = q_df, db = db, sample_ids = top_ids,
-  any_code = opt$any_code,
-  decode = TRUE, include_code = TRUE, include_bits = TRUE
-)
-
-# --- order: keep TopN score order, then locus order ---
-# sum_tab は run_match_fast() が返した合計スコアの降順テーブル
-# top_ids は head(sum_tab$SampleID, opt$top) なので、これが「Score降順」の正解順
-score_order <- top_ids  # already in score-desc / tie-broken by SampleID
-det$SampleID <- factor(as.character(det$SampleID),
-                       levels = score_order, ordered = TRUE)
-
-if (!is.null(db$locus_ids)) {
-  det <- det[order(det$SampleID, match(det$Locus, db$locus_ids)), , drop = FALSE]
-} else {
-  det <- det[order(det$SampleID, det$Locus), , drop = FALSE]
-}
-
-# write
-dir.create(dirname(opt$out), recursive = TRUE, showWarnings = FALSE)
-write.csv(det, opt$out, row.names = FALSE)
-cat("[OK] wrote (TopN detail):", opt$out, "rows=", nrow(det), "\n")
+cat(sprintf("[TIME] phase=detail size=%d LOAD_SEC=%.3f COMP_SEC=%.3f PEAK_MiB=%.1f\n",
+            NROW(db), load_sec, comp_sec, peak_mib))
+flush.console()
+# <<< peakRAM
