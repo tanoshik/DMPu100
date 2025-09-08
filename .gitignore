@@ -3,6 +3,7 @@
 .Rproj.user/
 .Ruserdata
 output/
+/NUL
 # Rcpp build cache
 src/.rcpp_cache/
 # Common build artifacts
