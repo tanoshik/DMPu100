@@ -1,38 +1,27 @@
 {
-  "version": "1.0.0",
-  "truth_source_order": ["schema_json", "codebook_md", "sample_csv", "chat_text"],
-  "on_mismatch": "halt_and_report",
+  "truth_source_order": ["schema_json","codebook_md","sample_csv","chat_text"],
+  "on_mismatch": "stop",
   "families": [
     {
-      "name": "virtual_db_u100",
+      "family": "virtual_db_u100",
       "patterns": [
-        "data/virtual_db_u100_S*_seed*.rds",
-        "data/virtual_db_u100_*.rds"
+        "^data/virtual_db_u100_S\\d+_seed\\d+\\.rds$"
       ],
-      "schema": "virtual_db_u100.schema.json"
+      "schema": "scripts/devtools/schemas/virtual_db_u100.schema.json"
     },
     {
-      "name": "freq_table",
+      "family": "freq_table",
       "patterns": [
-        "data/freq_table.rds",
-        "data/freq_table.csv"
+        "^data/freq_table\\.rds$"
       ],
-      "schema": "freq_table.schema.json"
+      "schema": "scripts/devtools/schemas/freq_table.schema.json"
     },
     {
-      "name": "locus_order",
+      "family": "locus_order",
       "patterns": [
-        "data/locus_order.rds",
-        "data/locus_order.csv"
+        "^data/locus_order\\.rds$"
       ],
-      "schema": "locus_order.schema.json"
-    },
-    {
-      "name": "scores_csv",
-      "patterns": [
-        "output/scores.csv"
-      ],
-      "schema": "scores_csv.schema.json"
+      "schema": "scripts/devtools/schemas/locus_order.schema.json"
     }
   ]
 }
