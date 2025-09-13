@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "virtual_db_u100",
+  "type": "object",
+  "properties": {
+    "table": {
+      "type": "object",
+      "description": "Wide table: per-sample row with two alleles per locus",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "type": "string", "enum": ["integer", "string", "number", "boolean"] },
+              "nullable": { "type": "boolean" },
+              "constraints": {
+                "type": "object",
+                "properties": {
+                  "any_code": { "type": "integer", "const": 9999 },
+                  "ascending_alleles": { "type": "boolean", "const": true },
+                  "any_right_aligned": { "type": "boolean", "const": true }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": ["name","type"],
+            "additionalProperties": false
+          }
+        },
+        "locus_name_rule": {
+          "type": "object",
+          "description": "Two columns per locus: <Locus>_A1, <Locus>_A2",
+          "properties": {
+            "pattern_a1": { "type": "string", "const": "^[A-Z0-9_]+_A1$" },
+            "pattern_a2": { "type": "string", "const": "^[A-Z0-9_]+_A2$" }
+          },
+          "required": ["pattern_a1","pattern_a2"],
+          "additionalProperties": false
+        },
+        "rowkey": {
+          "type": "string",
+          "const": "SampleID"
+        }
+      },
+      "required": ["columns","locus_name_rule","rowkey"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["table"],
+  "additionalProperties": false
+}

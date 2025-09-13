@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "truth_source_order": ["schema_json", "codebook_md", "sample_csv", "chat_text"],
+  "on_mismatch": "halt_and_report",
+  "families": [
+    {
+      "name": "virtual_db_u100",
+      "patterns": [
+        "data/virtual_db_u100_S*_seed*.rds",
+        "data/virtual_db_u100_*.rds"
+      ],
+      "schema": "virtual_db_u100.schema.json"
+    },
+    {
+      "name": "freq_table",
+      "patterns": [
+        "data/freq_table.rds",
+        "data/freq_table.csv"
+      ],
+      "schema": "freq_table.schema.json"
+    },
+    {
+      "name": "locus_order",
+      "patterns": [
+        "data/locus_order.rds",
+        "data/locus_order.csv"
+      ],
+      "schema": "locus_order.schema.json"
+    },
+    {
+      "name": "scores_csv",
+      "patterns": [
+        "output/scores.csv"
+      ],
+      "schema": "scores_csv.schema.json"
+    }
+  ]
+}

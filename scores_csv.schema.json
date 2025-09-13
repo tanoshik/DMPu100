@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "scores_csv",
+  "type": "object",
+  "properties": {
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "enum": ["SampleID","Score"] },
+          "type": { "type": "string", "enum": ["string","integer"] }
+        },
+        "required": ["name","type"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["columns"],
+  "additionalProperties": false
+}

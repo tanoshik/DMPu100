@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "freq_table",
+  "type": "object",
+  "properties": {
+    "columns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "enum": ["Locus", "Allele", "Frequency"] },
+          "type": { "type": "string", "enum": ["string", "integer", "number"] }
+        },
+        "required": ["name","type"],
+        "additionalProperties": false
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "frequency_range": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2, "const": [0.0, 1.0] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["columns","constraints"],
+  "additionalProperties": false
+}

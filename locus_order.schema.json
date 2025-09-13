@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "locus_order",
+  "type": "object",
+  "properties": {
+    "loci": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" },
+      "minItems": 21,
+      "maxItems": 21
+    }
+  },
+  "required": ["loci"],
+  "additionalProperties": false
+}
