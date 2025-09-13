@@ -1,222 +1,284 @@
 # scripts/devtools/make_schema_exports.R
-# ASCII-only comments. Dev utility to export schema/codebook/sample from .rds.
-# Supports:
-#  - data.frame directly
-#  - list(table = data.frame)
-#  - list of equal-length vectors
-#  - indexed_db list(sample_ids,locus_ids,A1,A2)
+# ASCII-only comments. Export schema/codebook/sample from data assets.
+# Families: virtual_db_u100, freq_table, locus_order, locus_layout
+# Output dir: output/exports/<family>/
 
-# ---- robust null-coalescing
+suppressWarnings(suppressMessages({
+  library(jsonlite)
+  library(utils)
+}))
+
 `%||%` <- function(a,b){ if (is.null(a) || !length(a)) b else a }
 
-# ---- registry loader (full replacement)
+# -------- Registry loader (robust) ------------------------------------------
 load_registry <- function(reg_path = NULL) {
-  # search order: explicit path -> repo root -> scripts/devtools
-  cands <- c(reg_path,
-             "schema_registry.json",
-             "scripts/devtools/schema_registry.json")
-  cands <- unique(cands[!is.na(cands) & nzchar(cands)])
-  hit <- NULL
-  for (p in cands) { if (file.exists(p)) { hit <- p; break } }
-  if (is.null(hit)) stop("registry json not found: schema_registry.json")
-  
-  # NOTE: keep raw list structure to avoid unwanted vector/data.frame simplification
-  reg_raw <- jsonlite::fromJSON(hit, simplifyVector = FALSE)
-  
-  # allow either {"families":[...], "on_mismatch":"stop"} or just [...]
-  if (is.list(reg_raw) && !is.null(reg_raw$families)) {
-    fams <- reg_raw$families
-    default_on_mismatch <- reg_raw$on_mismatch %||% "stop"
-  } else if (is.list(reg_raw) && is.null(names(reg_raw))) {
-    # top-level array
-    fams <- reg_raw
-    default_on_mismatch <- "stop"
-  } else {
-    stop("registry JSON shape not supported (expect {families:[...]} or top-level array)")
+  cands <- c(reg_path, "schema_registry.json",
+             file.path("scripts","devtools","schema_registry.json"))
+  cands <- cands[!is.na(cands)]
+  reg <- NULL
+  for (p in cands) {
+    if (!is.null(p) && file.exists(p)) {
+      reg <- tryCatch(jsonlite::read_json(p, simplifyVector = TRUE),
+                      error=function(e) NULL)
+      if (!is.null(reg)) break
+    }
   }
-  if (!length(fams)) stop("no families in registry")
+  if (is.null(reg)) stop("schema_registry.json not found")
   
-  # normalize each family item
-  fams2 <- lapply(fams, function(f) {
-    # if family item was simplified to atomic, coerce to empty list to fail fast
-    if (!is.list(f)) stop("family entry must be a JSON object (not an atomic array/vector)")
-    list(
-      family       = as.character(f$family %||% NA_character_),
-      patterns     = as.character(unlist(f$patterns %||% character(0), use.names = FALSE)),
-      schema       = as.character(f$schema %||% NA_character_),
-      outdir       = as.character(f$outdir %||% "output/exports"),
-      on_mismatch  = as.character(f$on_mismatch %||% default_on_mismatch)
-    )
-  })
-  
-  list(path = hit, families = fams2)
-}
-
-# ---- glob/regex matcher per family -----------------------------------------
-match_family <- function(fam_entry, all_paths) {
-  pats <- fam_entry$patterns
-  if (!length(pats)) return(character(0))
-  keep <- rep(FALSE, length(all_paths))
-  for (rx in pats) keep <- keep | grepl(rx, all_paths, perl = TRUE)
-  all_paths[keep]
-}
-
-# ---- RDS reader and normalization ------------------------------------------
-read_rds_df <- function(path) {
-  obj <- readRDS(path)
-  # case 1: data.frame
-  if (inherits(obj, "data.frame")) return(obj)
-  # case 2: list(table = data.frame)
-  if (is.list(obj) && !is.null(obj$table) && inherits(obj$table, "data.frame")) return(obj$table)
-  # case 3: list of equal-length vectors -> data.frame
-  if (is.list(obj) && is.null(obj$table) && length(obj) > 0 && all(vapply(obj, function(x) is.atomic(x) || is.factor(x), logical(1)))) {
-    lens <- vapply(obj, length, integer(1))
-    if (length(unique(lens)) == 1) return(as.data.frame(obj, stringsAsFactors = FALSE))
+  # Allow array-style (top-level array of families)
+  if (is.null(reg$families) && is.list(reg) && length(reg) > 0L) {
+    reg <- list(families = reg)
   }
-  # case 4: indexed_db (sample_ids, locus_ids, A1, A2)
-  if (is.list(obj) && all(c("sample_ids","locus_ids","A1","A2") %in% names(obj))) {
-    # We do NOT fully materialize S*L rows to avoid heavy mem; return a tiny sample df.
-    sample_ids <- obj$sample_ids
-    locus_ids  <- obj$locus_ids
-    A1 <- obj$A1; A2 <- obj$A2
-    if (!is.integer(A1)) A1 <- as.integer(A1)
-    if (!is.integer(A2)) A2 <- as.integer(A2)
-    S <- length(sample_ids); L <- length(locus_ids)
-    s_take <- min(S, 4L); l_take <- min(L, 5L)
-    rows <- vector("list", s_take * l_take)
-    k <- 1L
-    for (si in seq_len(s_take)) {
-      for (li in seq_len(l_take)) {
-        rows[[k]] <- list(
-          SampleID = sample_ids[si],
-          Locus    = as.character(locus_ids[li]),
-          A1       = A1[si, li],
-          A2       = A2[si, li]
+  reg$on_mismatch <- reg$on_mismatch %||% "stop"
+  
+  fams <- reg$families
+  if (is.null(fams) || !length(fams)) stop("No families in registry")
+  
+  norm <- list()
+  push <- function(x) { norm[[length(norm)+1L]] <<- x }
+  
+  for (i in seq_along(fams)) {
+    fi <- fams[[i]]
+    # Case A: character vector (one or more names)
+    if (is.character(fi)) {
+      for (nm in fi) {
+        pats <- switch(nm,
+                       "virtual_db_u100" = "^data/virtual_db_u100_S\\d+_seed\\d+\\.rds$",
+                       "freq_table"      = "^data/freq_table\\.rds$",
+                       "locus_order"     = "^data/locus_order\\.rds$",
+                       "locus_layout"    = "^data/locus_layout\\.rds$",
+                       ".*"
         )
-        k <- k + 1L
+        push(list(
+          family   = nm,
+          patterns = pats,
+          handler  = switch(nm,
+                            "virtual_db_u100" = "export_virtual_db_schema",
+                            "freq_table"      = "export_freq_table_schema",
+                            "locus_order"     = "export_locus_order_schema",
+                            "locus_layout"    = "export_locus_layout_schema",
+                            ""
+          )
+        ))
       }
+      next
     }
-    tiny <- do.call(rbind.data.frame, rows)
-    return(tiny)
+    # Case B: proper list object
+    if (!is.list(fi)) stop("Family entry must be object or string")
+    fi$family   <- fi$family   %||% paste0("family_", i)
+    fi$patterns <- fi$patterns %||% character(0)
+    fi$handler  <- fi$handler  %||% switch(fi$family,
+                                           "virtual_db_u100" = "export_virtual_db_schema",
+                                           "freq_table"      = "export_freq_table_schema",
+                                           "locus_order"     = "export_locus_order_schema",
+                                           "locus_layout"    = "export_locus_layout_schema",
+                                           ""
+    )
+    push(fi)
   }
-  stop(sprintf("Unsupported RDS content class. class=%s keys=%s",
-               paste(class(obj), collapse=","), paste(names(obj), collapse=",")))
+  
+  reg$families <- norm
+  reg
 }
 
-# ---- schema inference for indexed_db ---------------------------------------
-infer_schema_for_indexed_db <- function(obj) {
-  # Schema for long-form view: SampleID(int), Locus(enum with levels), A1(int), A2(int)
-  levels <- as.character(obj$locus_ids)
-  list(
-    title   = "virtual_db_u100 (indexed_db long view)",
-    version = "0.1.0",
-    columns = list(
-      list(name="SampleID", type="integer"),
-      list(name="Locus",    type="string", levels = levels),
-      list(name="A1",       type="integer"),
-      list(name="A2",       type="integer")
+match_family <- function(filepath, reg) {
+  for (fam in reg$families) {
+    pats <- fam$patterns %||% character(0)
+    if (!length(pats)) next
+    rx <- paste0("(", paste(pats, collapse = ")|("), ")")
+    if (any(grepl(rx, filepath, perl = TRUE))) return(fam)
+  }
+  NULL
+}
+
+# -------- Helpers ------------------------------------------------------------
+safe_read_rds <- function(path){
+  tryCatch(readRDS(path), error=function(e){
+    stop("Failed to read RDS: ", path, " :: ", conditionMessage(e))
+  })
+}
+safe_mkdir <- function(d){ if (!dir.exists(d)) dir.create(d, recursive=TRUE, showWarnings=FALSE) }
+write_schema_json <- function(path_json, schema){
+  safe_mkdir(dirname(path_json))
+  jsonlite::write_json(schema, path_json, pretty=TRUE, auto_unbox=TRUE)
+}
+write_codebook_md <- function(path_md, family, src_path, notes=NULL){
+  safe_mkdir(dirname(path_md))
+  cat("# Codebook\n\n", file=path_md)
+  cat(sprintf("- family: %s\n", family), file=path_md, append=TRUE)
+  cat(sprintf("- source: %s\n\n", src_path), file=path_md, append=TRUE)
+  if (!is.null(notes) && length(notes)){
+    cat("## Notes\n", file=path_md, append=TRUE)
+    for (ln in notes) cat(paste0("- ", ln, "\n"), file=path_md, append=TRUE)
+  }
+}
+write_sample_csv <- function(path_csv, df){
+  safe_mkdir(dirname(path_csv)); utils::write.csv(df, path_csv, row.names=FALSE)
+}
+
+infer_schema_df <- function(x){
+  props <- lapply(names(x), function(nm) list(type = class(x[[nm]])[1]))
+  list(title="inferred schema (data.frame)", version="0.1.0",
+       type="object", properties=setNames(props, names(x)), nrow=nrow(x))
+}
+infer_schema_vector <- function(x, item_type="string"){
+  list(title="inferred schema (vector)", version="0.1.0",
+       type="array", items=list(type=item_type), length=length(x))
+}
+infer_schema_list <- function(x){
+  list(title="inferred schema (list)", version="0.1.0",
+       type="object", names=names(x), length=length(x))
+}
+is_indexed_db <- function(obj){
+  is.list(obj) && all(c("sample_ids","locus_ids","A1","A2") %in% names(obj))
+}
+
+.emit <- function(out_dir, stem, family, schema, sample_df=NULL, notes=NULL, src_path=NA_character_){
+  write_schema_json(file.path(out_dir, paste0(stem, ".schema.json")), schema)
+  write_codebook_md(file.path(out_dir, paste0(stem, ".codebook.md")), family, src_path, notes)
+  if (!is.null(sample_df)) write_sample_csv(file.path(out_dir, paste0(stem, ".sample.csv")), sample_df)
+}
+
+# -------- Exporters ----------------------------------------------------------
+export_virtual_db_schema <- function(path, family="virtual_db_u100"){
+  x <- safe_read_rds(path)
+  if (!is_indexed_db(x)) stop("virtual_db_u100 expects indexed_db list")
+  sample_ids <- x$sample_ids; locus_ids <- x$locus_ids
+  A1 <- x$A1; A2 <- x$A2
+  if (!is.integer(A1)) A1 <- as.integer(A1)
+  if (!is.integer(A2)) A2 <- as.integer(A2)
+  s_take <- min(length(sample_ids), 4L); l_take <- min(length(locus_ids), 5L)
+  rows <- vector("list", s_take * l_take); k <- 1L
+  for (si in seq_len(s_take)) for (li in seq_len(l_take)) {
+    rows[[k]] <- list(SampleID=sample_ids[si], Locus=as.character(locus_ids[li]),
+                      A1=A1[si,li], A2=A2[si,li]); k <- k + 1L
+  }
+  sample_df <- do.call(rbind.data.frame, rows)
+  schema <- list(
+    title="Virtual DB (indexed grid)", version="0.1.0", type="object",
+    properties=list(
+      sample_ids=list(type="array", items=list(type="string"), length=length(sample_ids)),
+      locus_ids =list(type="array", items=list(type="string"), length=length(locus_ids)),
+      A1=list(type="integer", shape=c(length(sample_ids), length(locus_ids))),
+      A2=list(type="integer", shape=c(length(sample_ids), length(locus_ids)))
     )
   )
+  out_dir <- file.path("output","exports", family)
+  .emit(out_dir, tools::file_path_sans_ext(basename(path)), family, schema, sample_df,
+        notes=c("ANY_CODE=9999 treated as wildcard.",
+                "Traversal order should align with locus_order."),
+        src_path=normalizePath(path, winslash="/", mustWork=FALSE))
 }
 
-# ---- schema inference generic (best-effort) --------------------------------
-infer_schema_from_df <- function(df) {
-  cols <- lapply(names(df), function(nm){
-    x <- df[[nm]]
-    tp <- if (is.integer(x)) "integer" else if (is.numeric(x)) "number" else if (is.logical(x)) "boolean" else "string"
-    out <- list(name = nm, type = tp)
-    if (is.factor(x)) out$levels <- levels(x)
-    out
-  })
-  list(
-    title   = "inferred schema",
-    version = "0.1.0",
-    columns = cols
-  )
+export_freq_table_schema <- function(path, family="freq_table"){
+  x <- safe_read_rds(path)
+  if (!is.data.frame(x)) stop("freq_table.rds must be a data.frame")
+  schema <- infer_schema_df(x)
+  sample_df <- utils::head(x, 100L)
+  out_dir <- file.path("output","exports", family)
+  .emit(out_dir, "freq_table", family, schema, sample_df,
+        notes=c("Frequencies are used for display for now.",
+                "Decimal alleles allowed as character.",
+                "ANY_CODE(9999) handling: see project docs."),
+        src_path=normalizePath(path, winslash="/", mustWork=FALSE))
 }
 
-# ---- codebook writer --------------------------------------------------------
-write_codebook <- function(path_md, schema, family, src_path) {
-  dir.create(dirname(path_md), recursive = TRUE, showWarnings = FALSE)
-  cat("# Codebook\n\n", file = path_md)
-  cat(sprintf("- family: %s\n", family), file = path_md, append = TRUE)
-  cat(sprintf("- source: %s\n", src_path), file = path_md, append = TRUE)
-  cat(sprintf("- title:  %s\n", schema$title %||% ""), file = path_md, append = TRUE)
-  cat(sprintf("\n\n## Columns\n\n"), file = path_md, append = TRUE)
-  for (c in schema$columns) {
-    cat(sprintf("- %s : %s", c$name, c$type), file = path_md, append = TRUE); 
-    if (!is.null(c$levels)) cat(sprintf(" (levels: %s)", paste(head(c$levels, 20L), collapse=", ")), file = path_md, append = TRUE)
-    cat("\n", file = path_md, append = TRUE)
-  }
+export_locus_order_schema <- function(path, family="locus_order"){
+  x <- safe_read_rds(path)
+  if (!is.vector(x) || !is.character(x)) stop("locus_order.rds must be a character vector")
+  schema <- infer_schema_vector(x, "string")
+  sample_df <- data.frame(Locus = x, stringsAsFactors = FALSE)
+  out_dir <- file.path("output","exports", family)
+  .emit(out_dir, "locus_order", family, schema, sample_df,
+        notes=c("Order used by UI and scoring traversal.",
+                "Keep in sync with GlobalFiler 21 loci (fixed for now)."),
+        src_path=normalizePath(path, winslash="/", mustWork=FALSE))
 }
 
-# ---- sample csv writer (tiny) ----------------------------------------------
-write_sample_csv <- function(path_csv, df) {
-  dir.create(dirname(path_csv), recursive = TRUE, showWarnings = FALSE)
-  utils::write.csv(head(df, 50L), path_csv, row.names = FALSE)
-}
-
-# ---- export one -------------------------------------------------------------
-export_rds_schema <- function(input_rds, out_prefix, family, schema_path = NA_character_, on_mismatch = "stop") {
-  obj <- readRDS(input_rds)
-  is_indexed <- is.list(obj) && all(c("sample_ids","locus_ids","A1","A2") %in% names(obj))
-  # choose schema
-  if (!is.na(schema_path) && nzchar(schema_path) && file.exists(schema_path)) {
-    schema <- jsonlite::fromJSON(schema_path, simplifyVector = TRUE)
+export_locus_layout_schema <- function(path, family="locus_layout"){
+  x <- safe_read_rds(path)
+  out_dir <- file.path("output","exports", family)
+  if (is.data.frame(x)) {
+    schema <- infer_schema_df(x); sample_df <- utils::head(x, 50L)
+    notes <- c("UI grouping (left/right panes, dye assignment).",
+               "Recommended columns: Locus, Pane, Group, Order, Dye.")
+  } else if (is.list(x)) {
+    schema <- infer_schema_list(x)
+    sample_rows <- list(); take <- 0L
+    if (length(names(x))) for (nm in names(x)) {
+      v <- x[[nm]]
+      if (is.vector(v) && is.character(v)) {
+        for (val in utils::head(v, 50L)) {
+          sample_rows[[length(sample_rows)+1L]] <- list(Pane=nm, Locus=val)
+          take <- take + 1L; if (take >= 100L) break
+        }
+      }
+      if (take >= 100L) break
+    }
+    sample_df <- if (length(sample_rows)) do.call(rbind.data.frame, sample_rows) else NULL
+    notes <- c("List form detected (e.g., left/right -> loci).",
+               "Consider normalizing to a data.frame for downstream simplicity.")
   } else {
-    schema <- if (is_indexed) infer_schema_for_indexed_db(obj) else infer_schema_from_df(read_rds_df(input_rds))
+    stop("Unsupported locus_layout class: ", paste(class(x), collapse = ","))
   }
-  # very light mismatch check (column names only if df)
-  ok <- TRUE
-  if (!is_indexed) {
-    df <- read_rds_df(input_rds)
-    want <- vapply(schema$columns, function(c) c$name, character(1))
-    have <- names(df)
-    if (!all(want %in% have)) {
-      msg <- sprintf("schema columns not all present. want=%s / have=%s", paste(want, collapse=","), paste(have, collapse=","))
-      if (identical(on_mismatch, "stop")) stop(msg) else warning(msg)
-      ok <- FALSE
-    }
-  }
-  # write files
-  schema_json <- paste0(out_prefix, ".schema.json")
-  codebook_md <- paste0(out_prefix, ".codebook.md")
-  sample_csv  <- paste0(out_prefix, ".sample.csv")
-  dir.create(dirname(schema_json), recursive = TRUE, showWarnings = FALSE)
-  jsonlite::write_json(schema, schema_json, pretty = TRUE, auto_unbox = TRUE)
-  write_codebook(codebook_md, schema, family, input_rds)
-  # sample
-  smalldf <- if (is_indexed) read_rds_df(input_rds) else utils::head(read_rds_df(input_rds), 50L)
-  write_sample_csv(sample_csv, smalldf)
-  invisible(list(schema = schema_json, codebook = codebook_md, sample = sample_csv, ok = ok))
+  .emit(out_dir, "locus_layout", family, schema, sample_df, notes,
+        src_path=normalizePath(path, winslash="/", mustWork=FALSE))
 }
 
-# ---- main -------------------------------------------------------------------
-main <- function() {
-  reg <- load_registry(NULL)
-  message("[REGISTRY] ", normalizePath(reg$path, winslash = "/"))
-  all_paths <- list.files("data", pattern = "\\.rds$", recursive = FALSE, full.names = TRUE)
-  for (fam in reg$families) {
-    hits <- match_family(fam, all_paths)
-    if (!length(hits)) next
-    message(sprintf("[FAMILY] %s  files=%d", fam$family, length(hits)))
-    for (f in hits) {
-      base <- sub("\\.rds$", "", basename(f))
-      outdir <- file.path(fam$outdir, fam$family)
-      out_prefix <- file.path(outdir, base)
-      message(sprintf("  - exporting %s -> %s", f, normalizePath(out_prefix, winslash = "/", mustWork = FALSE)))
-      export_rds_schema(
-        input_rds   = f,
-        out_prefix  = out_prefix,
-        family      = fam$family,
-        schema_path = fam$schema,
-        on_mismatch = fam$on_mismatch %||% "stop"
-      )
+dispatch_export <- function(fam, input_path){
+  family <- fam$family %||% "unknown"
+  handler_name <- fam$handler %||% ""
+  if (nzchar(handler_name) && exists(handler_name, mode="function")) {
+    return(do.call(handler_name, list(input_path, family)))
+  }
+  if (identical(family, "virtual_db_u100")) return(export_virtual_db_schema(input_path, family))
+  if (identical(family, "freq_table"))      return(export_freq_table_schema(input_path, family))
+  if (identical(family, "locus_order"))     return(export_locus_order_schema(input_path, family))
+  if (identical(family, "locus_layout"))    return(export_locus_layout_schema(input_path, family))
+  obj <- safe_read_rds(input_path)
+  out_dir <- file.path("output","exports", family)
+  if (is.data.frame(obj)) {
+    .emit(out_dir, tools::file_path_sans_ext(basename(input_path)), family,
+          infer_schema_df(obj), utils::head(obj, 50L),
+          notes="fallback by class: data.frame",
+          src_path=normalizePath(input_path, winslash="/", mustWork=FALSE)); return(invisible(TRUE))
+  }
+  if (is.vector(obj) && is.character(obj)) {
+    .emit(out_dir, tools::file_path_sans_ext(basename(input_path)), family,
+          infer_schema_vector(obj, "string"),
+          data.frame(value=head(obj, 100L)),
+          notes="fallback by class: character vector",
+          src_path=normalizePath(input_path, winslash="/", mustWork=FALSE)); return(invisible(TRUE))
+  }
+  if (is.list(obj)) {
+    .emit(out_dir, tools::file_path_sans_ext(basename(input_path)), family,
+          infer_schema_list(obj), NULL,
+          notes="fallback by class: list",
+          src_path=normalizePath(input_path, winslash="/", mustWork=FALSE)); return(invisible(TRUE))
+  }
+  stop("Unsupported RDS content class for: ", input_path)
+}
+
+main <- function(reg_path = NULL){
+  reg <- load_registry(reg_path)
+  files <- character(0)
+  if (dir.exists("data")) {
+    files <- list.files("data", recursive = TRUE, full.names = TRUE)
+    files <- files[grepl("\\.(rds)$", files, ignore.case = TRUE)]
+  }
+  if (!length(files)) { message("[EXPORT] No candidate RDS under data/"); return(invisible(TRUE)) }
+  for (f in files) {
+    fam <- match_family(f, reg)
+    if (is.null(fam)) {
+      msg <- paste0("[REGISTRY] No family matched: ", f)
+      if (identical(reg$on_mismatch, "stop")) stop(msg) else { warning(msg); next }
     }
+    dispatch_export(fam, f)
   }
 }
 
 if (identical(environment(), globalenv())) {
   args <- commandArgs(trailingOnly = TRUE)
-  main()
+  reg_path <- if (length(args)) args[1] else NULL
+  main(reg_path)
 }

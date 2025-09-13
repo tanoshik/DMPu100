@@ -4,24 +4,27 @@
   "families": [
     {
       "family": "virtual_db_u100",
-      "patterns": [
-        "^data/virtual_db_u100_S\\d+_seed\\d+\\.rds$"
-      ],
+      "patterns": ["^data/virtual_db_u100_S\\d+_seed\\d+\\.rds$"],
+      "handler": "export_virtual_db_schema",
       "schema": "scripts/devtools/schemas/virtual_db_u100.schema.json"
     },
     {
       "family": "freq_table",
-      "patterns": [
-        "^data/freq_table\\.rds$"
-      ],
+      "patterns": ["^data/freq_table\\.rds$"],
+      "handler": "export_freq_table_schema",
       "schema": "scripts/devtools/schemas/freq_table.schema.json"
     },
     {
       "family": "locus_order",
-      "patterns": [
-        "^data/locus_order\\.rds$"
-      ],
+      "patterns": ["^data/locus_order\\.rds$"],
+      "handler": "export_locus_order_schema",
       "schema": "scripts/devtools/schemas/locus_order.schema.json"
+    },
+    {
+      "family": "locus_layout",
+      "patterns": ["^data/locus_layout\\.rds$"],
+      "handler": "export_locus_layout_schema",
+      "schema": "scripts/devtools/schemas/locus_layout.schema.json"
     }
   ]
 }
