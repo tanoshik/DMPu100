@@ -66,34 +66,56 @@ DataFrame dmp_match_cpp(
    }
   }
   
-  // selection
+  // ---- selection (bucketized; O(S) + intra-bucket stable) ----
   std::vector<int> idx;
   idx.reserve(S);
+  
+  // cache SampleID once (same as original)
+  std::vector<std::string> sid(S);
+  for (int i = 0; i < S; ++i) sid[i] = std::string(sample_ids[i]);
+  
+  // derive MAX_SC dynamically from scoreLUT (length=16) and enabled locus count (LE)
+  int max_per_locus = scoreLUT[0];
+  for (int t = 1; t < 16; ++t) if (scoreLUT[t] > max_per_locus) max_per_locus = scoreLUT[t];
+  // use LE (= (int)loci.size()) rather than L for masked runs
+  const int MAX_SC = std::max(0, max_per_locus * LE);
+  
+  // buckets[score] holds indices with that score
+  std::vector<std::vector<int>> buckets(MAX_SC + 1);
+  for (int s = 0; s < S; ++s) {
+    int sc = scores[s];
+    if (sc < 0) sc = 0;
+    if (sc > MAX_SC) sc = MAX_SC; // clamp for safety
+    buckets[sc].push_back(s);
+  }
+  
   if (mode == "topn") {
     const int K = std::min(std::max(top_n, 0), S);
-    std::vector<int> order(S);
-    std::iota(order.begin(), order.end(), 0);
-    
-    // cache sample_ids to avoid string construction in comparator
-    std::vector<std::string> sid(S);
-    for (int i = 0; i < S; ++i) sid[i] = std::string(sample_ids[i]);
-    
-    std::stable_sort(order.begin(), order.end(), [&](int a, int b){
-      if (scores[a] != scores[b]) return scores[a] > scores[b];
-      return sid[a] < sid[b];
-    });
-    idx.assign(order.begin(), order.begin() + K);
-  } else { // threshold
-    for (int s = 0; s < S; ++s) {
-      if (scores[s] >= threshold) {
-        idx.push_back(s);
-        if (display_limit > 0 && (int)idx.size() >= display_limit) break;
+    for (int sc = MAX_SC; sc >= 0 && (int)idx.size() < K; --sc) {
+      auto &b = buckets[sc];
+      if (b.empty()) continue;
+      // ID昇順の安定化（同点のみ）
+      std::stable_sort(b.begin(), b.end(), [&](int a, int b_){ return sid[a] < sid[b_]; });
+      for (int v : b) {
+        idx.push_back(v);
+        if ((int)idx.size() >= K) break;
       }
     }
-    std::stable_sort(idx.begin(), idx.end(), [&](int a, int b){
-      if (scores[a] != scores[b]) return scores[a] > scores[b];
-      return std::string(sample_ids[a]) < std::string(sample_ids[b]);
-    });
+  } else { // "threshold"
+    const int T = std::max(0, threshold);
+    for (int sc = MAX_SC; sc >= T && (display_limit <= 0 || (int)idx.size() < display_limit); --sc) {
+      auto &b = buckets[sc];
+      if (b.empty()) continue;
+      std::stable_sort(b.begin(), b.end(), [&](int a, int b_){ return sid[a] < sid[b_]; });
+      if (display_limit > 0) {
+        for (int v : b) {
+          idx.push_back(v);
+          if ((int)idx.size() >= display_limit) break;
+        }
+      } else {
+        idx.insert(idx.end(), b.begin(), b.end());
+      }
+    }
   }
   
   const int K = (int)idx.size();
