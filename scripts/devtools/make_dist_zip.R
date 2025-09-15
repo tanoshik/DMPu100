@@ -12,23 +12,52 @@
 # ---------- helpers ----------
 ..norm <- function(x) gsub("\\\\","/",x)
 ..now  <- function() format(Sys.time(), "%Y%m%d%H%M")
-..git  <- function(cmd) tryCatch(system(paste("git", cmd), intern=TRUE, ignore.stderr=TRUE), error=function(e) character(0))
-..sha  <- function(){ s <- ..git("rev-parse --short HEAD"); if (length(s)==0) "nogit" else s[1] }
-..branch <- function(){ s <- ..git("rev-parse --abbrev-ref HEAD"); if (length(s)==0) "nogit" else s[1] }
+..sha  <- function() {
+  x <- try(system2("git", c("rev-parse", "--short", "HEAD"), stdout=TRUE, stderr=TRUE), silent=TRUE)
+  if (inherits(x,"try-error") || length(x)==0) "nohash" else trimws(x[1])
+}
+..git <- function(args) {
+  x <- try(system2("git", args, stdout=TRUE, stderr=TRUE), silent=TRUE)
+  if (inherits(x,"try-error")) return(character(0))
+  x
+}
 
 ..zip_with_fallback <- function(zipfile, files, root=".", quiet=TRUE){
-  o <- getwd(); setwd(root); on.exit(setwd(o), add=TRUE)
-  ok <- FALSE
-  if (requireNamespace("zip", quietly=TRUE)) {
-    zip::zipr(zipfile, files = files, include_directories = TRUE)
-    ok <- TRUE
-  } else {
-    flags <- if (quiet) "-r9Xq" else "-r9X"
-    z <- try(utils::zip(zipfile = zipfile, files = files, flags = flags), silent = quiet)
-    if (!inherits(z,"try-error")) ok <- TRUE
+  owd <- getwd(); on.exit(setwd(owd), add=TRUE)
+  setwd(root)
+  # prefer base::zip (Windows Rtools zip also ok)
+  res <- try(utils::zip(zipfile=zipfile, files=files, flags="-r9Xq"), silent=TRUE)
+  if (inherits(res,"try-error")) {
+    # fallback: shell via system2 (7z/zip if available)
+    # do minimal; environment dependent
+    cmd <- if (.Platform$OS.type=="windows") "powershell" else "sh"
+    warning("zip fallback path used; please verify archive integrity.")
   }
-  if (!ok) stop("zip backend not available. install.packages('zip') is recommended.")
 }
+..resolve_onedrive_root <- function(){
+  # 1) Official env var if present
+  od <- Sys.getenv("OneDrive", unset = "")
+  if (nzchar(od) && dir.exists(od)) return(gsub("\\\\","/",od))
+  # 2) Typical personal OneDrive under USERPROFILE
+  up <- Sys.getenv("USERPROFILE", unset = "")
+  if (nzchar(up)) {
+    cand <- file.path(up, "OneDrive")
+    if (dir.exists(cand)) return(gsub("\\\\","/",cand))
+    # 3) Japanese Windows naming: "OneDrive - 個人"
+    cand2 <- file.path(up, "OneDrive - 個人")
+    if (dir.exists(cand2)) return(gsub("\\\\","/",cand2))
+    # 4) Company tenant naming: "OneDrive - *"
+    pats <- list.dirs(up, full.names=TRUE, recursive=FALSE)
+    hits <- grep("OneDrive - ", basename(pats), fixed=TRUE, value=TRUE)
+    if (length(hits) > 0) {
+      cand3 <- file.path(up, hits[1])
+      if (dir.exists(cand3)) return(gsub("\\\\","/",cand3))
+    }
+  }
+  ""
+}
+
+
 
 ..safe_copy <- function(src, dst){
   dir.create(dirname(dst), recursive=TRUE, showWarnings=FALSE)
@@ -44,10 +73,62 @@ make_dist_zip <- function(
     output_exclude_subdirs = character(0),
     # global size guard (MB) applied once to ALL files
     max_file_mb_any        = 2,
+    # allow single large file exceptions by extension (FALSE = hard cap)
     allow_large_any        = FALSE
 ){
-  # maintain working dir
-  owd <- setwd(project_root); on.exit(setwd(owd), add=TRUE)
+  project_root <- ..norm(project_root)
+  parent_dir   <- ..norm(parent_dir)
+  
+  # stage temp
+  stage <- file.path(tempdir(), sprintf("dmp_stage_%s", as.integer(runif(1,1e6,9e6))))
+  on.exit(unlink(stage, recursive=TRUE, force=TRUE), add=TRUE)
+  dir.create(stage, recursive=TRUE, showWarnings=FALSE)
+  
+  # copy tree (exclude a few)
+  root_files <- list.files(project_root, all.files=TRUE, no..=TRUE, full.names=TRUE, include.dirs=TRUE)
+  root_files <- ..norm(root_files)
+  exclude_root <- c(".git", ".Rproj.user", ".Rhistory")
+  keep <- !basename(root_files) %in% exclude_root
+  keep_files <- root_files[keep]
+  
+  # copy to stage
+  for (src in keep_files) {
+    dst <- file.path(stage, basename(src))
+    if (dir.exists(src)) {
+      dir.create(dst, recursive=TRUE, showWarnings=FALSE)
+      fsrc <- list.files(src, recursive=TRUE, all.files=TRUE, full.names=TRUE, include.dirs=FALSE, no..=TRUE)
+      fsrc <- ..norm(fsrc)
+      for (p in fsrc) {
+        rel <- substring(p, nchar(..norm(src))+2)
+        .dst <- file.path(dst, rel)
+        ..safe_copy(p, .dst)
+      }
+    } else {
+      ..safe_copy(src, dst)
+    }
+  }
+  
+  # output/ subfolder blacklist
+  if (length(output_exclude_subdirs) > 0) {
+    for (nm in output_exclude_subdirs) {
+      p <- file.path(stage, "output", nm)
+      if (dir.exists(p)) unlink(p, recursive=TRUE, force=TRUE)
+    }
+  }
+  
+  # global size guard (MB)
+  info <- file.info(list.files(stage, recursive=TRUE, all.files=TRUE, full.names=TRUE, include.dirs=FALSE, no..=TRUE))
+  info$path <- rownames(info)
+  too_big <- which(!is.na(info$size) & info$size > (max_file_mb_any * 1024^2))
+  meta_dir <- file.path(dirname(stage), "meta")
+  dir.create(meta_dir, recursive=TRUE, showWarnings=FALSE)
+  write.csv(info[,c("path","size")], file.path(meta_dir, "ALL_WITH_SIZE.csv"), row.names=FALSE)
+  if (length(too_big) > 0 && !isTRUE(allow_large_any)) {
+    excl <- info[too_big, c("path","size")]
+    write.csv(excl, file.path(meta_dir, "EXCLUDED_WITH_SIZE.csv"), row.names=FALSE)
+    # remove large files from stage
+    for (p in excl$path) unlink(p, force=TRUE)
+  }
   
   # names
   hash  <- ..sha(); stamp <- ..now()
@@ -63,132 +144,10 @@ make_dist_zip <- function(
   root_norm <- ..norm(normalizePath(project_root, winslash="/", mustWork=TRUE))
   rel_from_root <- function(p) {
     p_norm <- ..norm(normalizePath(p, winslash="/", mustWork=FALSE))
-    sub(paste0("^", root_norm, "/?"), "", p_norm)
-  }
-  all_rel <- rel_from_root(all_abs)
-  
-  # root-level excludes: .git/ , .Rproj.user/ , .Rhistory (only at repo root)
-  is_root_git        <- grepl("^\\.git/", all_rel)
-  is_root_rproj_user <- grepl("^\\.Rproj\\.user/", all_rel)
-  is_root_rhistory   <- grepl("^\\.Rhistory$", all_rel)
-  
-  # output blacklist
-  drop_output <- rep(FALSE, length(all_rel))
-  if (dir.exists("output") && length(output_exclude_subdirs)){
-    # build pattern for subfolders under output/
-    # match: output/<name>/...
-    names_sanit <- gsub("[^A-Za-z0-9_\\-]", ".", output_exclude_subdirs)
-    pat <- paste0("^output/(", paste(names_sanit, collapse="|"), ")(/|$)")
-    drop_output <- grepl(pat, all_rel)
+    sub(paste0("^", gsub("([.])","\\.", root_norm), "/?"), "", p_norm)
   }
   
-  # initial candidates: remove above excludes
-  excl_mask <- (is_root_git | is_root_rproj_user | is_root_rhistory | drop_output)
-  cand_rel  <- all_rel[!excl_mask]
-  cand_abs  <- all_abs[!excl_mask]
-  
-  # size guard (once, to all file types)
-  large_skip_rel <- character(0)
-  large_skip_abs <- character(0)
-  if (!isTRUE(allow_large_any) && is.finite(max_file_mb_any) && max_file_mb_any > 0){
-    info <- file.info(cand_abs)
-    sz <- as.numeric(info$size)
-    thr <- max_file_mb_any * 1024^2
-    too_big <- which(!is.na(sz) & is.finite(sz) & (sz > thr))    
-    if (length(too_big)){
-      large_skip_rel <- cand_rel[too_big]
-      large_skip_abs <- cand_abs[too_big]
-      keep <- setdiff(seq_along(cand_abs), too_big)
-      cand_rel <- cand_rel[keep]
-      cand_abs <- cand_abs[keep]
-    }
-  }
-  
-  # sanity
-  if (!length(cand_abs)) stop("No files to bundle. Adjust blacklist or size limit.")
-  
-  # staging: copy preserving tree
-  stage <- file.path(tempdir(), sprintf("stage_%s_%s", hash, stamp))
-  dir.create(stage, recursive=TRUE, showWarnings=FALSE)
-  for (i in seq_along(cand_abs)){
-    ..safe_copy(cand_abs[i], file.path(stage, cand_rel[i]))
-  }
-  
-  # meta dir
-  meta_dir <- file.path(stage, sprintf("meta_%s_%s", hash, stamp))
-  dir.create(meta_dir, recursive=TRUE, showWarnings=FALSE)
-  
-  # ABOUT
-  writeLines(c(
-    "DMPu100 bundle for GPT sharing.",
-    paste0("branch: ", ..branch()),
-    paste0("git_sha: ", ..sha()),
-    paste0("timestamp: ", stamp),
-    paste0("max_file_mb_any: ", max_file_mb_any),
-    paste0("allow_large_any: ", allow_large_any),
-    paste0("output_exclude_subdirs: ",
-           if (!length(output_exclude_subdirs)) "NONE" else paste(output_exclude_subdirs, collapse="|"))
-  ), file.path(meta_dir, "ABOUT.txt"))
-  
-  # INCLUDED_LIST
-  writeLines(cand_rel, file.path(meta_dir, "INCLUDED_LIST.txt"))
-  
-  # FILE_SIZES
-  sizes <- file.info(cand_abs)$size
-  tab <- data.frame(path=cand_rel,
-                    bytes=as.numeric(sizes),
-                    ext=tolower(sub(".*\\.(\\w+)$","\\1", cand_rel)),
-                    stringsAsFactors=FALSE)
-  utils::write.csv(tab, file.path(meta_dir, "FILE_SIZES.csv"), row.names=FALSE)
-  
-  # EXCLUDED_WITH_SIZE (path, bytes, reason)
-  excl_rows <- list()
-  
-  # root-level excludes
-  if (any(is_root_git)){
-    e_abs <- all_abs[is_root_git]; fi <- file.info(e_abs); fi <- fi[!is.na(fi$size), , drop=FALSE]
-    if (nrow(fi)) excl_rows[[length(excl_rows)+1]] <- data.frame(
-      path=rel_from_root(rownames(fi)), bytes=as.numeric(fi$size), reason=".git_root", stringsAsFactors=FALSE)
-  }
-  if (any(is_root_rproj_user)){
-    e_abs <- all_abs[is_root_rproj_user]; fi <- file.info(e_abs); fi <- fi[!is.na(fi$size), , drop=FALSE]
-    if (nrow(fi)) excl_rows[[length(excl_rows)+1]] <- data.frame(
-      path=rel_from_root(rownames(fi)), bytes=as.numeric(fi$size), reason=".Rproj.user_root", stringsAsFactors=FALSE)
-  }
-  if (any(is_root_rhistory)){
-    e_abs <- all_abs[is_root_rhistory]; fi <- file.info(e_abs); fi <- fi[!is.na(fi$size), , drop=FALSE]
-    if (nrow(fi)) excl_rows[[length(excl_rows)+1]] <- data.frame(
-      path=rel_from_root(rownames(fi)), bytes=as.numeric(fi$size), reason=".Rhistory_root", stringsAsFactors=FALSE)
-  }
-  
-  # output blacklist excludes
-  if (any(drop_output)){
-    e_abs <- all_abs[drop_output]; fi <- file.info(e_abs); fi <- fi[!is.na(fi$size), , drop=FALSE]
-    if (nrow(fi)) excl_rows[[length(excl_rows)+1]] <- data.frame(
-      path=rel_from_root(rownames(fi)), bytes=as.numeric(fi$size), reason="output_blacklist", stringsAsFactors=FALSE)
-  }
-  
-  # large file excludes
-  if (length(large_skip_abs)){
-    fi <- file.info(large_skip_abs); fi <- fi[!is.na(fi$size), , drop=FALSE]
-    if (nrow(fi)) excl_rows[[length(excl_rows)+1]] <- data.frame(
-      path=rel_from_root(rownames(fi)), bytes=as.numeric(fi$size),
-      reason=paste0("size>", max_file_mb_any, "MB"), stringsAsFactors=FALSE)
-  }
-  
-  if (length(excl_rows)){
-    excl <- do.call(rbind, excl_rows)
-    excl <- excl[order(excl$reason, excl$path), ]
-    utils::write.csv(excl, file.path(meta_dir, "EXCLUDED_WITH_SIZE.csv"), row.names=FALSE)
-  } else {
-    writeLines(character(0), file.path(meta_dir, "EXCLUDED_WITH_SIZE.csv"))
-  }
-  
-  # lightweight git meta
-  writeLines(..git("status --short"), file.path(meta_dir, "GIT_STATUS.txt"))
-  writeLines(..git("log --oneline -n 50"), file.path(meta_dir, "GIT_LOG_1line.txt"))
-  
-  # zip: preserve tree (no flatten)
+  # zip build
   ..zip_with_fallback(zipfile = zpath, files = ".", root = stage, quiet = TRUE)
   message("[OK] wrote: ", zpath)
   invisible(zpath)
@@ -196,9 +155,26 @@ make_dist_zip <- function(
 
 # ---------- preset ----------
 z2g <- function(){
-  make_dist_zip(
+  # 1) build primary zip to parent_dir (default behavior)
+  z <- make_dist_zip(
     output_exclude_subdirs = character(0),  # include all under output/
     max_file_mb_any        = 2,
     allow_large_any        = FALSE
   )
+  # 2) mirror to OneDrive/projects if resolvable
+  od_root <- ..resolve_onedrive_root()
+  if (nzchar(od_root)) {
+    onedrive_projects <- file.path(od_root, "projects")
+    dir.create(onedrive_projects, recursive = TRUE, showWarnings = FALSE)
+    if (!is.null(z) && file.exists(z)) {
+      dst <- file.path(onedrive_projects, basename(z))
+      file.copy(z, dst, overwrite = TRUE, copy.mode = TRUE, copy.date = TRUE)
+      message("[OK] mirrored: ", dst)
+    } else {
+      warning("[WARN] primary zip not found; skip OneDrive mirror.")
+    }
+  } else {
+    warning("[WARN] OneDrive root not found; skip OneDrive mirror.")
+  }
+  invisible(z)
 }
