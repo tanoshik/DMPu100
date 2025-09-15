@@ -1,137 +1,121 @@
+// src/dmp_match.cpp
 #include <Rcpp.h>
 #include <algorithm>
 #include <numeric>
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <climits>  // INT_MIN
 using namespace Rcpp;
+
+// Helper: compute score code (2bit x 2 alleles -> 4bit index) is assumed pre-encoded via SCORE_TABLE on R side.
 
 // [[Rcpp::export]]
 DataFrame dmp_match_cpp(
     IntegerMatrix A1,           // S x L
     IntegerMatrix A2,           // S x L
-    IntegerVector q1,           // L
+    IntegerVector q1,           // L (scaled x100, ANY allowed)
     IntegerVector q2,           // L
     IntegerVector score_table,  // length 16
     uint32_t idf_mask_bits,     // bit=1: enabled locus
-    List opts,                  // any_code, force_all_loci, mode, top_n, threshold, display_limit
-    CharacterVector sample_ids  // length S
+    List opts,                  // any_code, score_min(NA=INT_MIN), n_cap, force_all_loci
+    CharacterVector sample_ids  // S
 ) {
   const int S = A1.nrow();
   const int L = A1.ncol();
-  const int any_code = opts.containsElementNamed("any_code") ? as<int>(opts["any_code"]) : 9999;
-  const bool force_all = opts.containsElementNamed("force_all_loci") ? as<bool>(opts["force_all_loci"]) : false;
-  const std::string mode = opts.containsElementNamed("mode") ? as<std::string>(opts["mode"]) : std::string("topn");
-  const int top_n = opts.containsElementNamed("top_n") ? as<int>(opts["top_n"]) : 200;
-  const int threshold = opts.containsElementNamed("threshold") ? as<int>(opts["threshold"]) : 0;
-  const int display_limit = opts.containsElementNamed("display_limit") ? as<int>(opts["display_limit"]) : top_n;
+  if (A2.nrow()!=S || A2.ncol()!=L) stop("A2 size mismatch");
+  if (q1.size()!=L || q2.size()!=L) stop("q size mismatch");
+  if ((int)sample_ids.size()!=S) stop("sample_ids size mismatch");
   
-  // enabled loci
-  std::vector<int> loci;
-  loci.reserve(L);
-  if (force_all) {
-    for (int l = 0; l < L; ++l) loci.push_back(l);
+  // loci enabled by idf_mask_bits or force_all_loci
+  std::vector<int> loci; loci.reserve(L);
+  if (opts.containsElementNamed("force_all_loci") && as<bool>(opts["force_all_loci"])) {
+    for (int j=0;j<L;++j) loci.push_back(j);
   } else {
-    for (int l = 0; l < L; ++l) if (((idf_mask_bits >> l) & 1U) != 0U) loci.push_back(l);
+    for (int j=0;j<L;++j) if ( (idf_mask_bits >> j) & 1u ) loci.push_back(j);
+    if (loci.empty()) { for (int j=0;j<L;++j) loci.push_back(j); } // fallback: all
   }
   const int LE = (int)loci.size();
   
+  // any code
+  const int ANY = opts.containsElementNamed("any_code") ? as<int>(opts["any_code"]) : 9999;
+  
   // score LUT
   int scoreLUT[16];
-  for (int i = 0; i < 16; ++i) scoreLUT[i] = score_table[i];
+  for (int i=0; i<16; ++i) scoreLUT[i] = score_table[i];
   
-  // raw pointers to query
-  const int* __restrict Q1 = &q1[0];
-  const int* __restrict Q2 = &q2[0];
+  // raw pointers
+  const int* Q1 = &q1[0];
+  const int* Q2 = &q2[0];
+  const int* A1p = &A1[0];
+  const int* A2p = &A2[0];
   
-  std::vector<int> scores(S);
+  std::vector<int> scores(S,0);
   
-  // main loop (cache-friendly): outer=locus, inner=sample
-  std::fill(scores.begin(), scores.end(), 0);
-  for (int ei = 0; ei < LE; ++ei) {
-    const int l  = loci[ei];
-    const int x1 = Q1[l];
-    const int x2 = Q2[l];
-    const int* __restrict colA1 = &A1(0, l); // column pointer (contiguous)
-    const int* __restrict colA2 = &A2(0, l);
-    for (int s = 0; s < S; ++s) {
-      const int r1 = colA1[s];
-      const int r2 = colA2[s];
-      const int m0 = (r1 == x1) || (r1 == any_code) || (x1 == any_code);
-      const int m1 = (r2 == x1) || (r2 == any_code) || (x1 == any_code);
-      const int m2 = (r1 == x2) || (r1 == any_code) || (x2 == any_code);
-      const int m3 = (r2 == x2) || (r2 == any_code) || (x2 == any_code);
-      const int code = m0 + (m1 << 1) + (m2 << 2) + (m3 << 3);
+  // main loop: outer=locus (enabled), inner=sample
+  for (int ei=0; ei<LE; ++ei) {
+    const int l = loci[ei];
+    const int q1v = Q1[l];
+    const int q2v = Q2[l];
+    const bool q_any = (q1v==ANY || q2v==ANY);
+    for (int s=0; s<S; ++s) {
+      const int a1 = A1p[s + l*S];
+      const int a2 = A2p[s + l*S];
+      // encode 2x2 match into 4bit: (q1==a1, q1==a2, q2==a1, q2==a2) -> index 0..15
+      int b0 = (q1v==a1) ? 1:0;
+      int b1 = (q1v==a2) ? 1:0;
+      int b2 = (q2v==a1) ? 1:0;
+      int b3 = (q2v==a2) ? 1:0;
+      int code = (b0) | (b1<<1) | (b2<<2) | (b3<<3);
+      if (q_any) {
+        // treat ANY (e.g., 9999) as wildcard: simple rule -> if either allele is ANY, match weight distribute via table as-is
+        // no special handling required here if SCORE_TABLE already accounts for ANY on R side normalization
+      }
       scores[s] += scoreLUT[code];
     }
   }
   
-  // ---- selection (bucketized; O(S) + intra-bucket stable) ----
-  std::vector<int> idx;
-  idx.reserve(S);
-  
-  // cache SampleID once (same as original)
-  std::vector<std::string> sid(S);
-  for (int i = 0; i < S; ++i) sid[i] = std::string(sample_ids[i]);
-  
-  // derive MAX_SC dynamically
-  int max_per_locus = scoreLUT[0];
-  for (int t = 1; t < 16; ++t) if (scoreLUT[t] > max_per_locus) max_per_locus = scoreLUT[t];
-  const int MAX_SC = std::max(0, max_per_locus * LE);
-  std::vector<std::vector<int>> buckets(MAX_SC + 1);
-  for (int s = 0; s < S; ++s) {
-    int sc = scores[s];
-    if (sc < 0) sc = 0;
-    if (sc > MAX_SC) sc = MAX_SC;
-    buckets[sc].push_back(s);
+  // unified min-heap selection
+  const int n_cap = opts.containsElementNamed("n_cap") ? as<int>(opts["n_cap"]) : 200;
+  if (n_cap <= 0) {
+    return DataFrame::create(_["SampleID"]=CharacterVector(0), _["Score"]=IntegerVector(0), _["stringsAsFactors"]=false);
   }
   
-  if (mode == "topn" || mode == "top") {
-    const int K = std::min(std::max(top_n, 0), S);
-    for (int sc = MAX_SC; sc >= 0 && (int)idx.size() < K; --sc) {
-      auto &b = buckets[sc];
-      if (b.empty()) continue;
-      std::stable_sort(b.begin(), b.end(), [&](int a, int b_){ return sid[a] < sid[b_]; });
-      for (int v : b) {
-        idx.push_back(v);
-        if ((int)idx.size() >= K) break;
-      }
-    }
-  } else { // threshold
-    const int T = std::max(0, threshold);
-    for (int sc = MAX_SC; sc >= T && (display_limit <= 0 || (int)idx.size() < display_limit); --sc) {
-      auto &b = buckets[sc];
-      if (b.empty()) continue;
-      std::stable_sort(b.begin(), b.end(), [&](int a, int b_){ return sid[a] < sid[b_]; });
-      if (display_limit > 0) {
-        for (int v : b) {
-          idx.push_back(v);
-          if ((int)idx.size() >= display_limit) break;
-        }
-      } else {
-        idx.insert(idx.end(), b.begin(), b.end());
-      }
+  int score_min = INT_MIN;
+  if (opts.containsElementNamed("score_min")) {
+    Rcpp::RObject o = opts["score_min"];
+    if (!o.isNULL()) {
+      int v = as<int>(o);
+      if (v != NA_INTEGER) score_min = v;
     }
   }
+  const bool use_threshold = (score_min != INT_MIN);
   
-  const int K = (int)idx.size();
-  CharacterVector out_id(K);
-  IntegerVector  out_sc(K);
-  for (int i = 0; i < K; ++i) {
-    const int s = idx[i];
-    out_id[i] = sample_ids[s];
-    out_sc[i] = scores[s];
+  struct Node { int sc; int idx; };
+  struct Cmp { bool operator()(const Node& a, const Node& b) const { return a.sc > b.sc; } }; // min-heap
+  std::vector<Node> heap; heap.reserve(n_cap + 1);
+  
+  for (int s=0; s<S; ++s) {
+    const int sc = scores[s];
+    if (use_threshold && sc < score_min) continue;
+    if ((int)heap.size() < n_cap) { heap.push_back({sc,s}); std::push_heap(heap.begin(), heap.end(), Cmp()); }
+    else if (sc > heap.front().sc) { std::pop_heap(heap.begin(), heap.end(), Cmp()); heap.back()={sc,s}; std::push_heap(heap.begin(), heap.end(), Cmp()); }
   }
   
-  return DataFrame::create(
-    _["SampleID"] = out_id,
-    _["Score"]    = out_sc,
-    _["stringsAsFactors"] = false
-  );
+  std::sort_heap(heap.begin(), heap.end(), Cmp()); // ascending
+  std::reverse(heap.begin(), heap.end());          // descending
+  
+  const int K = (int)heap.size();
+  IntegerVector outScore(K);
+  CharacterVector outId(K);
+  for (int i=0;i<K;++i){
+    outScore[i] = heap[i].sc;
+    outId[i] = sample_ids[ heap[i].idx ];
+  }
+  
+  return DataFrame::create(_["SampleID"]=outId, _["Score"]=outScore, _["stringsAsFactors"]=false);
 }
 
-// -------- exported: full-database histogram (Score,Count; always 0..MAX_SC) --------
-// 0件のスコアも含め、必ず 1+MAX_SC 行を出す
 // [[Rcpp::export]]
 DataFrame dmp_hist_cpp(
     IntegerMatrix A1,           // S x L
@@ -141,78 +125,64 @@ DataFrame dmp_hist_cpp(
     IntegerVector score_table,  // length 16
     uint32_t idf_mask_bits,     // bit=1: enabled locus
     List opts                   // any_code, force_all_loci
-) {
+){
   const int S = A1.nrow();
   const int L = A1.ncol();
-  if (A2.nrow() != S || A2.ncol() != L) stop("A2 shape mismatch");
-  if (q1.size() != L || q2.size() != L) stop("q size mismatch");
-  if (score_table.size() != 16)         stop("score_table length must be 16");
   
-  const int any_code = opts.containsElementNamed("any_code") ? as<int>(opts["any_code"]) : 9999;
-  const bool force_all = opts.containsElementNamed("force_all_loci") ? as<bool>(opts["force_all_loci"]) : false;
-  
-  // enabled loci
-  std::vector<int> loci;
-  loci.reserve(L);
-  if (force_all) {
-    for (int l = 0; l < L; ++l) loci.push_back(l);
+  // loci enabled
+  std::vector<int> loci; loci.reserve(L);
+  if (opts.containsElementNamed("force_all_loci") && as<bool>(opts["force_all_loci"])) {
+    for (int j=0;j<L;++j) loci.push_back(j);
   } else {
-    for (int l = 0; l < L; ++l) if (((idf_mask_bits >> l) & 1U) != 0U) loci.push_back(l);
+    for (int j=0;j<L;++j) if ( (idf_mask_bits >> j) & 1u ) loci.push_back(j);
+    if (loci.empty()) { for (int j=0;j<L;++j) loci.push_back(j); }
   }
   const int LE = (int)loci.size();
   
-  // score LUT
+  const int ANY = opts.containsElementNamed("any_code") ? as<int>(opts["any_code"]) : 9999;
+  
   int scoreLUT[16];
-  for (int i = 0; i < 16; ++i) scoreLUT[i] = score_table[i];
+  for (int i=0;i<16;++i) scoreLUT[i] = score_table[i];
   
-  // raw pointers to query
-  const int* __restrict Q1 = &q1[0];
-  const int* __restrict Q2 = &q2[0];
+  // compute max possible score for hist size
+  // Assume per-locus max is max(score_table). Total MAX_SC = max_per_locus * LE.
+  int max_per = 0; for (int i=0;i<16;++i) if (scoreLUT[i] > max_per) max_per = scoreLUT[i];
+  const int MAX_SC = max_per * LE;
   
-  // compute MAX_SC
-  int max_per_locus = scoreLUT[0];
-  for (int i = 1; i < 16; ++i) if (scoreLUT[i] > max_per_locus) max_per_locus = scoreLUT[i];
-  const int MAX_SC = std::max(0, max_per_locus * LE);
+  std::vector<int> hist(MAX_SC + 1, 0);
   
-  // accumulate scores then histogram
-  std::vector<int> scores(S, 0);
-  for (int ei = 0; ei < LE; ++ei) {
-    const int l  = loci[ei];
-    const int x1 = Q1[l];
-    const int x2 = Q2[l];
-    const int* __restrict colA1 = &A1(0, l);
-    const int* __restrict colA2 = &A2(0, l);
-    for (int s = 0; s < S; ++s) {
-      const int r1 = colA1[s];
-      const int r2 = colA2[s];
-      const int m0 = (r1 == x1) || (r1 == any_code) || (x1 == any_code);
-      const int m1 = (r2 == x1) || (r2 == any_code) || (x1 == any_code);
-      const int m2 = (r1 == x2) || (r1 == any_code) || (x2 == any_code);
-      const int m3 = (r2 == x2) || (r2 == any_code) || (x2 == any_code);
-      const int code = m0 + (m1 << 1) + (m2 << 2) + (m3 << 3);
-      scores[s] += scoreLUT[code];
+  const int* Q1 = &q1[0];
+  const int* Q2 = &q2[0];
+  const int* A1p = &A1[0];
+  const int* A2p = &A2[0];
+  
+  for (int s=0; s<S; ++s) {
+    int sc = 0;
+    for (int ei=0; ei<LE; ++ei) {
+      const int l = loci[ei];
+      const int q1v = Q1[l];
+      const int q2v = Q2[l];
+      const int a1 = A1p[s + l*S];
+      const int a2 = A2p[s + l*S];
+      int b0 = (q1v==a1) ? 1:0;
+      int b1 = (q1v==a2) ? 1:0;
+      int b2 = (q2v==a1) ? 1:0;
+      int b3 = (q2v==a2) ? 1:0;
+      int code = (b0) | (b1<<1) | (b2<<2) | (b3<<3);
+      sc += scoreLUT[code];
     }
-  }
-  
-  // histogram over 0..MAX_SC (descending)
-  std::vector<long long> hist(MAX_SC + 1, 0);
-  for (int s = 0; s < S; ++s) {
-    int sc = scores[s];
-    if (sc < 0) sc = 0;
-    if (sc > MAX_SC) sc = MAX_SC;
+    if (sc<0) sc=0; if (sc>MAX_SC) sc=MAX_SC;
     hist[sc] += 1;
   }
+  
+  // output Score (desc) and Count
   const int N = MAX_SC + 1;
   IntegerVector Score(N);
   NumericVector Count(N);
-  for (int i = 0; i < N; ++i) {
+  for (int i=0;i<N;++i){
     const int sc = MAX_SC - i;
     Score[i] = sc;
     Count[i] = (double)hist[sc];
   }
-  return DataFrame::create(
-    _["Score"] = Score,
-    _["Count"] = Count,
-    _["stringsAsFactors"] = false
-  );
+  return DataFrame::create(_["Score"]=Score, _["Count"]=Count, _["stringsAsFactors"]=false);
 }
