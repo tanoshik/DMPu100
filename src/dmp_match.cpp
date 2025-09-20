@@ -57,30 +57,29 @@ DataFrame dmp_match_cpp(
     const int l = loci[ei];
     const int q1v = Q1[l];
     const int q2v = Q2[l];
-    const bool q_any = (q1v==ANY || q2v==ANY);
+    // q_any removed; ANY handled in per-bit comparisons
     for (int s=0; s<S; ++s) {
       const int a1 = A1p[s + l*S];
       const int a2 = A2p[s + l*S];
-      // encode 2x2 match into 4bit: (q1==a1, q1==a2, q2==a1, q2==a2) -> index 0..15
-      int b0 = (q1v==a1) ? 1:0;
-      int b1 = (q1v==a2) ? 1:0;
-      int b2 = (q2v==a1) ? 1:0;
-      int b3 = (q2v==a2) ? 1:0;
+      // ANY on either side acts as wildcard (q or db)
+      int b0 = ((q1v==ANY) || (a1==ANY) || (q1v==a1)) ? 1:0;
+      int b1 = ((q1v==ANY) || (a2==ANY) || (q1v==a2)) ? 1:0;
+      int b2 = ((q2v==ANY) || (a1==ANY) || (q2v==a1)) ? 1:0;
+      int b3 = ((q2v==ANY) || (a2==ANY) || (q2v==a2)) ? 1:0;
       int code = (b0) | (b1<<1) | (b2<<2) | (b3<<3);
-      if (q_any) {
-        // treat ANY (e.g., 9999) as wildcard: simple rule -> if either allele is ANY, match weight distribute via table as-is
-        // no special handling required here if SCORE_TABLE already accounts for ANY on R side normalization
-      }
       scores[s] += scoreLUT[code];
     }
   }
   
-  // unified min-heap selection
-  const int n_cap = opts.containsElementNamed("n_cap") ? as<int>(opts["n_cap"]) : 200;
-  if (n_cap <= 0) {
-    return DataFrame::create(_["SampleID"]=CharacterVector(0), _["Score"]=IntegerVector(0), _["stringsAsFactors"]=false);
+  // unified selection (no R-side sorting): C++ で順序を確定する
+  int n_cap = 200;
+  if (opts.containsElementNamed("n_cap")) {
+    Rcpp::RObject o = opts["n_cap"];
+    if (!o.isNULL()) {
+      int v = as<int>(o);
+      if (v != NA_INTEGER) n_cap = v;
+    }
   }
-  
   int score_min = INT_MIN;
   if (opts.containsElementNamed("score_min")) {
     Rcpp::RObject o = opts["score_min"];
@@ -93,26 +92,46 @@ DataFrame dmp_match_cpp(
   
   struct Node { int sc; int idx; };
   struct Cmp { bool operator()(const Node& a, const Node& b) const { return a.sc > b.sc; } }; // min-heap
-  std::vector<Node> heap; heap.reserve(n_cap + 1);
-  
-  for (int s=0; s<S; ++s) {
-    const int sc = scores[s];
-    if (use_threshold && sc < score_min) continue;
-    if ((int)heap.size() < n_cap) { heap.push_back({sc,s}); std::push_heap(heap.begin(), heap.end(), Cmp()); }
-    else if (sc > heap.front().sc) { std::pop_heap(heap.begin(), heap.end(), Cmp()); heap.back()={sc,s}; std::push_heap(heap.begin(), heap.end(), Cmp()); }
+  // 最終並びを確定する comparator（score desc, id asc）
+  auto less_final = [&](const Node& a, const Node& b) {
+    if (a.sc != b.sc) return a.sc > b.sc;                               // 高い方が先
+    return std::string(sample_ids[a.idx]) < std::string(sample_ids[b.idx]); // 同点はID昇順
+    };
+
+    std::vector<Node> pick;  // ここに最終候補を集約
+    pick.reserve(n_cap>0 ? n_cap : S);
+
+    if (n_cap <= 0) {
+    // キャップなし：全件を閾値でふるい、あとで最終整列
+    for (int s=0; s<S; ++s) {
+      const int sc = scores[s] + (2 * (L - LE));  // mask_bit=0 loci add +2 each
+      if (use_threshold && sc < score_min) continue;
+      pick.push_back({sc, s});
+     }
+     std::stable_sort(pick.begin(), pick.end(), less_final);
+    } else {
+    // TopN 抽出：min-heapで上位n_cap候補を抽出 → 最終整列
+    std::vector<Node> heap; heap.reserve(n_cap + 1);
+    for (int s=0; s<S; ++s) {
+      const int sc = scores[s] + (2 * (L - LE));
+      if (use_threshold && sc < score_min) continue;
+      if ((int)heap.size() < n_cap) { heap.push_back({sc,s}); std::push_heap(heap.begin(), heap.end(), Cmp()); }
+      else if (sc > heap.front().sc) { std::pop_heap(heap.begin(), heap.end(), Cmp()); heap.back()={sc,s}; std::push_heap(heap.begin(), heap.end(), Cmp()); }
+    }
+    // heap から降順列を構成し、tie-break を ID 昇順で確定
+    std::sort_heap(heap.begin(), heap.end(), Cmp()); // 昇順
+    std::reverse(heap.begin(), heap.end());          // 降順に並び替え
+    pick.assign(heap.begin(), heap.end());
+    std::stable_sort(pick.begin(), pick.end(), less_final);
   }
-  
-  std::sort_heap(heap.begin(), heap.end(), Cmp()); // ascending
-  std::reverse(heap.begin(), heap.end());          // descending
-  
-  const int K = (int)heap.size();
+
+  const int K = (int)pick.size();
   IntegerVector outScore(K);
   CharacterVector outId(K);
   for (int i=0;i<K;++i){
-    outScore[i] = heap[i].sc;
-    outId[i] = sample_ids[ heap[i].idx ];
+    outScore[i] = pick[i].sc;
+    outId[i]    = sample_ids[ pick[i].idx ];
   }
-  
   return DataFrame::create(_["SampleID"]=outId, _["Score"]=outScore, _["stringsAsFactors"]=false);
 }
 
@@ -145,9 +164,9 @@ DataFrame dmp_hist_cpp(
   for (int i=0;i<16;++i) scoreLUT[i] = score_table[i];
   
   // compute max possible score for hist size
-  // Assume per-locus max is max(score_table). Total MAX_SC = max_per_locus * LE.
+  // Assume per-locus max is max(score_table). Total MAX_SC = max_per_locus * L.
   int max_per = 0; for (int i=0;i<16;++i) if (scoreLUT[i] > max_per) max_per = scoreLUT[i];
-  const int MAX_SC = max_per * LE;
+  const int MAX_SC = max_per * L;
   
   std::vector<int> hist(MAX_SC + 1, 0);
   
@@ -164,13 +183,15 @@ DataFrame dmp_hist_cpp(
       const int q2v = Q2[l];
       const int a1 = A1p[s + l*S];
       const int a2 = A2p[s + l*S];
-      int b0 = (q1v==a1) ? 1:0;
-      int b1 = (q1v==a2) ? 1:0;
-      int b2 = (q2v==a1) ? 1:0;
-      int b3 = (q2v==a2) ? 1:0;
+      // ANY on either side acts as wildcard (q or db)
+      int b0 = ((q1v==ANY) || (a1==ANY) || (q1v==a1)) ? 1:0;
+      int b1 = ((q1v==ANY) || (a2==ANY) || (q1v==a2)) ? 1:0;
+      int b2 = ((q2v==ANY) || (a1==ANY) || (q2v==a1)) ? 1:0;
+      int b3 = ((q2v==ANY) || (a2==ANY) || (q2v==a2)) ? 1:0;
       int code = (b0) | (b1<<1) | (b2<<2) | (b3<<3);
       sc += scoreLUT[code];
     }
+    sc += (2 * (L - LE)); // mask_bit=0 loci add +2 each
     if (sc<0) sc=0; if (sc>MAX_SC) sc=MAX_SC;
     hist[sc] += 1;
   }
@@ -186,3 +207,4 @@ DataFrame dmp_hist_cpp(
   }
   return DataFrame::create(_["Score"]=Score, _["Count"]=Count, _["stringsAsFactors"]=false);
 }
+
