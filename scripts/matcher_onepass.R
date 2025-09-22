@@ -52,6 +52,16 @@ if (as.integer(opt$n_cap) < 0L) stop("--n_cap must be >= 0")
 opt$score_min <- as.integer(opt$score_min)
 if (is.na(opt$score_min) || opt$score_min < 0L) stop("--score_min must be an integer >= 0")
 
+# ---- output path helpers (ensure extensions) ----
+ensure_csv <- function(p) {
+  if (grepl("\\.csv$", p, ignore.case=TRUE)) return(p)
+  paste0(p, ".csv")
+}
+ensure_json <- function(p) {
+  if (grepl("\\.json$", p, ignore.case=TRUE)) return(p)
+  paste0(p, ".json")
+}
+
 # ---- compile core ----
 sourceCpp("src/dmp_match.cpp")  # exports: dmp_match_cpp, dmp_hist_cpp
 
@@ -193,6 +203,14 @@ peak_mib <- NA_real_
 # ensure out dir
 dir.create(dirname(opt$out), recursive = TRUE, showWarnings = FALSE)
 
+# normalize output paths
+scores_csv <- ensure_csv(opt$out)
+hist_csv_base <- file.path(dirname(scores_csv), sub("^scores", "hist", tools::file_path_sans_ext(basename(scores_csv))))
+if (opt$score_min > 0L) {
+  hist_csv_base <- file.path(dirname(hist_csv_base), sub("^hist", sprintf("hist_t%d", as.integer(opt$score_min)), basename(hist_csv_base)))
+}
+opts_json <- file.path(dirname(scores_csv), sprintf("opts_%s.json", tools::file_path_sans_ext(basename(scores_csv))))
+
 res <- data.frame(SampleID=character(0), Score=integer(0), stringsAsFactors = FALSE)
 if (compute_scores) {
   if (requireNamespace("peakRAM", quietly=TRUE)) {
@@ -235,17 +253,14 @@ if (compute_scores) {
     # peak_mib stays NA if peakRAM not available
   }
   # write scores (already sorted desc by C++)
-  write.csv(res, opt$out, row.names = FALSE)
-  if (as.integer(opt$debug) == 1L) cat(sprintf("[OK] wrote %s (%d rows)\n", opt$out, nrow(res)))
+  write.csv(res, scores_csv, row.names = FALSE)
+  if (as.integer(opt$debug) == 1L) cat(sprintf("[OK] wrote %s (%d rows)\n", scores_csv, nrow(res)))
 }
 
 # histogram
 hdf <- NULL
 if (compute_hist) {
-  hist_path <- file.path(dirname(opt$out), sub("^scores", "hist", basename(opt$out)))
-  if (opt$score_min > 0L) {
-    hist_path <- file.path(dirname(opt$out), sub("^hist", sprintf("hist_t%d", as.integer(opt$score_min)), basename(hist_path)))
-  }
+  hist_csv <- ensure_csv(hist_csv_base)
   if (requireNamespace("peakRAM", quietly=TRUE)) {
     pmh <- peakRAM::peakRAM({
       hdf <<- dmp_hist_cpp(
@@ -270,8 +285,8 @@ if (compute_hist) {
     t1 <- proc.time()[["elapsed"]]
     comp_sec <- comp_sec + (t1 - t0)
   }
-  write.csv(hdf, hist_path, row.names = FALSE)
-  if (as.integer(opt$debug) == 1L) cat(sprintf("[OK] wrote %s (%d rows)\n", hist_path, nrow(hdf)))
+  write.csv(hdf, hist_csv, row.names = FALSE)
+  if (as.integer(opt$debug) == 1L) cat(sprintf("[OK] wrote %s (%d rows)\n", hist_csv, nrow(hdf)))
 }
 
 # ---- opts_*.json ----
@@ -285,9 +300,9 @@ opts_list <- list(
   force_all_loci = as.logical(opt$force_all_loci),
   h2a_on = as.logical(opt$h2a_on)
 )
-json_path <- file.path(dirname(opt$out), sprintf("opts_%s.json", file_path_sans_ext(basename(opt$out))))
-writeLines(jsonlite::toJSON(opts_list, auto_unbox = TRUE, pretty = TRUE), json_path)
-if (as.integer(opt$debug) == 1L) cat(sprintf("[OK] wrote %s\n", json_path))
+opts_json <- ensure_json(opts_json)
+writeLines(jsonlite::toJSON(opts_list, auto_unbox = TRUE, pretty = TRUE), opts_json)
+if (as.integer(opt$debug) == 1L) cat(sprintf("[OK] wrote %s\n", opts_json))
 
 # ---- time.log ----
 # name format: "{kit}/{mask}/{ratio}/{h2a}/{DBsize}"
@@ -302,7 +317,7 @@ header <- "LOAD_DB_SEC,LOAD_Q_SEC,COMP_SEC,TOTAL_SEC,PEAK_MiB,name"
 line <- sprintf("%.3f,%.3f,%.3f,%.3f,%.1f,%s",
                 load_db_sec, load_q_sec, comp_sec, total_sec,
                 ifelse(is.na(peak_mib), NA_real_, peak_mib), core_name)
-logp <- file.path(dirname(opt$out), "time.log")
+logp <- file.path(dirname(scores_csv), "time.log")
 if (!file.exists(logp)) writeLines(header, logp)
 cat(paste0(line, "\n"), file = logp, append = TRUE)
 if (as.integer(opt$debug) == 1L) cat("[DBG] done\n")

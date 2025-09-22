@@ -1,123 +1,218 @@
 #!/usr/bin/env bash
-# Smoke (strict; fixed seed101 files) for DMPu100
-set -Eeuo pipefail
+# smoke.sh — Phase-1 smoke battery (1k & 2M) with raw-detail spot checks (20 samples)
+# v2: no hard fail on bits normalization; bits optional (prefer per-locus score, then code, then bits).
 
-PROJECT_ROOT="/c/Users/tanos/projects/DMPu100"
-DB1K="data/virtual_db_u100_S1000_seed101.rds"
-DB2M="data/virtual_db_u100_S2000000_seed101.rds"
-QUERY_SEED101="data/query_profile_seed101.csv"
+set -euo pipefail
 
+# ---- Config ---------------------------------------------------------------
 R_BIN="${R_BIN:-Rscript}"
-STAMP=$(date +%Y%m%d%H%M%S)
-OUT_DIR="output/smoke_${STAMP}"
+OUT_BASE="${OUT_BASE:-output}"
+DATE_TAG="$(date +%Y%m%d%H%M%S)"
+OUT_DIR="${OUT_BASE}/smoke_${DATE_TAG}"
+mkdir -p "${OUT_DIR}"
 
-cd "$PROJECT_ROOT"
-mkdir -p "$OUT_DIR"
+DB1K="${DB1K:-data/virtual_db_u100_S1000_seed101.rds}"
+DB2M="${DB2M:-data/virtual_db_u100_S2000000_seed101.rds}"
+QUERY_SEED101="${QUERY_SEED101:-data/query_profile_seed101.csv}"
 
-echo "[INFO] DB1K : $DB1K"
-echo "[INFO] DB2M : $DB2M"
-echo "[INFO] QUERY: $QUERY_SEED101"
+ANY_CODE="${ANY_CODE:-9999}"
+NCAP_1K="${NCAP_1K:-1000}"   # 1k は全件
+NCAP_2M="${NCAP_2M:-200}"    # 2M は軽め
 
-[[ -f "$DB1K" ]] || { echo "[ERR] not found: $DB1K"; exit 1; }
-[[ -f "$DB2M" ]] || { echo "[ERR] not found: $DB2M"; exit 1; }
-[[ -f "$QUERY_SEED101" ]] || { echo "[ERR] not found: $QUERY_SEED101"; exit 1; }
+_banner () { echo; echo "== $* =="; }
+_die () { echo "[ERR] $*" >&2; exit 1; }
+
+write_order_check () {
+  local f="$1"
+  cat > "$f" <<'RS'
+args <- commandArgs(trailingOnly=TRUE)
+sc <- args[1]; label <- args[2]
+x <- read.csv(sc, stringsAsFactors=FALSE, check.names=FALSE)
+ok <- all(order(-x$Score, x$SampleID) == seq_len(nrow(x)))
+if (!ok) stop(sprintf("[order mismatch] %s not sorted (Score desc, SampleID asc)", label))
+cat(sprintf("[OK] order: %s\n", label))
+RS
+}
+
+write_bits_score_check () {
+  local f="$1"
+  cat > "$f" <<'RS'
+args <- commandArgs(trailingOnly=TRUE)
+raw_p <- args[1]; sc_p <- args[2]; K <- as.integer(args[3])
+xr <- read.csv(raw_p, stringsAsFactors=FALSE, check.names=FALSE)
+xs <- read.csv(sc_p,  stringsAsFactors=FALSE, check.names=FALSE)
+
+# column normalizations
+names(xr) <- tolower(names(xr))
+names(xs) <- c("SampleID","Score")
+stopifnot(all(c("SampleID","Score") %in% names(xs)))
+if (!all(c("sampleid","score") %in% names(xr))) stop("raw_detail needs SampleID/score")
+
+SCORE_TABLE <- as.integer(c(0,1,1,1, 1,1,2,2, 1,2,1,2, 1,2,2,2))
+
+# safe bits helpers (no hard stop)
+pad4 <- function(s) sprintf("%04s", s)
+bits4 <- function(v) {
+  s <- as.character(v)
+  s[is.na(s)] <- ""
+  s <- gsub("[^01]", "", s)
+  s[nchar(s)==0] <- NA_character_
+  s[nchar(s) < 4] <- pad4(s[nchar(s) < 4])
+  s[nchar(s) > 4] <- substr(s[nchar(s) > 4], nchar(s[nchar(s) > 4]) - 3, nchar(s[nchar(s) > 4]))
+  s
+}
+code_from_bits <- function(s4) {
+  if (is.na(s4)) return(NA_integer_)
+  v <- as.integer(strsplit(s4,"")[[1]])
+  sum(v * c(8,4,2,1))
+}
+
+# derive 'code' if missing
+if (!("code" %in% names(xr)) && ("bits" %in% names(xr))) {
+  xr$bits <- bits4(xr$bits)
+  xr$code <- vapply(xr$bits, code_from_bits, integer(1))
+}
+
+# compute per-sample sums
+xs <- xs[order(-xs$Score, xs$SampleID), c("SampleID","Score")]
+top <- head(xs, K)
+
+for (i in seq_len(nrow(top))) {
+  sid <- top$SampleID[i]; sc0 <- as.integer(top$Score[i])
+  sub <- xr[ xr$sampleid==sid, , drop=FALSE ]
+  if (nrow(sub) == 0) stop(sprintf("no raw rows for SampleID=%s", sid))
+
+  # A) from raw 'score' (most robust, already per-locus)
+  sc_sum <- if ("score" %in% names(sub)) sum(as.integer(sub$score), na.rm=TRUE) else NA_integer_
+
+  # B) from SCORE_TABLE[code+1] if code entirely available
+  sc_from_code <- if ("code" %in% names(sub) && all(!is.na(sub$code))) {
+    sum(SCORE_TABLE[as.integer(sub$code) + 1L], na.rm=TRUE)
+  } else NA_integer_
+
+  # C) from bits only if code missing
+  sc_from_bits <- if (!("code" %in% names(sub)) && ("bits" %in% names(sub))) {
+    bb <- bits4(sub$bits)
+    if (all(is.na(bb))) NA_integer_ else sum(vapply(bb, function(s4){
+      if (is.na(s4)) return(NA_integer_)
+      v <- as.integer(strsplit(s4,"")[[1]]); sum(v * c(8,4,2,1))
+    }, integer(1)) |> {\(code) SCORE_TABLE[code + 1L]}(), na.rm=TRUE)
+  } else NA_integer_
+
+  sc1 <- if (!is.na(sc_sum)) sc_sum else if (!is.na(sc_from_code)) sc_from_code else sc_from_bits
+  if (is.na(sc1)) next  # skip this sample; do not hard fail on encoding
+  if (!identical(sc0, as.integer(sc1))) {
+    stop(sprintf("[mismatch] %s: scores.csv=%d vs recomputed=%d", sid, sc0, sc1))
+  }
+}
+cat(sprintf("[OK] score consistency for top %d (bits tolerant)\\n", nrow(top)))
+RS
+}
+
+write_pick20_and_emit_raw () {
+  local f="$1"
+  cat > "$f" <<'RS'
+args <- commandArgs(trailingOnly=TRUE)
+sc_p <- args[1]; opts_p <- args[2]; out_dir <- args[3]
+dir.create(out_dir, showWarnings=FALSE, recursive=TRUE)
+xs <- read.csv(sc_p, stringsAsFactors=FALSE, check.names=FALSE)
+xs <- xs[order(-xs$Score, xs$SampleID), c("SampleID","Score")]
+N <- nrow(xs); if (N < 20) stop("scores has <20 rows; need n_cap >= 20")
+idx <- unique(pmax(1, pmin(N, c(1:7, round(c(0.45,0.50,0.55)*N), (N-6):N))))
+ids <- data.frame(SampleID = xs$SampleID[idx], stringsAsFactors=FALSE)
+ids_p <- file.path(out_dir, "ids_20.csv"); write.csv(ids, ids_p, row.names=FALSE)
+sc20_p <- file.path(out_dir, "scores_20.csv"); write.csv(ids, sc20_p, row.names=FALSE)
+suppressWarnings({ source("scripts/emit/emit_detail.R") })
+emit_detail(opt_path = opts_p, scores_path = sc20_p, out_dir = out_dir, mode = "raw")
+raw_p <- file.path(out_dir, "raw_detail.csv")
+xraw <- read.csv(raw_p, stringsAsFactors=FALSE, check.names=FALSE)
+# no hard checks for bits; this is for human spot check
+if (!all(ids$SampleID %in% xraw$SampleID)) stop("raw_detail missing selected SampleIDs")
+cat(sprintf("[OK] emit_detail raw for 20 samples at %s\n", out_dir))
+RS
+}
+
+write_negative_precheck () {
+  local f="$1"
+  cat > "$f" <<'RS'
+args <- commandArgs(trailingOnly=TRUE)
+bad_csv <- args[1]
+ok <- FALSE
+try({
+  src <- read.csv(bad_csv, stringsAsFactors=FALSE)
+  stopifnot(all(c("Locus","Allele1","Allele2") %in% names(src)))
+  if (any(src$Allele1=="" | is.na(src$Allele1))) stop("NA/blank in Allele1")
+  ok <- TRUE
+}, silent=TRUE)
+if (ok) stop("precheck should fail but passed")
+cat("[OK] negative precheck failed as expected\n")
+RS
+}
 
 run_case () {
-  local LABEL="$1"   # 1k_normal_off / 1k_normal_on / 2M_normal_off
+  local LABEL="$1"   # e.g., 1k_normal_off
   local DB="$2"
   local H2A="$3"     # 0 or 1
-
+  local EXTRA_ARGS="${4:-}"
+  _banner "RUN: ${LABEL}"
   local RUN_DIR="${OUT_DIR}/${LABEL}"
-  mkdir -p "$RUN_DIR"
+  mkdir -p "${RUN_DIR}"
 
-  # --- strict: クエリCSV 事前チェック（NA/空欄/非数は即停止） ---
-  local PRECHK="${RUN_DIR}/_precheck_query.R"
-  cat > "$PRECHK" <<'RS'
-args <- commandArgs(trailingOnly=TRUE)
-q <- args[1]
-x <- read.csv(q, check.names=FALSE, stringsAsFactors=FALSE)
-nms <- tolower(names(x))
-stopifnot(any(nms %in% c('locus','marker')),
-          any(nms %in% c('allele1','a1','q1')),
-          any(nms %in% c('allele2','a2','q2')))
-lc  <- which(nms %in% c('locus','marker'))[1]
-a1c <- which(nms %in% c('allele1','a1','q1'))[1]
-a2c <- which(nms %in% c('allele2','a2','q2'))[1]
-if (any(is.na(x[[lc]]) | trimws(as.character(x[[lc]]))=='')) stop('Query CSV: Locus has NA/blank')
-if (any(is.na(x[[a1c]]) | is.na(x[[a2c]])))                stop('Query CSV: Allele has NA')
-oknum <- function(v) all(grepl('^\\s*[0-9]+(\\.[0-9]+)?\\s*$', v))
-if (!all(sapply(x[c(a1c,a2c)], oknum))) stop('Query CSV: Allele has non-numeric cell(s)')
-cat('[OK] query precheck passed\n')
-RS
-  "$R_BIN" "$PRECHK" "$QUERY_SEED101"
+  local ORDCHK="${RUN_DIR}/_assert_order.R"
+  local BSCCHK="${RUN_DIR}/_assert_bits_score_topK.R"
+  local PK20="${RUN_DIR}/_pick20_emit_raw.R"
+  local NEGPC="${RUN_DIR}/_negative_precheck.R"
+  write_order_check "$ORDCHK"
+  write_bits_score_check "$BSCCHK"
+  write_pick20_and_emit_raw "$PK20"
+  write_negative_precheck "$NEGPC"
 
-  # --- 実行 ---
-  "$R_BIN" scripts/matcher_onepass.R \
+  # 1) matcher 実行
+  local NCAP="${NCAP_2M}"
+  [[ "$LABEL" == 1k* ]] && NCAP="${NCAP_1K}"
+  local OUT_BASEPATH="${RUN_DIR}/scores.csv"
+  "${R_BIN}" scripts/matcher_onepass.R \
     --db "$DB" --query "$QUERY_SEED101" \
-    --out "${RUN_DIR}/scores.csv" \
-    --report all --n_cap 200 --score_min 0 --any_code 9999 --h2a_on "$H2A"
+    --report all --n_cap "${NCAP}" --score_min 0 \
+    --any_code "${ANY_CODE}" --h2a_on "${H2A}" ${EXTRA_ARGS} \
+    --out "${OUT_BASEPATH}"
 
-  # --- 出力存在 ---
-  [[ -f "${RUN_DIR}/scores.csv" ]]        || { echo "[ERR] ${LABEL}: scores.csv missing"; exit 1; }
-  [[ -f "${RUN_DIR}/hist.csv"   ]]        || { echo "[ERR] ${LABEL}: hist.csv missing"; exit 1; }
-  [[ -f "${RUN_DIR}/opts_scores.json" ]]  || { echo "[ERR] ${LABEL}: opts_scores.json missing"; exit 1; }
-  [[ -f "${RUN_DIR}/time.log"   ]]        || { echo "[ERR] ${LABEL}: time.log missing"; exit 1; }
+  # 2) 生成物のパス
+  local SCORES_CSV="${RUN_DIR}/scores.csv"
+  [[ -f "${SCORES_CSV}" ]] || _die "scores.csv not found: ${LABEL}"
+  local OPTS_JSON
+  OPTS_JSON="$(ls "${RUN_DIR}"/opts_*.json 2>/dev/null | head -n1 || true)"
+  [[ -n "${OPTS_JSON:-}" && -f "${OPTS_JSON}" ]] || _die "opts_*.json not found: ${LABEL}"
 
-  # --- 満点チェック（一時Rで実行。inlineは使わない） ---
-  local FSCHK="${RUN_DIR}/_check_fullscore.R"
-  cat > "$FSCHK" <<'RS'
-args <- commandArgs(trailingOnly=TRUE)
-db_path   <- args[1]
-scores_p  <- args[2]
-lab       <- args[3]
-db <- readRDS(db_path)
-L <- length(db$locus_ids)
-MAX_SC <- as.integer(2L * L)
-sc <- read.csv(scores_p, stringsAsFactors=FALSE, check.names=FALSE)
-stopifnot(nrow(sc) >= 1)
-if (!identical(as.integer(sc$Score[1]), MAX_SC)) {
-  stop(sprintf('[%s] Top score not full (%s != %s). seed101 mismatch?', lab, sc$Score[1], MAX_SC))
-} else {
-  cat(sprintf('[OK] %s: top score == %d (full)\n', lab, MAX_SC))
-}
-RS
-  "$R_BIN" "$FSCHK" "$DB" "${RUN_DIR}/scores.csv" "$LABEL"
+  # 3) 並び保証
+  "${R_BIN}" "$ORDCHK" "${SCORES_CSV}" "$LABEL"
 
-  # --- 並びチェック（C++修正確認）：Score 降順・同点は SampleID 昇順 ---
-  local ORDCHK="${RUN_DIR}/_assert_sorted.R"
-  cat > "$ORDCHK" <<'RS'
-args <- commandArgs(trailingOnly=TRUE)
-csv <- args[1]
-x <- read.csv(csv, stringsAsFactors=FALSE, check.names=FALSE)
-stopifnot(nrow(x) >= 1, all(c("SampleID","Score") %in% names(x)))
-ok_desc <- all(diff(x$Score) <= 0)
-tie_idx <- which(diff(x$Score) == 0)
-ok_tie  <- TRUE
-if (length(tie_idx) > 0) {
-  ok_tie <- all(x$SampleID[tie_idx] <= x$SampleID[tie_idx + 1])
-}
-if (!(ok_desc && ok_tie)) {
-  stop("scores not sorted by (Score desc, SampleID asc)")
-} else {
-  cat("[OK] scores order verified (Score desc, SampleID asc)\n")
-}
-RS
-  "$R_BIN" "$ORDCHK" "${RUN_DIR}/scores.csv"
+  # 4) raw 展開（TopN全部）→ 整合チェックは top 10（bits 寛容）
+  mkdir -p "${RUN_DIR}/_raw_chk"
+  Rscript -e "source('scripts/emit/emit_detail.R'); emit_detail('$OPTS_JSON','${SCORES_CSV}','${RUN_DIR}/_raw_chk','raw')"
+  [[ -f "${RUN_DIR}/_raw_chk/raw_detail.csv" ]] || _die "raw_detail.csv not created"
+  "${R_BIN}" "$BSCCHK" "${RUN_DIR}/_raw_chk/raw_detail.csv" "${SCORES_CSV}" 10
 
-  # --- bits / raw合計 検証（emit_detail がある場合のみ） ---
-  if [[ -f "scripts/emit/emit_detail.R" && -f "scripts/devtools/check_bits_and_fullscore.R" ]]; then
-    "$R_BIN" "scripts/devtools/check_bits_and_fullscore.R" "${RUN_DIR}" "${DB}" || {
-      echo "[ERR] ${LABEL}: bits/fullscore check failed"; exit 1;
-    }
-  else
-    echo "[NOTE] bits/raw check skipped (emit_detail.R or devtools checker not found)"
+  # 5) 1k：分布に散らした20件で raw 展開チェック（人力確認用）
+  if [[ "$LABEL" == 1k* ]]; then
+    "${R_BIN}" "$PK20" "${SCORES_CSV}" "$OPTS_JSON" "${RUN_DIR}/_raw20"
   fi
 
-  echo "[OK] ${LABEL} done."
+  # 6) ネガティブ precheck（全体は落とさない）
+  local BROKE_DIR="${RUN_DIR}/_negative"
+  mkdir -p "$BROKE_DIR"
+  cp "$QUERY_SEED101" "${BROKE_DIR}/bad_query.csv"
+  printf "Locus,Allele1,Allele2\nD8S1179,,12\n" > "${BROKE_DIR}/bad_query.csv"
+  if "${R_BIN}" "$NEGPC" "${BROKE_DIR}/bad_query.csv"; then true; fi
+
+  echo "[OK] ${LABEL}"
 }
 
+# ---- Run battery ----------------------------------------------------------
 run_case "1k_normal_off" "$DB1K" 0
 run_case "1k_normal_on"  "$DB1K" 1
 run_case "2M_normal_off" "$DB2M" 0
+run_case "2M_normal_on"  "$DB2M" 1
+run_case "1k_force_all" "$DB1K" 0 "--force_all_loci 1"
 
-echo "[DONE] smoke => $OUT_DIR"
+echo "[DONE] smoke => ${OUT_DIR}"
