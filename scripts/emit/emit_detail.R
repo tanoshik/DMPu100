@@ -5,6 +5,21 @@ suppressPackageStartupMessages({
   library(jsonlite)
 })
 
+# ---- CLI entry (kebab-case) ----
+parse_args <- function() {
+  a <- commandArgs(trailingOnly = TRUE)
+  kv <- list(); i <- 1
+  while (i <= length(a)) {
+    k <- a[i]
+    if (substr(k,1,2) == "--") {
+      key <- substring(k,3)
+      if (i+1 <= length(a) && substr(a[i+1],1,2) != "--") { kv[[key]] <- a[i+1]; i <- i + 2 }
+      else { kv[[key]] <- "1"; i <- i + 1 }
+    } else i <- i + 1
+  }
+  kv
+}
+
 # ---- public I/F ----
 # emit_detail(opt_path, scores_path, out_dir, mode=c("raw","detail"), any_code=9999L)
 emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw","detail"), any_code=9999L) {
@@ -93,22 +108,18 @@ emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw","detail"), 
   # ---- emit ----
   if (mode == "raw") {
     outp <- file.path(out_dir, "raw_detail.csv")
-    # preallocate vectors (append per locus)
     out_list <- vector("list", length(ids))
     for (k in seq_along(ids)) {
       sidx <- mmS[k]
       r1 <- A1[sidx, ]
       r2 <- A2[sidx, ]
-      # per-locus bits / code / score
       b0 <- as.integer(m(q1, r1))
       b1 <- as.integer(m(q1, r2))
       b2 <- as.integer(m(q2, r1))
       b3 <- as.integer(m(q2, r2))
       code <- b0 + 2L*b1 + 4L*b2 + 8L*b3
-      # 4-bit binary string, MSB=b3 .. LSB=b0  -> "b3b2b1b0"
-      bits <- paste0(b3, b2, b1, b0)
+      bits <- paste0(b3, b2, b1, b0)           # "b3b2b1b0"
       sc   <- SCORE_TABLE[code + 1L]
-      
       df <- data.frame(
         Locus = locus_ids,
         q1 = q1,
@@ -117,17 +128,30 @@ emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw","detail"), 
         r2 = r2,
         bits = bits,
         code = code,
-        score = sc,                # ← sanity_topN に合わせて lower-case
+        score = sc,                             # lower-case
         SampleID = rep(ids[k], L),
         stringsAsFactors = FALSE
       )
       out_list[[k]] <- df
     }
     out_df <- do.call(rbind, out_list)
-    # 出力はローカス順・SampleID順のまま（必要ならここで並べ替え可）
     write.csv(out_df, outp, row.names = FALSE)
     return(invisible(outp))
   } else {
     stop("mode='detail' is not implemented in Phase1")
   }
+}
+
+# run as CLI if sourced by Rscript
+if (sys.nframe() == 0) {
+  args <- parse_args()
+  opt_path    <- args[["opt-path"]]
+  scores_path <- args[["scores-path"]]
+  out_dir     <- args[["out-dir"]]
+  mode        <- if (!is.null(args[["mode"]])) args[["mode"]] else "raw"
+  any_code    <- if (!is.null(args[["any-code"]])) as.integer(args[["any-code"]]) else 9999L
+  if (is.null(opt_path) || is.null(scores_path) || is.null(out_dir)) {
+    stop("usage: Rscript scripts/emit/emit_detail.R --opt-path <opts_scores.json> --scores-path <scores.csv> --out-dir <dir> [--mode raw] [--any-code 9999]")
+  }
+  invisible(emit_detail(opt_path, scores_path, out_dir, mode=mode, any_code=any_code))
 }
