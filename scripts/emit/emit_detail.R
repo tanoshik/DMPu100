@@ -1,30 +1,17 @@
 # scripts/emit/emit_detail.R
 # ASCII-only; JP comments allowed for dev.
+# CLI: --opt_path --scores_path --out_dir [--any_code 9999]
 
 suppressPackageStartupMessages({
   library(jsonlite)
+  library(optparse)
 })
 
-# ---- CLI entry (kebab-case) ----
-parse_args <- function() {
-  a <- commandArgs(trailingOnly = TRUE)
-  kv <- list(); i <- 1
-  while (i <= length(a)) {
-    k <- a[i]
-    if (substr(k,1,2) == "--") {
-      key <- substring(k,3)
-      if (i+1 <= length(a) && substr(a[i+1],1,2) != "--") { kv[[key]] <- a[i+1]; i <- i + 2 }
-      else { kv[[key]] <- "1"; i <- i + 1 }
-    } else i <- i + 1
-  }
-  kv
-}
-
-# ---- public I/F ----
-# emit_detail(opt_path, scores_path, out_dir, mode=c("raw","detail"), any_code=9999L)
-emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw","detail"), any_code=9999L) {
+# ---- core fn ----
+# emit_detail(opt_path, scores_path, out_dir, mode="raw", any_code=9999L)
+emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw"), any_code=9999L) {
   mode <- match.arg(mode)
-  if (!file.exists(opt_path))   stop(sprintf("opt_path not found: %s", opt_path))
+  if (!file.exists(opt_path))    stop(sprintf("opt_path not found: %s", opt_path))
   if (!file.exists(scores_path)) stop(sprintf("scores_path not found: %s", scores_path))
   dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
   
@@ -69,11 +56,9 @@ emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw","detail"), 
     a1c <- which(nms %in% c("allele1","a1","q1"))[1]
     a2c <- which(nms %in% c("allele2","a2","q2"))[1]
     if (is.na(lc) || is.na(a1c) || is.na(a2c)) stop("query CSV needs Locus & A1 & A2")
-    
     mm <- match(locus_ids, qcsv[[lc]])
     if (any(is.na(mm))) stop("query CSV does not cover all loci")
     
-    # strict: numeric-only; NO lenient mapping here
     as_i100 <- function(v) {
       num <- suppressWarnings(as.numeric(v))
       if (any(is.na(num))) stop("query CSV contains non-numeric allele(s) under strict mode")
@@ -85,7 +70,6 @@ emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw","detail"), 
   
   # ---- select target SampleID(s) from scores_path ----
   scids <- read.csv(scores_path, stringsAsFactors = FALSE, check.names = FALSE)
-  # 「候補が複数あれば左端」を踏襲
   id_col <- which(tolower(names(scids)) %in% c("sampleid","id","sid"))[1]
   if (is.na(id_col)) stop("scores_path needs a column containing SampleID(s)")
   ids <- as.character(scids[[id_col]])
@@ -94,64 +78,56 @@ emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw","detail"), 
   mmS <- match(ids, sample_ids)
   if (any(is.na(mmS))) stop("some SampleID in scores_path not found in DB")
   
-  # ---- SCORE_TABLE（0832固定）----
+  # ---- SCORE_TABLE（固定）----
   SCORE_TABLE <- as.integer(c(
     0,1,1,1,
     1,1,2,2,
     1,2,1,2,
     1,2,2,2
   ))
-  
-  # ---- ANY match fn ----
   m <- function(x, y) { (x == ANY) | (y == ANY) | (x == y) }
   
-  # ---- emit ----
-  if (mode == "raw") {
-    outp <- file.path(out_dir, "raw_detail.csv")
-    out_list <- vector("list", length(ids))
-    for (k in seq_along(ids)) {
-      sidx <- mmS[k]
-      r1 <- A1[sidx, ]
-      r2 <- A2[sidx, ]
-      b0 <- as.integer(m(q1, r1))
-      b1 <- as.integer(m(q1, r2))
-      b2 <- as.integer(m(q2, r1))
-      b3 <- as.integer(m(q2, r2))
-      code <- b0 + 2L*b1 + 4L*b2 + 8L*b3
-      bits <- paste0(b3, b2, b1, b0)           # "b3b2b1b0"
-      sc   <- SCORE_TABLE[code + 1L]
-      df <- data.frame(
-        Locus = locus_ids,
-        q1 = q1,
-        q2 = q2,
-        r1 = r1,
-        r2 = r2,
-        bits = bits,
-        code = code,
-        score = sc,                             # lower-case
-        SampleID = rep(ids[k], L),
-        stringsAsFactors = FALSE
-      )
-      out_list[[k]] <- df
-    }
-    out_df <- do.call(rbind, out_list)
-    write.csv(out_df, outp, row.names = FALSE)
-    return(invisible(outp))
-  } else {
-    stop("mode='detail' is not implemented in Phase1")
+  # ---- emit raw ----
+  outp <- file.path(out_dir, "raw_detail.csv")
+  out_list <- vector("list", length(ids))
+  for (k in seq_along(ids)) {
+    sidx <- mmS[k]
+    r1 <- A1[sidx, ]
+    r2 <- A2[sidx, ]
+    b0 <- as.integer(m(q1, r1))
+    b1 <- as.integer(m(q1, r2))
+    b2 <- as.integer(m(q2, r1))
+    b3 <- as.integer(m(q2, r2))
+    code <- b0 + 2L*b1 + 4L*b2 + 8L*b3
+    bits <- paste0(b3, b2, b1, b0)          # "b3b2b1b0"
+    sc   <- SCORE_TABLE[code + 1L]
+    
+    df <- data.frame(
+      Locus = locus_ids,
+      q1 = q1, q2 = q2,
+      r1 = r1, r2 = r2,
+      bits = bits, code = code, score = sc,
+      SampleID = rep(ids[k], L),
+      stringsAsFactors = FALSE
+    )
+    out_list[[k]] <- df
   }
+  out_df <- do.call(rbind, out_list)
+  write.csv(out_df, outp, row.names = FALSE)
+  return(invisible(outp))
 }
 
-# run as CLI if sourced by Rscript
+# ---- CLI wrapper (snake-case only) ----
 if (sys.nframe() == 0) {
-  args <- parse_args()
-  opt_path    <- args[["opt-path"]]
-  scores_path <- args[["scores-path"]]
-  out_dir     <- args[["out-dir"]]
-  mode        <- if (!is.null(args[["mode"]])) args[["mode"]] else "raw"
-  any_code    <- if (!is.null(args[["any-code"]])) as.integer(args[["any-code"]]) else 9999L
-  if (is.null(opt_path) || is.null(scores_path) || is.null(out_dir)) {
-    stop("usage: Rscript scripts/emit/emit_detail.R --opt-path <opts_scores.json> --scores-path <scores.csv> --out-dir <dir> [--mode raw] [--any-code 9999]")
+  option_list <- list(
+    make_option("--opt_path",    type="character", help="path to opts_scores.json"),
+    make_option("--scores_path", type="character", help="path to scores.csv"),
+    make_option("--out_dir",     type="character", help="output dir"),
+    make_option("--any_code",    type="integer", default=9999L)
+  )
+  opt <- parse_args(OptionParser(option_list=option_list))
+  if (is.null(opt$opt_path) || is.null(opt$scores_path) || is.null(opt$out_dir)) {
+    stop("usage: Rscript scripts/emit/emit_detail.R --opt_path <json> --scores_path <csv> --out_dir <dir> [--any_code 9999]")
   }
-  invisible(emit_detail(opt_path, scores_path, out_dir, mode=mode, any_code=any_code))
+  emit_detail(opt$opt_path, opt$scores_path, opt$out_dir, any_code = as.integer(opt$any_code))
 }

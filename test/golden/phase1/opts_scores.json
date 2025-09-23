@@ -1,0 +1,8 @@
+{
+  "db_path": "C:/Users/tanos/projects/DMPu100/data/virtual_db_u100_S1000_seed101.rds",
+  "query_path": "C:/Users/tanos/projects/DMPu100/output/smoke_20250922192042/1k_normal_off/query_fixed.rds",
+  "mask_name": "normal",
+  "any_code": 9999,
+  "force_all_loci": false,
+  "h2a_on": false
+}
