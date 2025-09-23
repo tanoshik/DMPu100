@@ -1,94 +1,103 @@
 #!/usr/bin/env bash
+# smoke.sh - Phase-2 minimal smoke (ratio=0/1) with snake_case CLI.
+# ASCII only. Git Bash / bash compatible.
+
 set -euo pipefail
 
-# smoke.sh (Phase-1 strict + edges)
+ROOT_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
+cd "$ROOT_DIR"
+
 R_BIN="${R_BIN:-Rscript}"
-OUTROOT="output/smoke_$(date +%Y%m%d%H%M%S)"
+
 DB1K="data/virtual_db_u100_S1000_seed101.rds"
 QCSV="data/query_profile_seed101.csv"
-FREQ="data/freq_table.rds"
+IDFCSV="data/gf_idf_mask.csv"
 
-[[ -f "$DB1K" && -f "$QCSV" && -f "$FREQ" ]] || { echo "[ERR] DB/QCSV/FREQ missing"; exit 1; }
+OUTDIR="output/smoke_phase2_1k"
+BASE_DIR="$OUTDIR/baseline"
+R0_DIR="$OUTDIR/ratio0"
+R1_DIR="$OUTDIR/ratio1"
+MASKED_R0="data/_masked_r0.rds"
+MASKED_R1="data/_masked_r1.rds"
 
-run_case () {
-  local NAME="$1"; local QSRC="$2"; local EDGE_MODE="${3:-0}"
-  local OUTD="$OUTROOT/$NAME"
-  mkdir -p "$OUTD"
+mkdir -p "$BASE_DIR" "$R0_DIR" "$R1_DIR"
 
-  echo "== RUN: $NAME =="
+echo "[SMK] Using:"
+echo "  DB : $DB1K"
+echo "  Q  : $QCSV"
+echo "  IDF: $IDFCSV"
+echo "  OUT: $OUTDIR"
 
-  # 1) lenient ingest (align L, ANY補完) -> RDS
-  $R_BIN scripts/fix_query.R \
-    --db "$DB1K" \
-    --query "$QSRC" \
-    --out_rds "$OUTD/query_fixed.rds" \
-    --no_audit 1 >/dev/null
-  echo "[OK] fix_query wrote $OUTD/query_fixed.rds"
-
-  # 2) onepass(strict)
-  $R_BIN scripts/matcher_onepass.R \
-    --db "$DB1K" \
-    --query "$OUTD/query_fixed.rds" \
-    --out "$OUTD/scores.csv" \
-    --report all --n_cap 1000 --score_min 0 --debug 0 >/dev/null
-
-  # 3) emit raw_detail (全行)
-  $R_BIN scripts/emit/emit_detail.R \
-    --opt_path "$OUTD/opts_scores.json" \
-    --scores_path "$OUTD/scores.csv" \
-    --out_dir "$OUTD" \
-    --any_code 9999 >/dev/null
-  echo "[OK] emit_detail raw for 20 samples at $OUTD/_raw20"
-
-  # 3.1) 20件を散らして抽出（上位/中位/下位）
-  mkdir -p "$OUTD/_raw20"
-  awk -F, 'NR==1||NR==2||NR==51||NR==101||NR==151||NR==201||NR==251||NR==301||NR==351||NR==401||NR==451||NR==501||NR==551||NR==601||NR==651||NR==701||NR==751||NR==801||NR==851||NR==1001{print}' "$OUTD/scores.csv" > "$OUTD/scores_20.csv"
-  cut -d, -f1 "$OUTD/scores_20.csv" | sed '1d' > "$OUTD/ids_20.csv"
-  while read -r sid; do
-    awk -F, -v s="$sid" 'NR==1 || $NF==s' "$OUTD/raw_detail.csv" > "$OUTD/_raw20/${sid}.csv"
-  done < "$OUTD/ids_20.csv"
-
-  # 4) 計測（外付け）
-  $R_BIN scripts/measure_wrap.R --out_dir "$OUTD" >/dev/null
-
-  # 5) 簡易チェック
-  [[ -s "$OUTD/scores.csv" && -s "$OUTD/hist.csv" && -s "$OUTD/raw_detail.csv" ]] || { echo "[ERR] missing outputs"; exit 2; }
-  echo "[OK] $NAME"
-}
-
-# -----------------------
-# main
-# -----------------------
-mkdir -p "$OUTROOT"
-
-# case 1: 1k_normal_off
-run_case "1k_normal_off" "$QCSV"
-
-# case 2: edge_sparse_query（1行だけ＋他ANY）: 元CSVから1行だけ残す
-SPQ="output/tmp/edge_sparse_query.csv"
-mkdir -p output/tmp
-(head -n 1 "$QCSV"; sed -n '2p' "$QCSV") > "$SPQ"
-run_case "edge_sparse_query" "$SPQ"
-
-# case 3: edge_typo_locus_NEG（strict onepass へ直接CSVを渡すので FIX しない）
-echo "== RUN: edge_typo_locus_NEG =="
-NEGCSV="output/tmp/edge_typo.csv"
-cp "$QCSV" "$NEGCSV"
-# 2列目の Locus 名を typo
-awk -F, 'BEGIN{OFS=","} NR==1{print;next} NR==2{$1=$1"_X"; print; next} {print}' "$QCSV" > "$NEGCSV"
-
-set +e
+# 0) Baseline (original DB) - score_min omitted (no threshold)
 $R_BIN scripts/matcher_onepass.R \
   --db "$DB1K" \
-  --query "$NEGCSV" \
-  --out "$OUTROOT/edge_typo_locus_NEG/scores.csv" \
-  --report top --n_cap 10 --score_min 0 --debug 0 >/dev/null
-rc=$?
-set -e
-if [[ $rc -ne 0 ]]; then
-  echo "[OK] NEGATIVE as expected (loci coverage)"
+  --query "$QCSV" \
+  --out "$BASE_DIR/scores.csv" \
+  --report all \
+  --n_cap 1000 \
+  --any_code 9999 \
+  --h2a_on 0 \
+  --debug 0
+
+# 1) ratio=0 -> masked DB should be identical to baseline
+$R_BIN scripts/cli/dmp_apply_idf_mask.R \
+  --in_db "$DB1K" \
+  --out_db "$MASKED_R0" \
+  --idf_csv "$IDFCSV" \
+  --ratio 0 \
+  --seed 0 \
+  --any_code 9999 \
+  --debug 0
+
+$R_BIN scripts/matcher_onepass.R \
+  --db "$MASKED_R0" \
+  --query "$QCSV" \
+  --out "$R0_DIR/scores.csv" \
+  --report all \
+  --n_cap 1000 \
+  --any_code 9999 \
+  --h2a_on 0 \
+  --debug 0
+
+# Assert equality: baseline vs ratio0 scores
+if diff -q "$BASE_DIR/scores.csv" "$R0_DIR/scores.csv" > /dev/null ; then
+  echo "[OK] ratio=0 scores identical to baseline"
 else
-  echo "[ERR] NEG expected but succeeded"; exit 3
+  echo "[ERR] ratio=0 scores differ from baseline" >&2
+  exit 1
 fi
 
-echo "[DONE] smoke(min strict+edges) => $OUTROOT"
+# 2) ratio=1 -> masked DB; histogram should shift to higher scores on average
+$R_BIN scripts/cli/dmp_apply_idf_mask.R \
+  --in_db "$DB1K" \
+  --out_db "$MASKED_R1" \
+  --idf_csv "$IDFCSV" \
+  --ratio 1 \
+  --seed 0 \
+  --any_code 9999 \
+  --debug 0
+
+$R_BIN scripts/matcher_onepass.R \
+  --db "$MASKED_R1" \
+  --query "$QCSV" \
+  --out "$R1_DIR/scores.csv" \
+  --report all \
+  --n_cap 1000 \
+  --any_code 9999 \
+  --h2a_on 0 \
+  --debug 0
+
+# Simple check: mean(hist score) ratio1 >= baseline
+$R_BIN - <<'RS'
+b <- read.csv("output/smoke_phase2_1k/baseline/hist.csv",  stringsAsFactors=FALSE)
+r <- read.csv("output/smoke_phase2_1k/ratio1/hist.csv",     stringsAsFactors=FALSE)
+nm_b <- if ("Score" %in% names(b)) "Score" else names(b)[1]
+nm_r <- if ("Score" %in% names(r)) "Score" else names(r)[1]
+mb <- sum(as.integer(b[[nm_b]]) * as.integer(b[["Count"]])) / sum(as.integer(b[["Count"]]))
+mr <- sum(as.integer(r[[nm_r]]) * as.integer(r[["Count"]])) / sum(as.integer(r[["Count"]]))
+cat(sprintf("[CHK] mean score baseline=%.3f, ratio1=%.3f\n", mb, mr))
+if (is.na(mb) || is.na(mr)) stop("NA in histogram means")
+if (mr + 1e-9 < mb) stop("ratio1 mean score did not increase")
+RS
+
+echo "[DONE] smoke_phase2_1k passed"
