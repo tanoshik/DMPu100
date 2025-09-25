@@ -1,2 +1,0 @@
-locus,enabled
-# Fill with locus names from db$locus_ids and enabled flag (1 or 0). Lines starting with # will be ignored by CSV reader if preprocessed.

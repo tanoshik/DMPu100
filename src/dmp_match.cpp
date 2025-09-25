@@ -92,12 +92,24 @@ DataFrame dmp_match_cpp(
   
   struct Node { int sc; int idx; };
   struct Cmp { bool operator()(const Node& a, const Node& b) const { return a.sc > b.sc; } }; // min-heap
+  
+  // 事前に ID を C++ 側へコピー（NA は空文字に）
+  std::vector<std::string> sid(S);
+  for (int i = 0; i < S; ++i) {
+    SEXP si = sample_ids[i];  // Rcpp::String 経由ではなく SEXP として扱う
+    sid[i] = (si == NA_STRING) ? std::string()
+      : std::string(Rf_translateCharUTF8(si)); // UTF-8 に正規化して取り出す
+  }
+  
   // 最終並びを確定する comparator（score desc, id asc）
+  // ここから先は R に触れない
   auto less_final = [&](const Node& a, const Node& b) {
-    if (a.sc != b.sc) return a.sc > b.sc;                               // 高い方が先
-    return std::string(sample_ids[a.idx]) < std::string(sample_ids[b.idx]); // 同点はID昇順
-    };
-
+    if (a.sc != b.sc) return a.sc > b.sc;
+    const int ia = (a.idx >= 0 && a.idx < S) ? a.idx : 0;
+    const int ib = (b.idx >= 0 && b.idx < S) ? b.idx : 0;
+    return sid[ia] < sid[ib];
+  };
+  
     std::vector<Node> pick;  // ここに最終候補を集約
     pick.reserve(n_cap>0 ? n_cap : S);
 
