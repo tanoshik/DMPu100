@@ -63,6 +63,7 @@ req <- c("sample_ids","locus_ids","A1","A2")
 if (!is.list(db) || !all(req %in% names(db))) stop("DB RDS must be list(sample_ids, locus_ids, A1, A2)")
 
 sample_ids <- as.character(db$sample_ids)
+sample_ids[is.na(sample_ids)] <- ""   # ★堅牢化: NAは空文字に置換（CRC32でNAを出さない）
 locus_ids  <- as.character(db$locus_ids)
 A1 <- db$A1; A2 <- db$A2
 
