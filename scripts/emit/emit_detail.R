@@ -87,34 +87,59 @@ emit_detail <- function(opt_path, scores_path, out_dir, mode=c("raw"), any_code=
   ))
   m <- function(x, y) { (x == ANY) | (y == ANY) | (x == y) }
   
+  # ---- tag from scores_path ----
+  bn <- basename(scores_path)
+  if (startsWith(bn, "scores_")) {
+    out_tag <- sub("^scores_", "", tools::file_path_sans_ext(bn))
+  } else {
+    out_tag <- tools::file_path_sans_ext(bn)
+  }
+  
   # ---- emit raw ----
-  outp <- file.path(out_dir, "raw_detail.csv")
+  raw_out <- file.path(out_dir, sprintf("raw_%s.csv", out_tag))
   out_list <- vector("list", length(ids))
   for (k in seq_along(ids)) {
     sidx <- mmS[k]
-    r1 <- A1[sidx, ]
-    r2 <- A2[sidx, ]
+    r1 <- A1[sidx, ]; r2 <- A2[sidx, ]
     b0 <- as.integer(m(q1, r1))
     b1 <- as.integer(m(q1, r2))
     b2 <- as.integer(m(q2, r1))
     b3 <- as.integer(m(q2, r2))
     code <- b0 + 2L*b1 + 4L*b2 + 8L*b3
-    bits <- paste0(b3, b2, b1, b0)          # "b3b2b1b0"
+    bits <- paste0(b3, b2, b1, b0)      # "b3b2b1b0"
     sc   <- SCORE_TABLE[code + 1L]
     
     df <- data.frame(
+      SampleID = rep(ids[k], L),
       Locus = locus_ids,
       q1 = q1, q2 = q2,
       r1 = r1, r2 = r2,
       bits = bits, code = code, score = sc,
-      SampleID = rep(ids[k], L),
       stringsAsFactors = FALSE
     )
     out_list[[k]] <- df
   }
-  out_df <- do.call(rbind, out_list)
-  write.csv(out_df, outp, row.names = FALSE)
-  return(invisible(outp))
+  raw_df <- do.call(rbind, out_list)
+  
+  # ---- score_h2a (auto) ----
+  h2a_on <- isTRUE(tryCatch(fromJSON(opt_path)$h2a_on, error=function(e) FALSE))
+  if (h2a_on) {
+    inc <- (raw_df$r1 == raw_df$r2) & (raw_df$bits != "1111")
+    raw_df$score_h2a <- raw_df$score + as.integer(inc)
+  }
+  
+  # ---- write raw_<tag>.csv ----
+  write.csv(raw_df, raw_out, row.names = FALSE)
+  
+  # ---- detail_<tag>.csv (readable) ----
+  to_readable <- function(v) ifelse(v==any_code, "ANY", format(round(v/100, 2), trim=TRUE))
+  det_df <- raw_df
+  det_df$q1 <- to_readable(det_df$q1); det_df$q2 <- to_readable(det_df$q2)
+  det_df$r1 <- to_readable(det_df$r1); det_df$r2 <- to_readable(det_df$r2)
+  detail_out <- file.path(out_dir, sprintf("detail_%s.csv", out_tag))
+  write.csv(det_df, detail_out, row.names = FALSE)
+  
+  return(invisible(raw_out))
 }
 
 # ---- CLI wrapper (snake-case only) ----

@@ -189,11 +189,23 @@ rep_mode <- tolower(opt$report)
 compute_scores <- rep_mode %in% c("all","top")
 compute_hist   <- rep_mode %in% c("all","hist")
 
-dir.create(dirname(opt$out), recursive=TRUE, showWarnings=FALSE)
-scores_csv <- ensure_csv(opt$out)
-hist_csv   <- ensure_csv(file.path(dirname(scores_csv), "hist"))
-opts_json  <- ensure_json(file.path(dirname(scores_csv),
-                                    sprintf("opts_%s.json", tools::file_path_sans_ext(basename(scores_csv)))))
+# ---- resolve outputs (tag or path) ----
+ext <- tolower(tools::file_ext(opt$out))
+if (nzchar(ext)) {
+  # path mode (backward compatible)
+  dir.create(dirname(opt$out), recursive=TRUE, showWarnings=FALSE)
+  scores_csv <- ensure_csv(opt$out)
+  out_tag    <- tools::file_path_sans_ext(basename(scores_csv))
+  out_dir    <- dirname(scores_csv)
+} else {
+  # tag mode (short)
+  out_tag <- opt$out
+  out_dir <- file.path("output", out_tag)
+  dir.create(out_dir, recursive=TRUE, showWarnings=FALSE)
+  scores_csv <- file.path(out_dir, sprintf("scores_%s.csv", out_tag))
+}
+hist_csv  <- file.path(out_dir, sprintf("hist_%s.csv", out_tag))
+opts_json <- file.path(out_dir, sprintf("opts_scores_%s.json", out_tag))
 
 if (compute_scores) {
   cat("[TRACE] before dmp_match_cpp\n", file=TRACE, append=TRUE)
@@ -244,7 +256,7 @@ core_name <- sprintf("GF/%s/0.0/%s/%d", mask_name, if (opt$h2a_on==1L) "on" else
 total_sec <- proc.time()[["elapsed"]] - t0_total
 header <- "LOAD_DB_SEC,LOAD_Q_SEC,H2A_SEC,COMP_SEC,TOTAL_SEC,PEAK_MiB,name"
 line   <- sprintf("NA,NA,%.3f,NA,%.3f,NA,%s", t_h2a, total_sec, core_name)
-logp   <- file.path(dirname(scores_csv), "time.log")
+logp   <- file.path(dirname(scores_csv), sprintf("time_%s.log", out_tag))
 if (!file.exists(logp)) writeLines(header, logp)
 cat(paste0(line, "\n"), file=logp, append=TRUE)
 cat("[TRACE] done\n", file=TRACE, append=TRUE)
