@@ -96,13 +96,19 @@ A1m <- as.matrix(db$A1); storage.mode(A1m) <- "integer"
 A2m <- as.matrix(db$A2); storage.mode(A2m) <- "integer"
 if (nrow(A1m)!=S || ncol(A1m)!=L || nrow(A2m)!=S || ncol(A2m)!=L) stop("DB A1/A2 shape mismatch")
 
-# ---- h2a (DB homo -> RIGHT ANY) ----
+# ---- h2a (DB homo -> RIGHT ANY) + timing ----
+t_h2a <- NA_real_
 if (as.integer(opt$h2a_on) == 1L) {
+  t0_h2a <- proc.time()[["elapsed"]]
   ANY <- as.integer(opt$any_code)
   mask <- (A1m == A2m) & (A1m != ANY)
   A2m[mask] <- ANY
-  cat(sprintf("[TRACE] h2a_on masked=%d\n", sum(mask, na.rm=TRUE)), file=TRACE, append=TRUE)
+  t_h2a <- proc.time()[["elapsed"]] - t0_h2a
+  cat(sprintf("[TRACE] h2a_on masked=%d (H2A_SEC=%.3f)\n", sum(mask, na.rm=TRUE), t_h2a), file=TRACE, append=TRUE)
+} else {
+  t_h2a <- 0.0
 }
+
 
 # ---- load query (RDS or CSV, strict) ----
 to_pair <- function(a1, a2, ANY) {
@@ -236,8 +242,8 @@ if (as.integer(opt$debug)==1L) cat(sprintf("[OK] wrote %s\n", opts_json))
 # ---- time.log ----
 core_name <- sprintf("GF/%s/0.0/%s/%d", mask_name, if (opt$h2a_on==1L) "on" else "off", S)
 total_sec <- proc.time()[["elapsed"]] - t0_total
-header <- "LOAD_DB_SEC,LOAD_Q_SEC,COMP_SEC,TOTAL_SEC,PEAK_MiB,name"
-line   <- sprintf("NA,NA,NA,%.3f,NA,%s", total_sec, core_name)
+header <- "LOAD_DB_SEC,LOAD_Q_SEC,H2A_SEC,COMP_SEC,TOTAL_SEC,PEAK_MiB,name"
+line   <- sprintf("NA,NA,%.3f,NA,%.3f,NA,%s", t_h2a, total_sec, core_name)
 logp   <- file.path(dirname(scores_csv), "time.log")
 if (!file.exists(logp)) writeLines(header, logp)
 cat(paste0(line, "\n"), file=logp, append=TRUE)
