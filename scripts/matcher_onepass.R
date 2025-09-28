@@ -44,11 +44,11 @@ option_list <- list(
   make_option(c("-t","--score_min"),       type="integer",   default=0L),      # >=0
   make_option(c("-a","--any_code"),        type="integer",   default=9999L),
   make_option(c("-M","--idf_csv"),         type="character", default=NA),      # optional
-  make_option(c("-F","--force_all_loci"),  type="integer",   default=0L),      # 1: ignore idf mask
   make_option(c("-H","--h2a_on"),          type="integer",   default=0L),      # 1: DB homo -> RIGHT ANY
   make_option(c("-v","--debug"),           type="integer",   default=1L),
   make_option(c("-C","--path"),            type="character", default=NA)       # optional setwd
 )
+
 opt <- parse_args(OptionParser(option_list=option_list))
 cat(sprintf("[TRACE] argv parsed; report=%s n_cap=%s\n", opt$report, as.character(opt$n_cap)), file=TRACE, append=TRUE)
 
@@ -152,37 +152,31 @@ make_all_ones <- function(L) {
   bits
 }
 idf_mask_bits <- make_all_ones(L)
-mask_name <- "normal"
 
 if (!is.na(opt$idf_csv) && nzchar(opt$idf_csv) && file.exists(opt$idf_csv)) {
-  mask_name <- "gf_idf_mask"
   dfm <- read.csv(opt$idf_csv, stringsAsFactors=FALSE, check.names=FALSE)
   nms <- tolower(names(dfm)); names(dfm) <- nms
   lc <- which(nms %in% c("locus","marker","locus_id"))[1]
   bc <- which(nms %in% c("bit","mask","enabled","enable","use"))[1]
   if (!is.na(lc) && !is.na(bc)) {
     idf_mask_bits <- 0L
-    mm <- match(locus_ids, dfm[[lc]])
-    maxj <- min(L-1L, 31L)
-    for (j in 0:maxj) {
-      v <- 1L
-      if (!is.na(mm[j+1])) {
-        vv <- suppressWarnings(as.integer(dfm[[bc]][ mm[j+1] ]))
+    locus_ids <- tolower(colnames(A1m))
+    for (j in seq_along(locus_ids)) {
+      nm <- locus_ids[j]
+      i <- which(dfm[[lc]] == nm)[1]
+      v <- 0L
+      if (!is.na(i)) {
+        vv <- suppressWarnings(as.integer(dfm[[bc]][i]))
         if (!is.na(vv)) v <- ifelse(vv != 0L, 1L, 0L)
       }
-      if (v == 1L) idf_mask_bits <- bitwOr(idf_mask_bits, bitwShiftL(1L, j))
+      if (v == 1L) idf_mask_bits <- bitwOr(idf_mask_bits, bitwShiftL(1L, j-1L))
     }
   } else {
     warning("idf_csv lacks recognizable columns; falling back to all-ones")
     idf_mask_bits <- make_all_ones(L)
-    mask_name <- "normal"
   }
 }
-if (as.integer(opt$force_all_loci) == 1L) {
-  idf_mask_bits <- make_all_ones(L)
-  mask_name <- "normal"
-}
-cat(sprintf("[TRACE] mask_name=%s bits=0x%08X\n", mask_name, as.integer(idf_mask_bits)), file=TRACE, append=TRUE)
+cat(sprintf("[TRACE] idf_mask_bits=0x%08X\n", as.integer(idf_mask_bits)), file=TRACE, append=TRUE)
 
 # ---- run core ----
 rep_mode <- tolower(opt$report)
@@ -192,20 +186,22 @@ compute_hist   <- rep_mode %in% c("all","hist")
 # ---- resolve outputs (tag or path) ----
 ext <- tolower(tools::file_ext(opt$out))
 if (nzchar(ext)) {
-  # path mode (backward compatible)
+  # path mode (backward compatible: keep old fixed names)
   dir.create(dirname(opt$out), recursive=TRUE, showWarnings=FALSE)
   scores_csv <- ensure_csv(opt$out)
   out_tag    <- tools::file_path_sans_ext(basename(scores_csv))
   out_dir    <- dirname(scores_csv)
+  hist_csv   <- file.path(out_dir, "hist.csv")
+  opts_json  <- file.path(out_dir, "opts_scores.json")
 } else {
-  # tag mode (short)
+  # tag mode (short: tag embedded names)
   out_tag <- opt$out
   out_dir <- file.path("output", out_tag)
   dir.create(out_dir, recursive=TRUE, showWarnings=FALSE)
   scores_csv <- file.path(out_dir, sprintf("scores_%s.csv", out_tag))
+  hist_csv   <- file.path(out_dir, sprintf("hist_%s.csv", out_tag))
+  opts_json  <- file.path(out_dir, sprintf("opts_scores_%s.json", out_tag))
 }
-hist_csv  <- file.path(out_dir, sprintf("hist_%s.csv", out_tag))
-opts_json <- file.path(out_dir, sprintf("opts_scores_%s.json", out_tag))
 
 if (compute_scores) {
   cat("[TRACE] before dmp_match_cpp\n", file=TRACE, append=TRUE)
@@ -214,10 +210,9 @@ if (compute_scores) {
     score_table   = SCORE_TABLE,
     idf_mask_bits = as.integer(idf_mask_bits),
     opts = list(
-      any_code       = as.integer(opt$any_code),
-      score_min      = as.integer(opt$score_min),
-      n_cap          = as.integer(opt$n_cap),
-      force_all_loci = as.logical(opt$force_all_loci)
+      any_code  = as.integer(opt$any_code),
+      score_min = as.integer(opt$score_min),
+      n_cap     = as.integer(opt$n_cap)
     ),
     sample_ids = sample_ids
   )
@@ -232,8 +227,7 @@ if (compute_hist) {
     A1 = A1m, A2 = A2m, q1 = q$q1, q2 = q$q2,
     score_table   = SCORE_TABLE,
     idf_mask_bits = as.integer(idf_mask_bits),
-    opts = list(any_code = as.integer(opt$any_code),
-                force_all_loci = as.logical(opt$force_all_loci))
+    opts = list(any_code = as.integer(opt$any_code))
   )
   cat("[TRACE] after  dmp_hist_cpp\n", file=TRACE, append=TRUE)
   write.csv(hdf, hist_csv, row.names=FALSE)
@@ -241,22 +235,22 @@ if (compute_hist) {
 }
 
 opts_list <- list(
-  db_path        = normalizePath(opt$db, winslash="/"),
-  query_path     = normalizePath(opt$query, winslash="/"),
-  mask_name      = mask_name,
-  any_code       = as.integer(opt$any_code),
-  force_all_loci = as.logical(opt$force_all_loci),
-  h2a_on         = as.logical(opt$h2a_on)
+  db_path    = normalizePath(opt$db, winslash="/"),
+  query_path = normalizePath(opt$query, winslash="/"),
+  any_code   = as.integer(opt$any_code),
+  h2a_on     = as.logical(opt$h2a_on)
 )
 writeLines(jsonlite::toJSON(opts_list, auto_unbox=TRUE, pretty=TRUE), opts_json)
+
 if (as.integer(opt$debug)==1L) cat(sprintf("[OK] wrote %s\n", opts_json))
 
 # ---- time.log ----
-core_name <- sprintf("GF/%s/0.0/%s/%d", mask_name, if (opt$h2a_on==1L) "on" else "off", S)
+core_name <- sprintf("GF/0.0/%s/%d", if (opt$h2a_on==1L) "on" else "off", S)
 total_sec <- proc.time()[["elapsed"]] - t0_total
 header <- "LOAD_DB_SEC,LOAD_Q_SEC,H2A_SEC,COMP_SEC,TOTAL_SEC,PEAK_MiB,name"
 line   <- sprintf("NA,NA,%.3f,NA,%.3f,NA,%s", t_h2a, total_sec, core_name)
 logp   <- file.path(dirname(scores_csv), sprintf("time_%s.log", out_tag))
 if (!file.exists(logp)) writeLines(header, logp)
 cat(paste0(line, "\n"), file=logp, append=TRUE)
+
 cat("[TRACE] done\n", file=TRACE, append=TRUE)

@@ -18,7 +18,7 @@ DataFrame dmp_match_cpp(
     IntegerVector q2,           // L
     IntegerVector score_table,  // length 16
     uint32_t idf_mask_bits,     // bit=1: enabled locus
-    List opts,                  // any_code, score_min(NA=INT_MIN), n_cap, force_all_loci
+    List opts,                  // any_code, score_min(NA=INT_MIN), n_cap
     CharacterVector sample_ids  // S
 ) {
   const int S = A1.nrow();
@@ -28,13 +28,10 @@ DataFrame dmp_match_cpp(
   if ((int)sample_ids.size()!=S) stop("sample_ids size mismatch");
   
   // loci enabled by idf_mask_bits or force_all_loci
+  // loci enabled by idf_mask_bits (fallback to all if empty)
   std::vector<int> loci; loci.reserve(L);
-  if (opts.containsElementNamed("force_all_loci") && as<bool>(opts["force_all_loci"])) {
-    for (int j=0;j<L;++j) loci.push_back(j);
-  } else {
-    for (int j=0;j<L;++j) if ( (idf_mask_bits >> j) & 1u ) loci.push_back(j);
-    if (loci.empty()) { for (int j=0;j<L;++j) loci.push_back(j); } // fallback: all
-  }
+  for (int j=0;j<L;++j) if ( (idf_mask_bits >> j) & 1u ) loci.push_back(j);
+  if (loci.empty()) { for (int j=0;j<L;++j) loci.push_back(j); } // fallback
   const int LE = (int)loci.size();
   
   // any code
